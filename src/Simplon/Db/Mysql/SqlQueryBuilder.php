@@ -46,6 +46,17 @@
          */
         public function getQuery()
         {
+            foreach ($this->conditions as $key => $val)
+            {
+                if (strpos($this->query, '_' . $key . '_') !== FALSE)
+                {
+                    $this->query = str_replace('_' . $key . '_', $val, $this->query);
+
+                    // remove placeholder condition
+                    $this->_removeCondition($key);
+                }
+            }
+
             return (string)$this->query;
         }
 
@@ -71,6 +82,25 @@
         public function getConditions()
         {
             return (array)$this->conditions;
+        }
+
+        // ##########################################
+
+        /**
+         * @param $key
+         *
+         * @return bool
+         */
+        protected function _removeCondition($key)
+        {
+            if (isset($this->conditions[$key]))
+            {
+                unset($this->conditions[$key]);
+
+                return TRUE;
+            }
+
+            return FALSE;
         }
 
         // ##########################################
