@@ -22,7 +22,7 @@
 
     "autoload": {
         "psr-0": {
-            "Simplon\\Db\\Mysql": "src/"
+            "Simplon\\Mysql": "src/"
         }
     }
 }
