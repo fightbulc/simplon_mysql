@@ -508,7 +508,7 @@
          * @param $query
          * @param array $conds
          *
-         * @return string
+         * @return array|null
          */
         public function fetchRowMany($query, array $conds = [])
         {
