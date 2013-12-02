@@ -10,9 +10,6 @@
         protected $_fetchMode;
         protected $_data;
 
-        /** @var callable */
-        protected $_closure;
-
         // ######################################
 
         /**
@@ -30,20 +27,10 @@
 
         // ######################################
 
-        /**
-         * @return mixed
-         */
-        public function getData()
-        {
-            return call_user_func([$this->_pdoStatement, $this->_fetchType]);
-        }
-
-        // ######################################
-
         function rewind()
         {
             $this->_position = 0;
-            $this->_data = $this->getData();
+            $this->_data = $this->_fetchType === 'fetch' ? $this->_pdoStatement->fetch($this->_fetchMode) : $this->_pdoStatement->fetchColumn();
         }
 
         // ######################################
@@ -70,7 +57,7 @@
 
         function next()
         {
-            $this->_data = $this->getData();
+            $this->_data = $this->_fetchType === 'fetch' ? $this->_pdoStatement->fetch($this->_fetchMode) : $this->_pdoStatement->fetchColumn();
             ++$this->_position;
         }
 
