@@ -450,7 +450,7 @@
          *
          * @return null|string
          */
-        public function fetchValue($query, array $conds)
+        public function fetchValue($query, array $conds = [])
         {
             $response = $this->_prepareSelect($query, $conds)
                 ->fetchColumn();
@@ -471,7 +471,7 @@
          *
          * @return array|null
          */
-        public function fetchValueMany($query, array $conds)
+        public function fetchValueMany($query, array $conds = [])
         {
             $responsesMany = [];
             $pdoStatment = $this->_prepareSelect($query, $conds);
@@ -497,7 +497,7 @@
          *
          * @return string
          */
-        public function fetchValueManyCursor($query, array $conds)
+        public function fetchValueManyCursor($query, array $conds = [])
         {
             if ($this->_getHasCursor() === FALSE)
             {
@@ -530,7 +530,7 @@
          *
          * @return array|null
          */
-        public function fetch($query, array $conds)
+        public function fetch($query, array $conds = [])
         {
             $response = $this->_prepareSelect($query, $conds)
                 ->fetch($this->_getFetchMode());
@@ -551,7 +551,7 @@
          *
          * @return string
          */
-        public function fetchMany($query, array $conds)
+        public function fetchMany($query, array $conds = [])
         {
             $responsesMany = [];
             $pdoStatment = $this->_prepareSelect($query, $conds);
@@ -577,7 +577,7 @@
          *
          * @return array|null
          */
-        public function fetchManyCursor($query, array $conds)
+        public function fetchManyCursor($query, array $conds = [])
         {
             if ($this->_getHasCursor() === FALSE)
             {
@@ -797,13 +797,23 @@
                 $placeholder['params'][] = $columnName . ' = :' . $columnName;
             }
 
-            foreach ($conds as $columnName => $value)
-            {
-                $placeholder['conds'][] = $columnName . ' ' . $this->_getConditionOperator($value) . ' :' . $columnName;
-            }
-
             $query = str_replace(':PARAMS', join(', ', $placeholder['params']), $query);
-            $query = str_replace(':CONDS', join(', ', $placeholder['conds']), $query);
+
+            // ----------------------------------
+
+            if (!empty($conds))
+            {
+                foreach ($conds as $columnName => $value)
+                {
+                    $placeholder['conds'][] = $columnName . ' ' . $this->_getConditionOperator($value) . ' :' . $columnName;
+                }
+
+                $query = str_replace(':CONDS', join(', ', $placeholder['conds']), $query);
+            }
+            else
+            {
+                $query = str_replace(' WHERE :CONDS', '', $query);
+            }
 
             // ----------------------------------
 
@@ -825,18 +835,25 @@
          *
          * @return bool
          */
-        public function delete($tableName, array $conds)
+        public function delete($tableName, array $conds = [])
         {
             $query = 'DELETE FROM ' . $tableName . ' WHERE :CONDS';
 
-            $placeholder = [];
-
-            foreach ($conds as $columnName => $value)
+            if (!empty($conds))
             {
-                $placeholder[] = $columnName . ' ' . $this->_getConditionOperator($value) . ' :' . $columnName;
-            }
+                $placeholder = [];
 
-            $query = str_replace(':CONDS', join(', ', $placeholder), $query);
+                foreach ($conds as $columnName => $value)
+                {
+                    $placeholder[] = $columnName . ' ' . $this->_getConditionOperator($value) . ' :' . $columnName;
+                }
+
+                $query = str_replace(':CONDS', join(', ', $placeholder), $query);
+            }
+            else
+            {
+                $query = str_replace(' WHERE :CONDS', '', $query);
+            }
 
             // ----------------------------------
 
