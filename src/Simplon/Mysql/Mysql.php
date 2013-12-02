@@ -6,7 +6,6 @@
     {
         protected $_dbh;
         protected $_fetchMode;
-        protected $_hasCursor;
 
         /** @var  \PDOStatement */
         protected $_lastStatement;
@@ -151,30 +150,6 @@
             $this->_lastStatement = NULL;
 
             return $this;
-        }
-
-        // ##########################################
-
-        /**
-         * @param mixed $hasCursor
-         *
-         * @return Mysql
-         */
-        protected function _setHasCursor($hasCursor)
-        {
-            $this->_hasCursor = $hasCursor;
-
-            return $this;
-        }
-
-        // ##########################################
-
-        /**
-         * @return bool
-         */
-        protected function _getHasCursor()
-        {
-            return $this->_hasCursor ? TRUE : FALSE;
         }
 
         // ##########################################
@@ -495,31 +470,15 @@
          * @param $query
          * @param array $conds
          *
-         * @return string
+         * @return SqlQueryIterator
          */
         public function fetchValueManyCursor($query, array $conds = [])
         {
-            if ($this->_getHasCursor() === FALSE)
-            {
-                $this->_setHasCursor(TRUE);
-                $this->_prepareSelect($query, $conds);
-            }
+            $this->_prepareSelect($query, $conds);
 
             // ----------------------------------
 
-            $response = $this->_getLastStatement()
-                ->fetchColumn();
-
-            if ($response)
-            {
-                return (string)$response;
-            }
-
-            // ----------------------------------
-
-            $this->_setHasCursor(FALSE);
-
-            return NULL;
+            return new SqlQueryIterator($this->_getLastStatement(), 'fetchColumn');
         }
 
         // ##########################################
@@ -575,31 +534,15 @@
          * @param $query
          * @param array $conds
          *
-         * @return array|null
+         * @return SqlQueryIterator
          */
         public function fetchManyCursor($query, array $conds = [])
         {
-            if ($this->_getHasCursor() === FALSE)
-            {
-                $this->_setHasCursor(TRUE);
-                $this->_prepareSelect($query, $conds);
-            }
+            $this->_prepareSelect($query, $conds);
 
             // ----------------------------------
 
-            $response = $this->_getLastStatement()
-                ->fetch();
-
-            if ($response)
-            {
-                return (array)$response;
-            }
-
-            // ----------------------------------
-
-            $this->_setHasCursor(FALSE);
-
-            return NULL;
+            return new SqlQueryIterator($this->_getLastStatement(), 'fetch');
         }
 
         // ##########################################

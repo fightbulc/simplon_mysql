@@ -2,13 +2,7 @@
 
     require __DIR__ . '/../vendor/autoload.php';
 
-    $mysqlConfigVo = (new \Simplon\Mysql\MysqlConfigVo())
-        ->setServer('localhost')
-        ->setDatabase('beatguide_devel_service')
-        ->setUsername('rootuser')
-        ->setPassword('rootuser');
-
-    $dbh = new \Simplon\Mysql\Mysql($mysqlConfigVo);
+    $dbh = new \Simplon\Mysql\Mysql('localhost', 'beatguide_devel_service', 'rootuser', 'rootuser');
     $query = 'SELECT * FROM events WHERE venue_id = :venueId LIMIT 2';
     $conds = array('venueId' => 23);
 
@@ -49,17 +43,12 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    echo '<h4>#1 cursor</h4>';
-    $results = $sqlManager->fetchColumnAllCursor($sqlBuilder);
-    var_dump($results);
-
-    echo '<h4>#2 cursor</h4>';
-    $results = $sqlManager->fetchColumnAllCursor($sqlBuilder);
-    var_dump($results);
-
-    echo '<h4>#3 cursor (should result in FALSE)</h4>';
-    $results = $sqlManager->fetchColumnAllCursor($sqlBuilder);
-    var_dump($results);
+    $counter = 0;
+    foreach ($sqlManager->fetchColumnAllCursor($sqlBuilder) as $result)
+    {
+        echo '<h4>#' . (++$counter) . ' cursor</h4>';
+        var_dump($result);
+    }
 
     // ############################################
 
@@ -89,7 +78,7 @@
 
     // ############################################
 
-    echo '<h3>fetchCursor</h3>';
+    echo '<h3>fetchManyCursor</h3>';
 
     $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
@@ -97,17 +86,12 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    echo '<h4>#1 cursor</h4>';
-    $results = $sqlManager->fetchAllCursor($sqlBuilder);
-    var_dump($results);
-
-    echo '<h4>#2 cursor</h4>';
-    $results = $sqlManager->fetchAllCursor($sqlBuilder);
-    var_dump($results);
-
-    echo '<h4>#3 cursor (should result in FALSE)</h4>';
-    $results = $sqlManager->fetchAllCursor($sqlBuilder);
-    var_dump($results);
+    $counter = 0;
+    foreach ($sqlManager->fetchAllCursor($sqlBuilder) as $result)
+    {
+        echo '<h4>#' . (++$counter) . ' cursor</h4>';
+        var_dump($result);
+    }
 
     // ############################################
 

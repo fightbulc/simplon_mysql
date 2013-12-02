@@ -100,20 +100,13 @@
         /**
          * @param SqlQueryBuilder $sqlBuilder
          *
-         * @return array|bool
+         * @return SqlQueryIterator
          */
         public function fetchColumnAllCursor(SqlQueryBuilder $sqlBuilder)
         {
-            $result = $this
+            return $this
                 ->_getMysqlInstance()
                 ->fetchValueManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-
-            if ($result !== NULL)
-            {
-                return (string)$result;
-            }
-
-            return FALSE;
         }
 
         // ########################################
@@ -163,20 +156,13 @@
         /**
          * @param SqlQueryBuilder $sqlBuilder
          *
-         * @return array|bool
+         * @return SqlQueryIterator
          */
         public function fetchAllCursor(SqlQueryBuilder $sqlBuilder)
         {
-            $result = $this
+            return $this
                 ->_getMysqlInstance()
                 ->fetchManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-
-            if ($result !== NULL)
-            {
-                return (array)$result;
-            }
-
-            return FALSE;
         }
 
         // ########################################

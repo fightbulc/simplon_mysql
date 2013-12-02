@@ -2,13 +2,7 @@
 
     require __DIR__ . '/../vendor/autoload.php';
 
-    $mysqlConfigVo = (new \Simplon\Mysql\MysqlConfigVo())
-        ->setServer('localhost')
-        ->setDatabase('beatguide_devel_service')
-        ->setUsername('rootuser')
-        ->setPassword('rootuser');
-
-    $dbh = new \Simplon\Mysql\Mysql($mysqlConfigVo);
+    $dbh = new \Simplon\Mysql\Mysql('localhost', 'beatguide_devel_service', 'rootuser', 'rootuser');
     $query = 'SELECT * FROM events WHERE venue_id = :venueId LIMIT 10';
     $conds = array('venueId' => 23);
 
@@ -28,17 +22,13 @@
     // ############################################
 
     echo '<h3>fetchValueManyCursor</h3>';
-    echo '<h4>#1 cursor</h4>';
-    $results = $dbh->fetchValueManyCursor($query, $conds);
-    var_dump($results);
 
-    echo '<h4>#2 cursor</h4>';
-    $results = $dbh->fetchValueManyCursor($query, $conds);
-    var_dump($results);
-
-    echo '<h4>#3 cursor (should result in NULL)</h4>';
-    $results = $dbh->fetchValueManyCursor($query, $conds);
-    var_dump($results);
+    $counter = 0;
+    foreach ($dbh->fetchValueManyCursor($query, $conds) as $result)
+    {
+        echo '<h4>#' . (++$counter) . ' cursor</h4>';
+        var_dump($result);
+    }
 
     // ############################################
 
@@ -54,18 +44,14 @@
 
     // ############################################
 
-    echo '<h3>fetchCursor</h3>';
-    echo '<h4>#1 cursor</h4>';
-    $results = $dbh->fetchManyCursor($query, $conds);
-    var_dump($results);
+    echo '<h3>fetchManyCursor</h3>';
 
-    echo '<h4>#2 cursor</h4>';
-    $results = $dbh->fetchManyCursor($query, $conds);
-    var_dump($results);
-
-    echo '<h4>#3 cursor (should result in NULL)</h4>';
-    $results = $dbh->fetchManyCursor($query, $conds);
-    var_dump($results);
+    $counter = 0;
+    foreach ($dbh->fetchManyCursor($query, $conds) as $result)
+    {
+        echo '<h4>#' . (++$counter) . ' cursor</h4>';
+        var_dump($result);
+    }
 
     // ############################################
 
