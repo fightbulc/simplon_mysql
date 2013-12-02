@@ -28,7 +28,7 @@
         ->setConditions($conds);
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
-    $results = $sqlManager->fetchColumnAll($sqlBuilder);
+    $results = $sqlManager->fetchColumnMany($sqlBuilder);
 
     echo '<h4>total rows: ' . $sqlManager->getRowCount() . '</h4>';
     var_dump($results);
@@ -44,7 +44,7 @@
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $counter = 0;
-    foreach ($sqlManager->fetchColumnAllCursor($sqlBuilder) as $result)
+    foreach ($sqlManager->fetchColumnManyCursor($sqlBuilder) as $result)
     {
         echo '<h4>#' . (++$counter) . ' cursor</h4>';
         var_dump($result);
@@ -73,7 +73,7 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->fetchAll($sqlBuilder);
+    $results = $sqlManager->fetchRowMany($sqlBuilder);
     var_dump($results);
 
     // ############################################
@@ -87,7 +87,7 @@
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $counter = 0;
-    foreach ($sqlManager->fetchAllCursor($sqlBuilder) as $result)
+    foreach ($sqlManager->fetchRowManyCursor($sqlBuilder) as $result)
     {
         echo '<h4>#' . (++$counter) . ' cursor</h4>';
         var_dump($result);

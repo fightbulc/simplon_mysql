@@ -9,13 +9,13 @@
     // ############################################
 
     echo '<h3>fetchValue</h3>';
-    $results = $dbh->fetchValue($query, $conds);
+    $results = $dbh->fetchColumn($query, $conds);
     var_dump($results);
 
     // ############################################
 
     echo '<h3>fetchValueMany</h3>';
-    $results = $dbh->fetchValueMany($query, $conds);
+    $results = $dbh->fetchColumnMany($query, $conds);
     echo '<h4>total rows: ' . $dbh->getRowCount() . '</h4>';
     var_dump($results);
 
@@ -24,7 +24,7 @@
     echo '<h3>fetchValueManyCursor</h3>';
 
     $counter = 0;
-    foreach ($dbh->fetchValueManyCursor($query, $conds) as $result)
+    foreach ($dbh->fetchColumnManyCursor($query, $conds) as $result)
     {
         echo '<h4>#' . (++$counter) . ' cursor</h4>';
         var_dump($result);
@@ -33,13 +33,13 @@
     // ############################################
 
     echo '<h3>fetch</h3>';
-    $results = $dbh->fetch($query, $conds);
+    $results = $dbh->fetchRow($query, $conds);
     var_dump($results);
 
     // ############################################
 
     echo '<h3>fetchMany</h3>';
-    $results = $dbh->fetchMany($query, $conds);
+    $results = $dbh->fetchRowMany($query, $conds);
     var_dump($results);
 
     // ############################################
@@ -47,7 +47,7 @@
     echo '<h3>fetchManyCursor</h3>';
 
     $counter = 0;
-    foreach ($dbh->fetchManyCursor($query, $conds) as $result)
+    foreach ($dbh->fetchRowManyCursor($query, $conds) as $result)
     {
         echo '<h4>#' . (++$counter) . ' cursor</h4>';
         var_dump($result);

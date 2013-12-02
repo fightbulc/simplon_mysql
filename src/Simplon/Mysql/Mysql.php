@@ -425,7 +425,7 @@
          *
          * @return null|string
          */
-        public function fetchValue($query, array $conds = [])
+        public function fetchColumn($query, array $conds = [])
         {
             $response = $this->_prepareSelect($query, $conds)
                 ->fetchColumn();
@@ -446,7 +446,7 @@
          *
          * @return array|null
          */
-        public function fetchValueMany($query, array $conds = [])
+        public function fetchColumnMany($query, array $conds = [])
         {
             $responsesMany = [];
             $pdoStatment = $this->_prepareSelect($query, $conds);
@@ -472,7 +472,7 @@
          *
          * @return SqlQueryIterator
          */
-        public function fetchValueManyCursor($query, array $conds = [])
+        public function fetchColumnManyCursor($query, array $conds = [])
         {
             $this->_prepareSelect($query, $conds);
 
@@ -489,7 +489,7 @@
          *
          * @return array|null
          */
-        public function fetch($query, array $conds = [])
+        public function fetchRow($query, array $conds = [])
         {
             $response = $this->_prepareSelect($query, $conds)
                 ->fetch($this->_getFetchMode());
@@ -510,7 +510,7 @@
          *
          * @return string
          */
-        public function fetchMany($query, array $conds = [])
+        public function fetchRowMany($query, array $conds = [])
         {
             $responsesMany = [];
             $pdoStatment = $this->_prepareSelect($query, $conds);
@@ -536,7 +536,7 @@
          *
          * @return SqlQueryIterator
          */
-        public function fetchManyCursor($query, array $conds = [])
+        public function fetchRowManyCursor($query, array $conds = [])
         {
             $this->_prepareSelect($query, $conds);
 

@@ -64,7 +64,7 @@
         {
             $result = $this
                 ->_getMysqlInstance()
-                ->fetchValue($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
+                ->fetchColumn($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
 
             if ($result !== NULL)
             {
@@ -81,11 +81,11 @@
          *
          * @return array|bool
          */
-        public function fetchColumnAll(SqlQueryBuilder $sqlBuilder)
+        public function fetchColumnMany(SqlQueryBuilder $sqlBuilder)
         {
             $result = $this
                 ->_getMysqlInstance()
-                ->fetchValueMany($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
+                ->fetchColumnMany($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
 
             if ($result !== NULL)
             {
@@ -102,11 +102,11 @@
          *
          * @return SqlQueryIterator
          */
-        public function fetchColumnAllCursor(SqlQueryBuilder $sqlBuilder)
+        public function fetchColumnManyCursor(SqlQueryBuilder $sqlBuilder)
         {
             return $this
                 ->_getMysqlInstance()
-                ->fetchValueManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
+                ->fetchColumnManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
         }
 
         // ########################################
@@ -120,7 +120,7 @@
         {
             $result = $this
                 ->_getMysqlInstance()
-                ->fetch($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
+                ->fetchRow($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
 
             if ($result !== NULL)
             {
@@ -137,11 +137,11 @@
          *
          * @return array|bool
          */
-        public function fetchAll(SqlQueryBuilder $sqlBuilder)
+        public function fetchRowMany(SqlQueryBuilder $sqlBuilder)
         {
             $result = $this
                 ->_getMysqlInstance()
-                ->fetchMany($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
+                ->fetchRowMany($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
 
             if ($result !== NULL)
             {
@@ -158,11 +158,11 @@
          *
          * @return SqlQueryIterator
          */
-        public function fetchAllCursor(SqlQueryBuilder $sqlBuilder)
+        public function fetchRowManyCursor(SqlQueryBuilder $sqlBuilder)
         {
             return $this
                 ->_getMysqlInstance()
-                ->fetchManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
+                ->fetchRowManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
         }
 
         // ########################################
