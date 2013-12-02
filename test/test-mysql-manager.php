@@ -2,13 +2,13 @@
 
     require __DIR__ . '/../vendor/autoload.php';
 
-    $mysqlConfigVo = (new \Simplon\Db\Mysql\MysqlConfigVo())
+    $mysqlConfigVo = (new \Simplon\Mysql\MysqlConfigVo())
         ->setServer('localhost')
         ->setDatabase('beatguide_devel_service')
         ->setUsername('rootuser')
         ->setPassword('rootuser');
 
-    $dbh = new \Simplon\Db\Mysql\Mysql($mysqlConfigVo);
+    $dbh = new \Simplon\Mysql\Mysql($mysqlConfigVo);
     $query = 'SELECT * FROM events WHERE venue_id = :venueId LIMIT 2';
     $conds = array('venueId' => 23);
 
@@ -16,11 +16,11 @@
 
     echo '<h3>fetchValue</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
     $results = $sqlManager->fetchColumn($sqlBuilder);
 
     var_dump($results);
@@ -29,11 +29,11 @@
 
     echo '<h3>fetchValueMany</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
     $results = $sqlManager->fetchColumnAll($sqlBuilder);
 
     echo '<h4>total rows: ' . $sqlManager->getRowCount() . '</h4>';
@@ -43,11 +43,11 @@
 
     echo '<h3>fetchValueManyCursor</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     echo '<h4>#1 cursor</h4>';
     $results = $sqlManager->fetchColumnAllCursor($sqlBuilder);
@@ -65,11 +65,11 @@
 
     echo '<h3>fetch</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $results = $sqlManager->fetchRow($sqlBuilder);
     var_dump($results);
@@ -78,11 +78,11 @@
 
     echo '<h3>fetchMany</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $results = $sqlManager->fetchAll($sqlBuilder);
     var_dump($results);
@@ -91,11 +91,11 @@
 
     echo '<h3>fetchCursor</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery($query)
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     echo '<h4>#1 cursor</h4>';
     $results = $sqlManager->fetchAllCursor($sqlBuilder);
@@ -113,10 +113,10 @@
 
     echo '<h3>execute sql: truncate</h3>';
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setQuery('TRUNCATE import_dump');
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $response = $sqlManager->executeSql($sqlBuilder);
     var_dump($response);
@@ -140,12 +140,12 @@
         ],
     ];
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
         ->setData($data)
         ->setMultiData(TRUE);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $results = $sqlManager->insert($sqlBuilder);
     var_dump($results);
@@ -157,12 +157,12 @@
     $conds = ['id' => 1];
     $data = ['dump' => '{"message":"Hello Dad"}'];
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
         ->setConditions($conds)
         ->setData($data);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $results = $sqlManager->update($sqlBuilder);
     var_dump($results);
@@ -181,12 +181,12 @@
         ],
     ];
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
         ->setData($data)
         ->setMultiData(TRUE);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $results = $sqlManager->replace($sqlBuilder);
     var_dump($results);
@@ -202,11 +202,11 @@
         ],
     ];
 
-    $sqlBuilder = (new \Simplon\Db\Mysql\SqlQueryBuilder())
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
         ->setConditions($conds);
 
-    $sqlManager = new \Simplon\Db\Mysql\SqlManager($dbh);
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
     $results = $sqlManager->delete($sqlBuilder);
     var_dump($results);

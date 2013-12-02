@@ -1,6 +1,6 @@
 <?php
 
-    namespace Simplon\Db\Mysql;
+    namespace Simplon\Mysql;
 
     class SqlQueryHelper
     {

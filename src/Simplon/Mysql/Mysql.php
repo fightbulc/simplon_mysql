@@ -1,6 +1,6 @@
 <?php
 
-    namespace Simplon\Db\Mysql;
+    namespace Simplon\Mysql;
 
     class Mysql
     {
@@ -8,123 +8,39 @@
         protected $_fetchMode;
         protected $_hasCursor;
 
-        /** @var  MysqlConfigVo */
-        protected $_mysqlConfigVo;
-
         /** @var  \PDOStatement */
         protected $_lastStatement;
 
         // ##########################################
 
         /**
-         * @param MysqlConfigVo $mysqlConfigVo
-         */
-        public function __construct(MysqlConfigVo $mysqlConfigVo)
-        {
-            // set config
-            $this->_setMysqlConfigVo($mysqlConfigVo);
-
-            // set database handle
-            $this->_setDbh($this->_connect());
-
-            // run init
-            $this->_init();
-        }
-
-        // ##########################################
-
-        /**
-         * @param MysqlConfigVo $mysqlConfigVo
+         * @param $server
+         * @param $database
+         * @param $username
+         * @param $password
+         * @param int $fetchMode
+         * @param string $charset
+         * @param string $collate
          *
-         * @return Mysql
-         */
-        protected function _setMysqlConfigVo(MysqlConfigVo $mysqlConfigVo)
-        {
-            $this->_mysqlConfigVo = $mysqlConfigVo;
-
-            return $this;
-        }
-
-        // ##########################################
-
-        /**
-         * @return MysqlConfigVo
          * @throws MysqlException
          */
-        protected function _getMysqlConfigVo()
-        {
-            if ($this->_mysqlConfigVo)
-            {
-                return $this->_mysqlConfigVo;
-            }
-
-            throw new MysqlException('Missing MysqlConfigVo');
-        }
-
-        // ##########################################
-
-        /**
-         * @return \PDO
-         * @throws MysqlException
-         */
-        protected function _connect()
+        public function __construct($server, $database, $username, $password, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', $collate = 'utf8_unicode_ci')
         {
             try
             {
-                $mysqlConfigVo = $this->_getMysqlConfigVo();
+                // create PDO instance
+                $this->_setDbh(new \PDO('mysql:host=' . $server . ';dbname=' . $database, $username, $password));
 
-                return new \PDO(
-                    'mysql:host=' . $mysqlConfigVo->getServer() . ';dbname=' . $mysqlConfigVo->getDatabase(),
-                    $mysqlConfigVo->getUsername(),
-                    $mysqlConfigVo->getPassword()
-                );
+                // set fetchMode
+                $this->_setFetchMode($fetchMode);
+
+                // set charset
+                $this->executeSql("SET NAMES '{$charset}' COLLATE '{$collate}'");
             }
             catch (\PDOException $e)
             {
                 throw new MysqlException($e->getMessage(), $e->getCode());
             }
-        }
-
-        // ##########################################
-
-        /**
-         * @return Mysql
-         */
-        protected function _init()
-        {
-            $mysqlConfigVo = $this->_getMysqlConfigVo();
-
-            // set charset
-            $this->executeSql("SET NAMES '{$mysqlConfigVo->getCharset()}' COLLATE '{$mysqlConfigVo->getCollate()}'");
-
-            // set fetchMode
-            $this->_setFetchMode($mysqlConfigVo->getFetchMode());
-
-            return $this;
-        }
-
-        // ##########################################
-
-        /**
-         * @param mixed $fetchMode
-         *
-         * @return Mysql
-         */
-        protected function _setFetchMode($fetchMode)
-        {
-            $this->_fetchMode = $fetchMode;
-
-            return $this;
-        }
-
-        // ##########################################
-
-        /**
-         * @return int
-         */
-        protected function _getFetchMode()
-        {
-            return (int)$this->_fetchMode;
         }
 
         // ##########################################
@@ -149,6 +65,30 @@
         protected function _getDbh()
         {
             return $this->_dbh;
+        }
+
+        // ##########################################
+
+        /**
+         * @param mixed $fetchMode
+         *
+         * @return Mysql
+         */
+        protected function _setFetchMode($fetchMode)
+        {
+            $this->_fetchMode = $fetchMode;
+
+            return $this;
+        }
+
+        // ##########################################
+
+        /**
+         * @return int
+         */
+        protected function _getFetchMode()
+        {
+            return (int)$this->_fetchMode;
         }
 
         // ##########################################
