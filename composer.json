@@ -2,7 +2,7 @@
     "name": "simplon/mysql",
     "description": "Simplon MySQL Library",
     "homepage": "https://github.com/fightbulc/simplon_mysql",
-    "version": "0.1.1",
+    "version": "0.1.0",
     "type": "library",
     "keywords": ["db", "pdo", "mysql", "manager"],
     "license": "MIT",
