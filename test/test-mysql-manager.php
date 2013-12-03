@@ -110,6 +110,24 @@
     echo '<h3>insert</h3>';
 
     $data = [
+        'id'   => NULL,
+        'dump' => '{"message":"Hello"}',
+    ];
+
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+        ->setTableName('import_dump')
+        ->setData($data);
+
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
+
+    $results = $sqlManager->insert($sqlBuilder);
+    var_dump($results);
+
+    // ############################################
+
+    echo '<h3>insertMany</h3>';
+
+    $data = [
         [
             'id'   => NULL,
             'dump' => '{"message":"Hello"}',
@@ -126,8 +144,7 @@
 
     $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
-        ->setData($data)
-        ->setMultiData(TRUE);
+        ->setData($data);
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
@@ -139,7 +156,7 @@
     echo '<h3>update</h3>';
 
     $conds = ['id' => 1];
-    $data = ['dump' => '{"message":"Hello Dad"}'];
+    $data = ['dump' => '{"message":"Hello BOOOOO"}'];
 
     $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
@@ -155,6 +172,23 @@
 
     echo '<h3>replace</h3>';
     $data = [
+        'id'   => 3,
+        'dump' => '{"message":"Booooh!"}'
+    ];
+
+    $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+        ->setTableName('import_dump')
+        ->setData($data);
+
+    $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
+
+    $results = $sqlManager->replace($sqlBuilder);
+    var_dump($results);
+
+    // ############################################
+
+    echo '<h3>replaceMany</h3>';
+    $data = [
         [
             'id'   => 2,
             'dump' => '{"message":"Hello Mum"}'
@@ -167,8 +201,7 @@
 
     $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
-        ->setData($data)
-        ->setMultiData(TRUE);
+        ->setData($data);
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
@@ -180,15 +213,13 @@
     echo '<h3>delete</h3>';
 
     $conds = [
-        'id' => [
-            'opr' => '>=',
-            'val' => '3'
-        ],
+        'id' => 3,
     ];
 
     $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
         ->setTableName('import_dump')
-        ->setConditions($conds);
+        ->setConditions($conds)
+        ->setConditionsQuery('id = :id');
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 

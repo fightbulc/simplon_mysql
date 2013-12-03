@@ -153,10 +153,8 @@
 
     echo '<h3>delete</h3>';
     $conds = [
-        'id' => [
-            'opr' => '>=',
-            'val' => '3'
-        ],
+        'id' => 3,
     ];
-    $results = $dbh->delete('import_dump', $conds);
+    $condsQuery = 'id = :id';
+    $results = $dbh->delete('import_dump', $conds, $condsQuery);
     var_dump($results);
