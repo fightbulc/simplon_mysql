@@ -284,7 +284,7 @@
                 $lastInsert = $dbh->lastInsertId();
 
                 // cache response
-                $responses[] = $lastInsert ? ['id' => (int)$lastInsert] : TRUE;
+                $responses[] = $lastInsert ? (int)$lastInsert : TRUE;
             }
 
             return $responses;
@@ -552,7 +552,7 @@
          * @param array $data
          * @param bool $insertIgnore
          *
-         * @return array|null
+         * @return int|bool|null
          * @throws MysqlException
          */
         public function insert($tableName, array $data, $insertIgnore = FALSE)
@@ -562,9 +562,16 @@
                 throw new MysqlException("Multi-dimensional datasets are not allowed. Use 'Mysql::insertMany()' instead");
             }
 
-            return $this->insertMany($tableName, [$data], $insertIgnore);
-        }
+            $response = $this->insertMany($tableName, [$data], $insertIgnore);
 
+            if ($response !== NULL)
+            {
+                return array_pop($response);
+            }
+
+            return NULL;
+        }
+        
         // ##########################################
 
         /**
