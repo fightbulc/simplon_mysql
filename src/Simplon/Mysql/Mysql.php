@@ -571,7 +571,7 @@
 
             return NULL;
         }
-        
+
         // ##########################################
 
         /**
@@ -623,7 +623,7 @@
          * @param $tableName
          * @param array $data
          *
-         * @return array|null
+         * @return int|bool|null
          * @throws MysqlException
          */
         public function replace($tableName, array $data)
@@ -633,7 +633,14 @@
                 throw new MysqlException("Multi-dimensional datasets are not allowed. Use 'Mysql::replaceMany()' instead");
             }
 
-            return $this->replaceMany($tableName, [$data]);
+            $response = $this->replaceMany($tableName, [$data]);
+
+            if ($response !== NULL)
+            {
+                return array_pop($response);
+            }
+
+            return NULL;
         }
 
         // ##########################################
