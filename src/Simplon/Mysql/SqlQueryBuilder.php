@@ -5,25 +5,22 @@
     class SqlQueryBuilder
     {
         /** @var string */
-        protected $tableName;
+        protected $_tableName;
 
         /** @var string */
-        protected $query;
-
-        /** @var string */
-        protected $preparedQuery;
+        protected $_query;
 
         /** @var bool */
-        protected $insertIgnore = FALSE;
-
-        /** @var bool */
-        protected $multiData = FALSE;
+        protected $_enableInsertIgnore = FALSE;
 
         /** @var array */
-        protected $conditions = [];
+        protected $_conditions = [];
+
+        /** @var  string */
+        protected $_conditionsQuery;
 
         /** @var array */
-        protected $data = [];
+        protected $_data = [];
 
         // ##########################################
 
@@ -34,7 +31,7 @@
          */
         public function setQuery($query)
         {
-            $this->query = $query;
+            $this->_query = $query;
 
             return $this;
         }
@@ -46,18 +43,18 @@
          */
         public function getQuery()
         {
-            foreach ($this->conditions as $key => $val)
+            foreach ($this->_conditions as $key => $val)
             {
-                if (strpos($this->query, '_' . $key . '_') !== FALSE)
+                if (strpos($this->_query, '_' . $key . '_') !== FALSE)
                 {
-                    $this->query = str_replace('_' . $key . '_', $val, $this->query);
+                    $this->_query = str_replace('_' . $key . '_', $val, $this->_query);
 
                     // remove placeholder condition
                     $this->_removeCondition($key);
                 }
             }
 
-            return (string)$this->query;
+            return (string)$this->_query;
         }
 
         // ##########################################
@@ -69,7 +66,7 @@
          */
         public function setConditions($conditions)
         {
-            $this->conditions = $conditions;
+            $this->_conditions = $conditions;
 
             return $this;
         }
@@ -81,7 +78,7 @@
          */
         public function getConditions()
         {
-            return (array)$this->conditions;
+            return (array)$this->_conditions;
         }
 
         // ##########################################
@@ -93,14 +90,43 @@
          */
         protected function _removeCondition($key)
         {
-            if (isset($this->conditions[$key]))
+            if (isset($this->_conditions[$key]))
             {
-                unset($this->conditions[$key]);
+                unset($this->_conditions[$key]);
 
                 return TRUE;
             }
 
             return FALSE;
+        }
+
+        // ##########################################
+
+        /**
+         * @param string $conditionsQuery
+         *
+         * @return SqlQueryBuilder
+         */
+        public function setConditionsQuery($conditionsQuery)
+        {
+            $this->_conditionsQuery = $conditionsQuery;
+
+            return $this;
+        }
+
+        // ##########################################
+
+        /**
+         * @return null|string
+         */
+        public function getConditionsQuery()
+        {
+            if ($this->_conditionsQuery)
+            {
+                return (string)$this->_conditionsQuery;
+            }
+
+            return NULL;
         }
 
         // ##########################################
@@ -112,7 +138,7 @@
          */
         public function setData($data)
         {
-            $this->data = $data;
+            $this->_data = $data;
 
             return $this;
         }
@@ -124,7 +150,17 @@
          */
         public function getData()
         {
-            return (array)$this->data;
+            return (array)$this->_data;
+        }
+
+        // ##########################################
+
+        /**
+         * @return bool
+         */
+        public function hasMultiData()
+        {
+            return isset($this->_data[0]) && is_array($this->_data[0]);
         }
 
         // ##########################################
@@ -136,7 +172,7 @@
          */
         public function setTableName($tableName)
         {
-            $this->tableName = $tableName;
+            $this->_tableName = $tableName;
 
             return $this;
         }
@@ -148,7 +184,7 @@
          */
         public function getTableName()
         {
-            return (string)$this->tableName;
+            return (string)$this->_tableName;
         }
 
         // ##########################################
@@ -158,9 +194,9 @@
          *
          * @return SqlQueryBuilder
          */
-        public function setInsertIgnore($insertIgnore)
+        public function enableInsertIgnore($insertIgnore)
         {
-            $this->insertIgnore = $insertIgnore;
+            $this->_enableInsertIgnore = $insertIgnore;
 
             return $this;
         }
@@ -172,30 +208,6 @@
          */
         public function hasInsertIgnore()
         {
-            return (bool)$this->insertIgnore;
-        }
-
-        // ##########################################
-
-        /**
-         * @param boolean $multiData
-         *
-         * @return SqlQueryBuilder
-         */
-        public function setMultiData($multiData)
-        {
-            $this->multiData = $multiData;
-
-            return $this;
-        }
-
-        // ##########################################
-
-        /**
-         * @return bool
-         */
-        public function hasMultiData()
-        {
-            return (bool)$this->multiData;
+            return $this->_enableInsertIgnore !== FALSE ? TRUE : FALSE;
         }
     }

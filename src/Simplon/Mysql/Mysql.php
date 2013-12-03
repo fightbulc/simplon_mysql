@@ -623,7 +623,7 @@
          * @param $tableName
          * @param array $data
          *
-         * @return int|bool|null
+         * @return array|null
          * @throws MysqlException
          */
         public function replace($tableName, array $data)
@@ -633,14 +633,7 @@
                 throw new MysqlException("Multi-dimensional datasets are not allowed. Use 'Mysql::replaceMany()' instead");
             }
 
-            $response = $this->replaceMany($tableName, [$data]);
-
-            if ($response !== NULL)
-            {
-                return array_pop($response);
-            }
-
-            return NULL;
+            return $this->replaceMany($tableName, [$data]);
         }
 
         // ##########################################
@@ -687,55 +680,18 @@
             return NULL;
         }
 
-        // ######################################
-
-        /**
-         * @param $value
-         * @param string $default
-         *
-         * @return string
-         */
-        protected function _getConditionOperator($value, $default = '=')
-        {
-            if (is_array($value))
-            {
-                $default = trim($value['opr']);
-            }
-
-            return $default;
-        }
-
-        // ######################################
-
-        /**
-         * @param array $values
-         *
-         * @return array
-         */
-        protected function _prepareConditionValues(array $values)
-        {
-            foreach ($values as $column => $value)
-            {
-                if (is_array($value))
-                {
-                    $values[$column] = trim($value['val']);
-                }
-            }
-
-            return $values;
-        }
-
         // ##########################################
 
         /**
          * @param $tableName
          * @param array $conds
          * @param array $data
+         * @param null $condsQuery
          *
-         * @return bool
+         * @return bool|null
          * @throws MysqlException
          */
-        public function update($tableName, array $conds, array $data)
+        public function update($tableName, array $conds, array $data, $condsQuery = NULL)
         {
             if (isset($data[0]))
             {
@@ -760,12 +716,21 @@
 
             if (!empty($conds))
             {
-                foreach ($conds as $columnName => $value)
+                if ($condsQuery === NULL)
                 {
-                    $placeholder['conds'][] = $columnName . ' ' . $this->_getConditionOperator($value) . ' :' . $columnName;
-                }
+                    $placeholder = [];
 
-                $query = str_replace(':CONDS', join(', ', $placeholder['conds']), $query);
+                    foreach ($conds as $columnName => $value)
+                    {
+                        $placeholder[] = $columnName . '= :' . $columnName;
+                    }
+
+                    $query = str_replace(':CONDS', join(' AND ', $placeholder), $query);
+                }
+                else
+                {
+                    $query = str_replace(':CONDS', $condsQuery, $query);
+                }
             }
             else
             {
@@ -774,7 +739,7 @@
 
             // ----------------------------------
 
-            $response = $this->_prepareUpdate($query, $this->_prepareConditionValues($conds), $data);
+            $response = $this->_prepareUpdate($query, $conds, $data);
 
             if ($response === TRUE)
             {
@@ -789,23 +754,31 @@
         /**
          * @param $tableName
          * @param array $conds
+         * @param null $condsQuery
          *
-         * @return bool
+         * @return bool|null
          */
-        public function delete($tableName, array $conds = [])
+        public function delete($tableName, array $conds = [], $condsQuery = NULL)
         {
             $query = 'DELETE FROM ' . $tableName . ' WHERE :CONDS';
 
             if (!empty($conds))
             {
-                $placeholder = [];
-
-                foreach ($conds as $columnName => $value)
+                if ($condsQuery === NULL)
                 {
-                    $placeholder[] = $columnName . ' ' . $this->_getConditionOperator($value) . ' :' . $columnName;
-                }
+                    $placeholder = [];
 
-                $query = str_replace(':CONDS', join(', ', $placeholder), $query);
+                    foreach ($conds as $columnName => $value)
+                    {
+                        $placeholder[] = $columnName . '= :' . $columnName;
+                    }
+
+                    $query = str_replace(':CONDS', join(' AND ', $placeholder), $query);
+                }
+                else
+                {
+                    $query = str_replace(':CONDS', $condsQuery, $query);
+                }
             }
             else
             {
@@ -814,7 +787,7 @@
 
             // ----------------------------------
 
-            $response = $this->_prepareDelete($query, $this->_prepareConditionValues($conds));
+            $response = $this->_prepareDelete($query, $conds);
 
             if ($response === TRUE)
             {

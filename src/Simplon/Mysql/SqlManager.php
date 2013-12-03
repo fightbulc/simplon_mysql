@@ -230,7 +230,8 @@
                 ->update(
                     $sqlBuilder->getTableName(),
                     $sqlBuilder->getConditions(),
-                    $sqlBuilder->getData()
+                    $sqlBuilder->getData(),
+                    $sqlBuilder->getConditionsQuery()
                 );
         }
 
@@ -244,6 +245,10 @@
         public function delete(SqlQueryBuilder $sqlBuilder)
         {
             return $this->_getMysqlInstance()
-                ->delete($sqlBuilder->getTableName(), $sqlBuilder->getConditions());
+                ->delete(
+                    $sqlBuilder->getTableName(),
+                    $sqlBuilder->getConditions(),
+                    $sqlBuilder->getConditionsQuery()
+                );
         }
     }
