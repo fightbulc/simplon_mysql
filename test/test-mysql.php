@@ -63,6 +63,16 @@
 
     echo '<h3>insert</h3>';
     $data = [
+        'id'   => NULL,
+        'dump' => '{"message":"#One"}',
+    ];
+    $results = $dbh->insert('import_dump', $data);
+    var_dump($results);
+
+    // ############################################
+
+    echo '<h3>insertMany</h3>';
+    $data = [
         [
             'id'   => NULL,
             'dump' => '{"message":"Hello"}',
@@ -90,6 +100,16 @@
     // ############################################
 
     echo '<h3>replace</h3>';
+    $data = [
+        'id'   => 1,
+        'dump' => '{"message":"#Two"}',
+    ];
+    $results = $dbh->replace('import_dump', $data);
+    var_dump($results);
+
+    // ############################################
+
+    echo '<h3>replaceMany</h3>';
     $data = [
         [
             'id'   => 2,
