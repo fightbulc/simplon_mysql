@@ -62,6 +62,8 @@
     // ############################################
 
     echo '<h3>insert</h3>';
+
+    echo '<h4>with ID response</h4>';
     $data = [
         'id'   => NULL,
         'dump' => '{"message":"#One"}',
@@ -69,9 +71,18 @@
     $results = $dbh->insert('import_dump', $data);
     var_dump($results);
 
+    echo '<h4>with NO-ID response</h4>';
+    $data = [
+        'dump' => '{"message":"#One"}',
+    ];
+    $results = $dbh->insert('import_dump_no_id', $data);
+    var_dump($results);
+
     // ############################################
 
     echo '<h3>insertMany</h3>';
+
+    echo '<h4>with ID response</h4>';
     $data = [
         [
             'id'   => NULL,
@@ -87,6 +98,21 @@
         ],
     ];
     $results = $dbh->insertMany('import_dump', $data);
+    var_dump($results);
+
+    echo '<h4>with NO-ID response</h4>';
+    $data = [
+        [
+            'dump' => '{"message":"Hello"}',
+        ],
+        [
+            'dump' => '{"message":"Foo"}',
+        ],
+        [
+            'dump' => '{"message":"Bar"}',
+        ],
+    ];
+    $results = $dbh->insertMany('import_dump_no_id', $data);
     var_dump($results);
 
     // ############################################
