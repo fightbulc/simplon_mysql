@@ -515,7 +515,7 @@
             $responsesMany = [];
             $pdoStatment = $this->_prepareSelect($query, $conds);
 
-            while ($response = $pdoStatment->fetch())
+            while ($response = $pdoStatment->fetch($this->_getFetchMode()))
             {
                 $responsesMany[] = $response;
             }
