@@ -47,7 +47,27 @@
             {
                 if (strpos($this->_query, '_' . $key . '_') !== FALSE)
                 {
-                    $this->_query = str_replace('_' . $key . '_', $val, $this->_query);
+                    // Handle arrays for the 'IN (...)' queries
+                    if (is_array($val))
+                    {
+                        $indexes = [];
+
+                        foreach ($val as $i => $v)
+                        {
+                            $index = $key . '_' . $i;
+                            $indexes[] = ':'.$index;
+
+                            $this->_addCondition($index, $v);
+                        }
+
+                        $this->_query = str_replace('_' . $key . '_', implode(',', $indexes), $this->_query);
+                    }
+
+                    // Handle regular condition replacements
+                    else
+                    {
+                        $this->_query = str_replace('_' . $key . '_', $val, $this->_query);
+                    }
 
                     // remove placeholder condition
                     $this->_removeCondition($key);
@@ -98,6 +118,26 @@
             }
 
             return FALSE;
+        }
+
+        // ##########################################
+
+        /**
+         * @param $key
+         * @param $value
+         *
+         * @return SqlQueryBuilder
+         */
+        protected function _addCondition($key, $value)
+        {
+            if (!isset($this->_conditions))
+            {
+                $this->_conditions = [];
+            }
+
+            $this->_conditions[$key] = $value;
+
+            return $this;
         }
 
         // ##########################################
