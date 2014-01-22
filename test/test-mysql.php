@@ -2,7 +2,18 @@
 
     require __DIR__ . '/../vendor/autoload.php';
 
-    $dbh = new \Simplon\Mysql\Mysql('localhost', 'beatguide_devel_service', 'rootuser', 'rootuser');
+    $config = [
+        'server'   => 'localhost',
+        'username' => 'rootuser',
+        'password' => 'rootuser',
+        'database' => 'beatguide_devel_service',
+    ];
+
+    $mysqlConfigVo = new \Simplon\Mysql\MysqlConfigVo($config);
+    $dbh = new \Simplon\Mysql\Mysql($mysqlConfigVo);
+
+    // ############################################
+
     $query = 'SELECT * FROM events WHERE venue_id = :venueId LIMIT 10';
     $conds = array('venueId' => 23);
 

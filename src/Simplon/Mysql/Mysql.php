@@ -13,28 +13,44 @@
         // ##########################################
 
         /**
-         * @param $server
-         * @param $database
-         * @param $username
-         * @param $password
-         * @param int $fetchMode
-         * @param string $charset
-         * @param string $collate
+         * @param MysqlConfigVo $mysqlConfigVo
          *
          * @throws MysqlException
          */
-        public function __construct($server, $database, $username, $password, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', $collate = 'utf8_unicode_ci')
+        public function __construct(MysqlConfigVo $mysqlConfigVo)
         {
             try
             {
+                // set dns
+                $dns = [];
+
+                // use unix socket
+                if ($mysqlConfigVo->hasUnixSocket())
+                {
+                    $dns[] = 'mysql:unix_socket=' . $mysqlConfigVo->getUnixSocket();
+                }
+
+                // use server
+                else
+                {
+                    $dns[] = 'mysql:host=' . $mysqlConfigVo->getServer();
+
+                    if ($mysqlConfigVo->hasPort())
+                    {
+                        $dns[] = 'port=' . $mysqlConfigVo->getPort();
+                    }
+                }
+
+                $dns[] = 'dbname=' . $mysqlConfigVo->getDatabase();
+                $dns[] = 'charset=' . $mysqlConfigVo->getCharset();
+
+                // ------------------------------
+
                 // create PDO instance
-                $this->_setDbh(new \PDO('mysql:host=' . $server . ';dbname=' . $database, $username, $password));
+                $this->_setDbh(new \PDO(join(';', $dns), $mysqlConfigVo->getUsername(), $mysqlConfigVo->getPassword()));
 
                 // set fetchMode
-                $this->_setFetchMode($fetchMode);
-
-                // set charset
-                $this->executeSql("SET NAMES '{$charset}' COLLATE '{$collate}'");
+                $this->_setFetchMode($mysqlConfigVo->getFetchMode());
             }
             catch (\PDOException $e)
             {
@@ -240,7 +256,14 @@
 
             // ----------------------------------
 
-            $errorInfo = json_encode($this->_prepareErrorInfo($pdoStatement->errorInfo()));
+            $error = [
+                'query'     => $query,
+                'params'    => $params,
+                'errorInfo' => $this->_prepareErrorInfo($pdoStatement->errorInfo()),
+            ];
+
+            $errorInfo = json_encode($error);
+
             throw new MysqlException("Houston we have a problem: {$errorInfo}");
         }
 
@@ -276,7 +299,13 @@
                 // throw errors
                 if ($pdoStatement->errorCode() !== '00000')
                 {
-                    $errorInfo = json_encode($this->_prepareErrorInfo($pdoStatement->errorInfo()));
+                    $error = [
+                        'query'     => $query,
+                        'errorInfo' => $this->_prepareErrorInfo($pdoStatement->errorInfo()),
+                    ];
+
+                    $errorInfo = json_encode($error);
+
                     throw new MysqlException("Houston we have a problem: {$errorInfo}");
                 }
 
@@ -324,7 +353,14 @@
             // throw errors
             if ($pdoStatement->errorCode() !== '00000')
             {
-                $errorInfo = json_encode($this->_prepareErrorInfo($pdoStatement->errorInfo()));
+                $error = [
+                    'query'     => $query,
+                    'conds'     => $conds,
+                    'errorInfo' => $this->_prepareErrorInfo($pdoStatement->errorInfo()),
+                ];
+
+                $errorInfo = json_encode($error);
+
                 throw new MysqlException("Houston we have a problem: {$errorInfo}");
             }
 
@@ -366,7 +402,14 @@
             // throw errors
             if ($pdoStatement->errorCode() !== '00000')
             {
-                $errorInfo = json_encode($this->_prepareErrorInfo($pdoStatement->errorInfo()));
+                $error = [
+                    'query'     => $query,
+                    'conds'     => $conds,
+                    'errorInfo' => $this->_prepareErrorInfo($pdoStatement->errorInfo()),
+                ];
+
+                $errorInfo = json_encode($error);
+
                 throw new MysqlException("Houston we have a problem: {$errorInfo}");
             }
 
@@ -413,7 +456,13 @@
                 return TRUE;
             }
 
-            $errorInfo = json_encode($this->_prepareErrorInfo($dbh->errorInfo()));
+            $error = [
+                'query'     => $query,
+                'errorInfo' => $this->_prepareErrorInfo($dbh->errorInfo()),
+            ];
+
+            $errorInfo = json_encode($error);
+
             throw new MysqlException("Houston we have a problem: {$errorInfo}");
         }
 
