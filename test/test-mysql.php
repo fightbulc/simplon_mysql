@@ -10,6 +10,7 @@
     ];
 
     $mysqlConfigVo = new \Simplon\Mysql\MysqlConfigVo($config);
+    
     $dbh = new \Simplon\Mysql\Mysql($mysqlConfigVo);
 
     // ############################################

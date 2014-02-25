@@ -26,9 +26,9 @@
         ->setConditions($conds);
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
-    $results = $sqlManager->fetchColumn($sqlBuilder);
+    $result = $sqlManager->fetchColumn($sqlBuilder);
 
-    var_dump($results);
+    var_dump($result);
 
     // ############################################
 
@@ -39,10 +39,10 @@
         ->setConditions($conds);
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
-    $results = $sqlManager->fetchColumnMany($sqlBuilder);
+    $result = $sqlManager->fetchColumnMany($sqlBuilder);
 
     echo '<h4>total rows: ' . $sqlManager->getRowCount() . '</h4>';
-    var_dump($results);
+    var_dump($result);
 
     // ############################################
 
@@ -71,8 +71,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->fetchRow($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->fetchRow($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -84,8 +84,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->fetchRowMany($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->fetchRowMany($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -131,8 +131,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->insert($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->insert($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -159,8 +159,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->insert($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->insert($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -176,8 +176,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->update($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->update($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -193,8 +193,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->replace($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->replace($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -216,8 +216,8 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->replace($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->replace($sqlBuilder);
+    var_dump($result);
 
     // ############################################
 
@@ -234,5 +234,5 @@
 
     $sqlManager = new \Simplon\Mysql\SqlManager($dbh);
 
-    $results = $sqlManager->delete($sqlBuilder);
-    var_dump($results);
+    $result = $sqlManager->delete($sqlBuilder);
+    var_dump($result);
