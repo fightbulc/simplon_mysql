@@ -518,7 +518,7 @@ class Mysql
      * @param $query
      * @param array $conds
      *
-     * @return SqlQueryIterator
+     * @return MysqlQueryIterator
      */
     public function fetchColumnManyCursor($query, array $conds = [])
     {
@@ -526,7 +526,7 @@ class Mysql
 
         // ----------------------------------
 
-        return new SqlQueryIterator($this->getLastStatement(), 'fetchColumn');
+        return new MysqlQueryIterator($this->getLastStatement(), 'fetchColumn');
     }
 
     /**
@@ -575,7 +575,7 @@ class Mysql
      * @param $query
      * @param array $conds
      *
-     * @return SqlQueryIterator
+     * @return MysqlQueryIterator
      */
     public function fetchRowManyCursor($query, array $conds = [])
     {
@@ -583,7 +583,7 @@ class Mysql
 
         // ----------------------------------
 
-        return new SqlQueryIterator($this->getLastStatement(), 'fetch');
+        return new MysqlQueryIterator($this->getLastStatement(), 'fetch');
     }
 
     /**
