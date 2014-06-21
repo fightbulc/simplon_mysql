@@ -9,8 +9,6 @@
 
 # Simplon/Mysql
 
-Current version: 0.2.1
-
 1. __Installing__  
 2. __Direct vs. SqlManager__  
 3. __Setup connection__
@@ -28,7 +26,10 @@ Current version: 0.2.1
 5.4. Replace    
 5.5. Delete
 5.6. Execute
-6. __Exceptions__
+6. __IN() Clause Handling__
+6.1. The issue  
+6.2. The solution  
+7. __Exceptions__
 
 -------------------------------------------------
 
@@ -46,7 +47,7 @@ Easy install via composer. Still no idea what composer is? Inform yourself [here
 ```json
 {
   "require": {
-    "simplon/mysql": "0.2.*"
+    "simplon/mysql": "*"
   }
 }
 ```
@@ -638,7 +639,45 @@ var_dump($result); // TRUE || FALSE
 
 -------------------------------------------------
 
-## 6. Exceptions
+## 6. IN() Clause Handling
+
+#### 6.1. The issue
+
+There is no way using an ```IN()``` clause via PDO. This functionality is simply not given. However, you could do something like the following:
+
+```php
+$ids = [1,2,3,4,5];
+$query = "SELECT * FROM users WHERE id IN (" . join(',', $ids) . ")";
+```
+
+Looks good at first sight - not sexy but probably does the job, right? Wrong. This approach only works with ```INTEGERS``` and it does not ```ESCAPE``` the user's input - the reason why we use ```PDO``` in first place.
+
+Just for the record here is a string example which would not work:
+
+```php
+$emails = ['johnny@me.com', 'peter@ibm.com'];
+$query = "SELECT * FROM users WHERE email IN (" . join(',', $emails) . ")";
+```
+
+The only way how this would work is by wrapping each value like the following: ```'"email"'```. Way too much work.
+#### 6.2. The solution
+
+To take advantage of the built in ```IN() Clause``` with escaping and type handling do the following:
+
+```php
+// integers
+$conds = [ 'ids' => [1,2,3,4,5] ];
+$query = "SELECT * FROM users WHERE id IN (:ids)";
+
+// strings
+$conds = [ 'emails' => ['johnny@me.com', 'peter@ibm.com'] ];
+$query = "SELECT * FROM users WHERE email IN (:emails)";
+```
+
+
+-------------------------------------------------
+
+## 7. Exceptions
 
 For both access methods (direct, sqlmanager) occuring exceptions will be wrapped by a ```MysqlException```. All essential exception information will be summarised as ```JSON``` within the ```Exception Message```.
 
