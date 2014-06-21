@@ -39,37 +39,6 @@ class SqlQueryBuilder
      */
     public function getQuery()
     {
-        foreach ($this->conditions as $key => $val)
-        {
-            if (strpos($this->query, '_' . $key . '_') !== false)
-            {
-                // Handle arrays for the 'IN (...)' queries
-                if (is_array($val))
-                {
-                    $indexes = [];
-
-                    foreach ($val as $i => $v)
-                    {
-                        $index = $key . '_' . $i;
-                        $indexes[] = ':' . $index;
-
-                        $this->addCondition($index, $v);
-                    }
-
-                    $this->query = str_replace('_' . $key . '_', implode(',', $indexes), $this->query);
-                }
-
-                // Handle regular condition replacements
-                else
-                {
-                    $this->query = str_replace('_' . $key . '_', $val, $this->query);
-                }
-
-                // remove placeholder condition
-                $this->removeCondition($key);
-            }
-        }
-
         return (string)$this->query;
     }
 
