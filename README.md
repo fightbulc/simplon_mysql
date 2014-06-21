@@ -17,31 +17,31 @@ __Note:__ Version breaks w/ prior versions due to PSR-2/4 changes as well as som
 
 1. [__Installing__](#1-installing)  
 2. [__Direct vs. SqlManager__](#2-direct-vs-sqlmanager)  
-3. [__Setup connection__](#3-setup-connection)
+3. [__Setup connection__](#3-setup-connection)  
 4. [__Usage: Direct access__](#4-usage-direct-access)  
 4.1. Query  
-4.2. Insert    
+4.2. Insert  
 4.3. Update  
 4.4. Replace  
 4.5. Delete  
-4.6. Execute
+4.6. Execute  
 5. [__Usage: SqlManager__](#5-usage-sqlmanager)  
 5.1. Query  
 5.2. Insert  
 5.3. Update  
 5.4. Replace    
-5.5. Delete
-5.6. Execute
-6. [__IN() Clause Handling__](#6-in-clause-handling)
+5.5. Delete  
+5.6. Execute  
+6. [__IN() Clause Handling__](#6-in-clause-handling)  
 6.1. The issue  
 6.2. The solution  
-7. [__CRUD Helper__](#7-crud-helper)
+7. [__CRUD Helper__](#7-crud-helper)  
 7.1. Intro  
 7.2. Requirements  
 7.3. Flexibility/Restrictions  
 7.4. Conclusion  
 7.5. Examples  
-8. [__Exceptions__](#8-exceptions)
+8. [__Exceptions__](#8-exceptions)  
 
 -------------------------------------------------
 
