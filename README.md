@@ -91,7 +91,7 @@ $config = [
     'fetchMode'  => \PDO::FETCH_ASSOC,
     'charset'    => 'utf8',
     'port'       => 3306,
-    'unixSocket' => NULL,
+    'unixSocket' => null,
 ];
 
 $dbConn = new \Simplon\Mysql\Mysql(
@@ -113,24 +113,24 @@ $sqlManager = new \Simplon\Mysql\SqlManager($dbConn);
 
 #### FetchColumn
 
-Returns a selected column from the first match. In the example below ```id``` will be returned or ```NULL``` if nothing was found.
+Returns a selected column from the first match. In the example below ```id``` will be returned or ```false``` if nothing was found.
 
 ```php
 $result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
 
 // result
-var_dump($result); // '1' || NULL
+var_dump($result); // '1' || false
 ```
 
 #### FetchColumnMany
 
-Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```NULL``` if nothing was found.
+Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
 
 ```php
 $result = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
 
 // result
-var_dump($result); // ['1', '15', '30', ...] || NULL
+var_dump($result); // ['1', '15', '30', ...] || false
 ```
 
 #### FetchColumnManyCursor
@@ -148,22 +148,22 @@ foreach ($cursor as $result)
 
 #### FetchRow
 
-Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```NULL``` will be returned.
+Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
 
 ```php
 $result = $dbConn->fetchRow('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
 
-var_dump($result); // ['id' => '1', 'age' => '22'] || NULL
+var_dump($result); // ['id' => '1', 'age' => '22'] || false
 ```
 
 #### FetchRowMany
 
-Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```NULL``` will be returned.
+Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
 
 ```php
 $result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
 
-var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || NULL
+var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || false
 ```
 
 #### FetchRowManyCursor
@@ -189,17 +189,17 @@ Inserting data into the database is pretty straight forward. Follow the example 
 
 ```php
 $data = [
-    'id'   => NULL,
+    'id'   => false,
     'name' => 'Peter',
     'age'  => 45,
 ];
 
 $id = $dbConn->insert('names', $data);
 
-var_dump($id); // 50 || NULL
+var_dump($id); // 50 || bool
 ```
 
-The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```TRUE``` for a successful insert. If anything went bogus you will receive ```NULL```. 
+The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```true``` for a successful insert. If anything went bogus you will receive ```false```. 
 
 #### Many datasets
 
@@ -208,12 +208,12 @@ Follow the example for inserting many datasets at once:
 ```php
 $data = [
     [    
-        'id'   => NULL,
+        'id'   => false,
         'name' => 'Peter',
         'age'  => 45,
     ],
     [    
-        'id'   => NULL,
+        'id'   => false,
         'name' => 'Peter',
         'age'  => 16,
     ],
@@ -221,10 +221,10 @@ $data = [
 
 $id = $dbConn->insertMany('names', $data);
 
-var_dump($id); // 50 || NULL
+var_dump($id); // 50 || bool
 ```
 
-The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```TRUE``` for a successful insert. If anything went bogus you will receive ```NULL```. 
+The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```true``` for a successful insert. If anything went bogus you will receive ```false```. 
 
 -------------------------------------------------
 
@@ -232,7 +232,7 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 
 #### Simple update statement
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```TRUE```. If something went wrong you will receive ```NULL```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
 $conds [
@@ -246,12 +246,12 @@ $data = [
 
 $result = $dbConn->update('names', $conds, $data);
 
-var_dump($result); // TRUE || NULL
+var_dump($result); // true || false
 ```
 
 #### Custom update conditions query
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```TRUE```. If something went wrong you will receive ```NULL```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
 $conds [
@@ -269,7 +269,7 @@ $data = [
 
 $result = $dbConn->update('names', $conds, $data, $condsQuery);
 
-var_dump($result); // TRUE || NULL
+var_dump($result); // true || false
 ```
 
 -------------------------------------------------
@@ -280,7 +280,7 @@ As MySQL states it: ```REPLACE``` works exactly like ```INSERT```, except that i
 
 #### Replace a single datasets
 
-As a result you will either receive the ```INSERT ID``` or ```NULL``` in case something went wrong.
+As a result you will either receive the ```INSERT ID``` or ```false``` in case something went wrong.
 
 ```php
 $data = [
@@ -291,12 +291,12 @@ $data = [
 
 $result = $dbConn->replace('names', $data);
 
-var_dump($result); // 1 || NULL
+var_dump($result); // 1 || false
 ```
 
 #### Replace multiple datasets
 
-As a result you will either receive an array of ```INSERT IDs``` or ```NULL``` in case something went wrong.
+As a result you will either receive an array of ```INSERT IDs``` or ```false``` in case something went wrong.
 
 ```php
 $data = [
@@ -314,7 +314,7 @@ $data = [
 
 $result = $dbConn->replaceMany('names', $data);
 
-var_dump($result); // [5, 10]  || NULL
+var_dump($result); // [5, 10]  || false
 ```
 
 -------------------------------------------------
@@ -323,17 +323,17 @@ var_dump($result); // [5, 10]  || NULL
 
 #### Simple delete conditions
 
-The following example demonstrates how to remove data. If the query succeeds we will receive ```TRUE``` else ```NULL```.
+The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
 $result = $dbConn->delete('names', ['id' => 50]);
 
-var_dump($result); // TRUE || NULL
+var_dump($result); // true || false
 ```
 
 #### Custom delete conditions query
 
-The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```TRUE``` else ```NULL```.
+The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
 $conds = [
@@ -346,19 +346,19 @@ $condsQuery = 'id = :id OR name =: name';
 
 $result = $dbConn->delete('names', $conds, $condsQuery);
 
-var_dump($result); // TRUE || NULL
+var_dump($result); // true || false
 ```
 
 -------------------------------------------------
 
 ### 4.6. Execute
 
-This method is ment for calls which do not require any parameters such as ```TRUNCATE```. If the call succeeds you will receive ```TRUE```. If it fails an ```MysqlException``` will be thrown. 
+This method is ment for calls which do not require any parameters such as ```TRUNCATE```. If the call succeeds you will receive ```true```. If it fails an ```MysqlException``` will be thrown. 
 
 ```php
 $result = $dbConn->executeSql('TRUNCATE names');
 
-var_dump($result); // TRUE
+var_dump($result); // true
 ```
 
 -------------------------------------------------
@@ -371,7 +371,7 @@ The following query examples will be a rewrite of the aforementioned ```direct a
 
 #### FetchColumn
 
-Returns a selected column from the first match. In the example below ```id``` will be returned or ```FALSE``` if nothing was found.
+Returns a selected column from the first match. In the example below ```id``` will be returned or ```false``` if nothing was found.
 
 ```php
 $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
@@ -381,12 +381,12 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 $result = $sqlManager->fetchColumn($sqlBuilder);
 
 // result
-var_dump($result); // '1' || FALSE
+var_dump($result); // '1' || false
 ```
 
 #### FetchColumnMany
 
-Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```FALSE``` if nothing was found.
+Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
 
 ```php
 $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
@@ -396,7 +396,7 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 $result = $sqlManager->fetchColumnMany($sqlBuilder);
 
 // result
-var_dump($result); // ['1', '15', '30', ...] || FALSE
+var_dump($result); // ['1', '15', '30', ...] || false
 ```
 
 #### FetchColumnManyCursor
@@ -416,7 +416,7 @@ foreach ($sqlManager->fetchColumnMany($sqlBuilder) as $result)
 
 #### FetchRow
 
-Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```FALSE``` will be returned.
+Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
 
 ```php
 $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
@@ -425,12 +425,12 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->fetchRow($sqlBuilder);
 
-var_dump($result); // ['id' => '1', 'age' => '22'] || NULL
+var_dump($result); // ['id' => '1', 'age' => '22'] || false
 ```
 
 #### FetchRowMany
 
-Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```NULL``` will be returned.
+Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
 
 ```php
 $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
@@ -439,7 +439,7 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->fetchRowMany($sqlBuilder);
 
-var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || NULL
+var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || false
 ```
 
 #### FetchRowManyCursor
@@ -467,7 +467,7 @@ Inserting data into the database is pretty straight forward. Follow the example 
 
 ```php
 $data = [
-    'id'   => NULL,
+    'id'   => false,
     'name' => 'Peter',
     'age'  => 45,
 ];
@@ -478,10 +478,10 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $id = $sqlManager->insert($sqlBuilder);
 
-var_dump($id); // 50 || FALSE
+var_dump($id); // 50 || false
 ```
 
-The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```TRUE``` for a successful insert. If anything went bogus you will receive ```FALSE```. 
+The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```true``` for a successful insert. If anything went bogus you will receive ```false```. 
 
 #### Many datasets
 
@@ -490,12 +490,12 @@ Follow the example for inserting many datasets at once:
 ```php
 $data = [
     [    
-        'id'   => NULL,
+        'id'   => false,
         'name' => 'Peter',
         'age'  => 45,
     ],
     [    
-        'id'   => NULL,
+        'id'   => false,
         'name' => 'Peter',
         'age'  => 16,
     ],
@@ -507,16 +507,16 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->insert($sqlBuilder);
 
-var_dump($id); // [50, 51, ...] || FALSE
+var_dump($id); // [50, 51, ...] || false
 ```
 
-The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```TRUE``` for a successful insert. If anything went bogus you will receive ```FALSE```. 
+The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```true``` for a successful insert. If anything went bogus you will receive ```false```. 
 
 ### 5.3. Update
 
 #### Simple update statement
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```TRUE```. If something went wrong you will receive ```FALSE```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
 $data = [
@@ -531,12 +531,12 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->update($sqlBuilder);
 
-var_dump($result); // TRUE || FALSE
+var_dump($result); // true || false
 ```
 
 #### Custom update conditions query
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```TRUE```. If something went wrong you will receive ```FALSE```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
 $data = [
@@ -552,7 +552,7 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->update($sqlBuilder);
 
-var_dump($result); // TRUE || FALSE
+var_dump($result); // true || false
 ```
 
 ### 5.4. Replace
@@ -561,7 +561,7 @@ As MySQL states it: ```REPLACE``` works exactly like ```INSERT```, except that i
 
 #### Replace a single datasets
 
-As a result you will either receive the ```INSERT ID``` or ```NULL``` in case something went wrong.
+As a result you will either receive the ```INSERT ID``` or ```false``` in case something went wrong.
 
 ```php
 $data = [
@@ -576,12 +576,12 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->replace($sqlBuilder);
 
-var_dump($result); // 1 || NULL
+var_dump($result); // 1 || false
 ```
 
 #### Replace multiple datasets
 
-As a result you will either receive an array of ```INSERT IDs``` or ```NULL``` in case something went wrong.
+As a result you will either receive an array of ```INSERT IDs``` or ```false``` in case something went wrong.
 
 ```php
 $data = [
@@ -603,14 +603,14 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->replaceMany($sqlBuilder);
 
-var_dump($result); // [5, 10]  || NULL
+var_dump($result); // [5, 10]  || false
 ```
 
 ### 5.5. Delete
 
 #### Simple delete conditions
 
-The following example demonstrates how to remove data. If the query succeeds we will receive ```TRUE``` else ```FALSE```.
+The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
 $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
@@ -619,12 +619,12 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->delete($sqlBuilder);
 
-var_dump($result); // TRUE || FALSE
+var_dump($result); // true || false
 ```
 
 #### Custom delete conditions query
 
-The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```TRUE``` else ```FALSE```.
+The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
 $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
@@ -634,7 +634,7 @@ $sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
 
 $result = $sqlManager->delete($sqlBuilder);
 
-var_dump($result); // TRUE || FALSE
+var_dump($result); // true || false
 ```
 
 -------------------------------------------------

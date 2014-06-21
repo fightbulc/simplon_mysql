@@ -320,7 +320,7 @@ class Mysql
                 throw new MysqlException("Houston we have a problem: {$errorInfo}");
             }
 
-            // last insert|bool
+            // last insert|null
             $lastInsert = $dbh->lastInsertId();
 
             // cache response
@@ -476,7 +476,7 @@ class Mysql
      * @param $query
      * @param array $conds
      *
-     * @return null|string
+     * @return false|string
      */
     public function fetchColumn($query, array $conds = [])
     {
@@ -487,14 +487,14 @@ class Mysql
             return (string)$response;
         }
 
-        return null;
+        return false;
     }
 
     /**
      * @param $query
      * @param array $conds
      *
-     * @return array|null
+     * @return array|bool
      */
     public function fetchColumnMany($query, array $conds = [])
     {
@@ -511,7 +511,7 @@ class Mysql
             return (array)$responsesMany;
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -533,7 +533,7 @@ class Mysql
      * @param $query
      * @param array $conds
      *
-     * @return array|null
+     * @return array|bool
      */
     public function fetchRow($query, array $conds = [])
     {
@@ -544,14 +544,14 @@ class Mysql
             return (array)$response;
         }
 
-        return null;
+        return false;
     }
 
     /**
      * @param $query
      * @param array $conds
      *
-     * @return array|null
+     * @return array|bool
      */
     public function fetchRowMany($query, array $conds = [])
     {
@@ -568,7 +568,7 @@ class Mysql
             return (array)$responsesMany;
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -591,7 +591,7 @@ class Mysql
      * @param array $data
      * @param bool $insertIgnore
      *
-     * @return int|bool|null
+     * @return int|bool
      * @throws MysqlException
      */
     public function insert($tableName, array $data, $insertIgnore = false)
@@ -603,12 +603,12 @@ class Mysql
 
         $response = $this->insertMany($tableName, [$data], $insertIgnore);
 
-        if ($response !== null)
+        if ($response !== false)
         {
             return array_pop($response);
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -616,7 +616,7 @@ class Mysql
      * @param array $data
      * @param bool $insertIgnore
      *
-     * @return array|null
+     * @return array|bool
      * @throws MysqlException
      */
     public function insertMany($tableName, array $data, $insertIgnore = false)
@@ -651,14 +651,14 @@ class Mysql
             return (array)$response;
         }
 
-        return null;
+        return false;
     }
 
     /**
      * @param $tableName
      * @param array $data
      *
-     * @return array|null
+     * @return array|bool
      * @throws MysqlException
      */
     public function replace($tableName, array $data)
@@ -675,7 +675,7 @@ class Mysql
      * @param $tableName
      * @param array $data
      *
-     * @return array|null
+     * @return array|bool
      * @throws MysqlException
      */
     public function replaceMany($tableName, array $data)
@@ -710,7 +710,7 @@ class Mysql
             return (array)$response;
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -719,7 +719,7 @@ class Mysql
      * @param array $data
      * @param null $condsQuery
      *
-     * @return bool|null
+     * @return bool
      * @throws MysqlException
      */
     public function update($tableName, array $conds, array $data, $condsQuery = null)
@@ -777,7 +777,7 @@ class Mysql
             return true;
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -785,7 +785,7 @@ class Mysql
      * @param array $conds
      * @param null $condsQuery
      *
-     * @return bool|null
+     * @return bool
      */
     public function delete($tableName, array $conds = [], $condsQuery = null)
     {
@@ -823,6 +823,6 @@ class Mysql
             return true;
         }
 
-        return null;
+        return false;
     }
 }
