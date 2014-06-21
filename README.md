@@ -9,7 +9,7 @@
 
 # Simplon/Mysql
 
-Current version: 0.3.0
+Current version: 0.3.*
 
 __Note:__ Version breaks w/ prior versions due to PSR-2/4 changes as well as some refactorings. Lots happened!
 
