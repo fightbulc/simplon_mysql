@@ -2,7 +2,7 @@
 
 namespace Simplon\Mysql;
 
-class SqlQueryIterator implements \Iterator
+class MysqlQueryIterator implements \Iterator
 {
     protected $position;
     protected $pdoStatement;

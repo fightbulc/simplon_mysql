@@ -1,6 +1,6 @@
 <?php
 
-namespace Simplon\Mysql;
+namespace Simplon\Mysql\Manager;
 
 class SqlQueryBuilder
 {

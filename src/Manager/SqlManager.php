@@ -1,6 +1,9 @@
 <?php
 
-namespace Simplon\Mysql;
+namespace Simplon\Mysql\Manager;
+
+use Simplon\Mysql\Mysql;
+use Simplon\Mysql\MysqlQueryIterator;
 
 class SqlManager
 {
@@ -86,7 +89,7 @@ class SqlManager
     /**
      * @param SqlQueryBuilder $sqlBuilder
      *
-     * @return SqlQueryIterator
+     * @return MysqlQueryIterator
      */
     public function fetchColumnManyCursor(SqlQueryBuilder $sqlBuilder)
     {
@@ -136,7 +139,7 @@ class SqlManager
     /**
      * @param SqlQueryBuilder $sqlBuilder
      *
-     * @return SqlQueryIterator
+     * @return MysqlQueryIterator
      */
     public function fetchRowManyCursor(SqlQueryBuilder $sqlBuilder)
     {
