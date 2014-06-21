@@ -692,13 +692,12 @@ $query = "SELECT * FROM users WHERE email IN (:emails)";
 
 #### 7.1. Intro
 
-```CRUD``` stands for ```Create Read Update Delete``` and reflects possible processes of interacting with an object.
-Is that correct? I guess...well, you know what I mean :)
+```CRUD``` stands for ```Create Read Update Delete``` and reflects the for basic functions for persisent storage.
 
-Anyway, I found myself writing more and more CRUDs for all my object/database interactions simply for the reason of
-having a ```SINGLE POINT OF ACCESS``` when I was interacting with these objects. Eventually, it has sort of a touch of a
-database model but with more flexibility. Also, we keep writing ```VALUE OBJECTS``` and by that we keep the red line for
-all our code base.
+I found myself writing more and more CRUDs for all my object/database interactions simply for the reason of having a
+```SINGLE POINT OF ACCESS``` when I was interacting with these objects for above mentioned functions. Eventually, it has
+sort of a touch of a database model but with more flexibility. Also, we keep writing ```VALUE OBJECTS``` and by that we
+keep the red line for all our code base.
 
 __Note:__ ```VALUE OBJECTS``` are actually ```MODELS``` while models are not value objects. The reason for this is that a value
 object is vehicle for all sorts of data while models are only vehicles for database data. At least that's what it should be.  
@@ -708,25 +707,30 @@ object is vehicle for all sorts of data while models are only vehicles for datab
 There are really __not many__ requirements/restrictions:
 
 - Instance of ```SqlCrudManager``` - requires an instance of ```Simplon\Mysql```.
-- Table name should be in plural or set it via ```protected static $crudSource``` within the value object.
+- Value object needs to extend from ```SqlCrudVo```
+- Table name should be in plural or set it via ```SqlCrudVo::$crudSource``` within the value object.
 - Value object's instance variables must match the table's column names in ```CamelCase``` (see example below).
 - Each value object reflects ```ONE OBJECT``` only - ```Mysql::fetchRow()``` fetches your data.
-- ```Variable = Column``` __Don't set any variable__ which doesn't reflect your database table. __If you have to__ set your
-    columns via ```UserVo::crudColumns()```. See ```Flexibility``` for description.
+- ```VARIABLE = COLUMN``` __Don't set any variable__ which doesn't reflect your database table. __If you have to__
+    set your columns via ```SqlCrudVo::crudColumns()```. See ```Flexibility``` for description.
  
 #### 7.3. Flexibility
 
-- __Set source:__ In case you have a table name which can't be easily pluralised (e.g. person/people) you can set the source yourself via ```UserVo::$crudSource``` within value object
+- __Set source:__ In case you have a table name which can't be easily pluralised (e.g. person/people) you can set the source yourself via ```SqlCrudVo::$crudSource``` within value object
 
-- __Set custom read query:__ In case you need a custom query to get your object you can implement ```UserVo::crudSetQuery($query)``` within your value object. 
+- __Set custom read query:__ In case you need a custom query to get your object you can implement ```SqlCrudVo::crudSetQuery($query)``` within your value object. 
 
-- __Callbacks:__ You can implement two methods which will be called prior/after saving an object: ```UserVo::crudBeforeSave($isCreateEvent)``` and ```UserVo::crudAfterSave($isCreateEvent)```. The manager
+- __Callbacks:__ You can implement two methods which will be called prior/after saving an object: ```SqlCrudVo::crudBeforeSave($isCreateEvent)``` and ```SqlCrudVo::crudAfterSave($isCreateEvent)```. The manager
     will pass you a boolean to let you know what type of save process happens/happened. You could use this e.g. to set automatically ```created_at``` and ```updated_at``` fields. 
 
-- __Set columns yourself:__ If you have to define column-unrelated variables make use of ```UserVo::crudColumns()``` within the your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
+- __Set columns yourself:__ If you have to define column-unrelated variables make use of ```SqlCrudVo::crudColumns()``` within the your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
     __Example:__ ```['createdAt' => 'created_at']``` 
 
-- __Ignore variables:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement the array ```UserVo::$crudIgnoreVariables``` and fill it with those variables you want to ignore.  
+- __Ignore variables:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement the array ```SqlCrudVo::$crudIgnoreVariables``` and fill it with those variables you want to ignore.  
+
+- __No assumptions:__ There are no assumptions about primary keys or anything alike. You set all conditions for reading, updating and/or deleting objects.
+
+- __Casted values:__ Thanks to your value object which is always in between you and your database you can cast all values - good bye ```STRING CASTED ONLY``` values.
 
 #### 7.4. Conclusion
 
@@ -792,8 +796,11 @@ echo $userVo->getId(); // 1
 Read a user:
 
 ```php
+// conditions: where id = 1
+$conds = ['id' => 1];
+
 /** @var UserVo $userVo */
-$userVo = $sqlCrudManager->read(new UserVo(), ['id' => 1]);
+$userVo = $sqlCrudManager->read(new UserVo(), $conds);
 
 // print name
 echo $userVo->getName(); // Johnny Foobar
@@ -802,15 +809,18 @@ echo $userVo->getName(); // Johnny Foobar
 Update a user:
 
 ```php
+// conditions: where id = 1
+$conds = ['id' => 1];
+
 /** @var UserVo $userVo */
-$userVo = $sqlCrudManager->read(new UserVo(), ['id' => 1]);
+$userVo = $sqlCrudManager->read(new UserVo(), $conds);
 
 // set new name
 $userVo->setName('Hansi Hinterseher');
 
 // update
 /** @var UserVo $userVo */
-$userVo = $sqlCrudManager->update($userVo, ['id' => 1]);
+$userVo = $sqlCrudManager->update($userVo, $conds);
 
 // print name
 echo $userVo->getName(); // Hansi Hinterseher
@@ -819,11 +829,14 @@ echo $userVo->getName(); // Hansi Hinterseher
 Delete a user:
 
 ```php
+// conditions: where id = 1
+$conds = ['id' => 1];
+
 /**
 * UserVo:::crudGetSource() is the name of the table
 * based on the value object's name
 */
-$sqlCrudManager->update(UserVo:::crudGetSource(), ['id' => 1]);
+$sqlCrudManager->update(UserVo:::crudGetSource(), $conds);
 ```
 
 -------------------------------------------------
