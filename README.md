@@ -9,27 +9,39 @@
 
 # Simplon/Mysql
 
-1. __Installing__  
-2. __Direct vs. SqlManager__  
-3. __Setup connection__
-4. __Usage: Direct access__  
+Current version: 0.3.0
+
+__Note:__ Version breaks w/ prior versions due to PSR-2/4 changes as well as some refactorings. Lots happened!
+
+-------------------------------------------------
+
+1. [__Installing__](#1-installing)  
+2. [__Direct vs. SqlManager__](#2-direct-vs-sqlmanager)  
+3. [__Setup connection__](#3-setup-connection)
+4. [__Usage: Direct access__](#4-usage-direct-access)  
 4.1. Query  
 4.2. Insert    
 4.3. Update  
 4.4. Replace  
 4.5. Delete  
 4.6. Execute
-5. __Usage: SqlManager__  
+5. [__Usage: SqlManager__](#5-usage-sqlmanager)  
 5.1. Query  
 5.2. Insert  
 5.3. Update  
 5.4. Replace    
 5.5. Delete
 5.6. Execute
-6. __IN() Clause Handling__
+6. [__IN() Clause Handling__](#6-in-clause-handling)
 6.1. The issue  
 6.2. The solution  
-7. __Exceptions__
+7. [__CRUD Helper__](#7-crud-helper)
+7.1. Intro  
+7.2. Requirements  
+7.3. Flexibility/Restrictions  
+7.4. Conclusion  
+7.5. Examples  
+8. [__Exceptions__](#8-exceptions)
 
 -------------------------------------------------
 
@@ -674,10 +686,149 @@ $conds = [ 'emails' => ['johnny@me.com', 'peter@ibm.com'] ];
 $query = "SELECT * FROM users WHERE email IN (:emails)";
 ```
 
+-------------------------------------------------
+
+## 7. CRUD Helper
+
+#### 7.1. Intro
+
+```CRUD``` stands for ```Create Read Update Delete``` and reflects possible processes of interacting with an object.
+Is that correct? I guess...well, you know what I mean :)
+
+Anyway, I found myself writing more and more CRUDs for all my object/database interactions simply for the reason of
+having a ```SINGLE POINT OF ACCESS``` when I was interacting with these objects. Eventually, it has sort of a touch of a
+database model but with more flexibility. Also, we keep writing ```VALUE OBJECTS``` and by that we keep the red line for
+all our code base.
+
+__Note:__ ```VALUE OBJECTS``` are actually ```MODELS``` while models are not value objects. The reason for this is that a value
+object is vehicle for all sorts of data while models are only vehicles for database data. At least that's what it should be.  
+
+#### 7.2. Requirements/Restrictions
+
+There are really __not many__ requirements/restrictions:
+
+- Instance of ```SqlCrudManager``` - requires an instance of ```Simplon\Mysql```.
+- Table name should be in plural or set it via ```protected static $crudSource``` within the value object.
+- Value object's instance variables must match the table's column names in ```CamelCase``` (see example below).
+- Each value object reflects ```ONE OBJECT``` only - ```Mysql::fetchRow()``` fetches your data.
+- ```Variable = Column``` __Don't set any variable__ which doesn't reflect your database table. __If you have to__ set your
+    columns via ```UserVo::crudColumns()```. See ```Flexibility``` for description.
+ 
+#### 7.3. Flexibility
+
+- __Set source:__ In case you have a table name which can't be easily pluralised (e.g. person/people) you can set the source yourself via ```UserVo::$crudSource``` within value object
+
+- __Set custom read query:__ In case you need a custom query to get your object you can implement ```UserVo::crudSetQuery($query)``` within your value object. 
+
+- __Callbacks:__ You can implement two methods which will be called prior/after saving an object: ```UserVo::crudBeforeSave($isCreateEvent)``` and ```UserVo::crudAfterSave($isCreateEvent)```. The manager
+    will pass you a boolean to let you know what type of save process happens/happened. You could use this e.g. to set automatically ```created_at``` and ```updated_at``` fields. 
+
+- __Set columns yourself:__ If you have to define column-unrelated variables make use of ```UserVo::crudColumns()``` within the your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
+    __Example:__ ```['createdAt' => 'created_at']``` 
+
+- __Ignore variables:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement the array ```UserVo::$crudIgnoreVariables``` and fill it with those variables you want to ignore.  
+
+#### 7.4. Conclusion
+
+That's all what is needed - at least for now. It's ```simple```, ```explicit``` and ```flexible``` enough not to restrict you in your requirements respectively your ```creativity```.
+
+#### 7.5. Examples
+
+Enough talk, bring it on! Alright, what is needed? Lets assume we have a database table called ```users``` and a value
+object called ```UserVo```. __Note:__ the value object name has to be the singular of the table's plural name.
+
+Here is the table schema:
+
+```sql
+CREATE TABLE `users` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL DEFAULT '',
+  `email` varchar(254) NOT NULL DEFAULT '',
+  `created_at` int(10) unsigned NOT NULL,
+  `updated_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+```
+
+... and here is our value object for the given table:
+
+```php
+class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
+{
+    protected $id;
+    protected $name;
+    protected $email;
+    protected $createdAt;
+    protected $updatedAt;
+
+    // ... here goes getter/setter for the above variables
+} 
+```
+
+Now, lets do some CRUD, baby! For all processes we need an instance of our ```SqlCrudManager```:
+
+```php
+/**
+* construct it with an instance of your simplon/mysql
+*/
+$sqlCrudManager = new \Simplon\Mysql\Crud\SqlCrudManager($mysqlInstance);
+```
+
+Create a user:
+
+```php
+$userVo = (new UserVo())
+    ->setId(null)
+    ->setName('Johnny Foobar')
+    ->setEmail('foo@bar.com');
+
+/** @var UserVo $userVo */
+$userVo = $sqlCrudManager->create($userVo);
+
+// print insert id
+echo $userVo->getId(); // 1
+```
+
+Read a user:
+
+```php
+/** @var UserVo $userVo */
+$userVo = $sqlCrudManager->read(new UserVo(), ['id' => 1]);
+
+// print name
+echo $userVo->getName(); // Johnny Foobar
+```
+
+Update a user:
+
+```php
+/** @var UserVo $userVo */
+$userVo = $sqlCrudManager->read(new UserVo(), ['id' => 1]);
+
+// set new name
+$userVo->setName('Hansi Hinterseher');
+
+// update
+/** @var UserVo $userVo */
+$userVo = $sqlCrudManager->update($userVo, ['id' => 1]);
+
+// print name
+echo $userVo->getName(); // Hansi Hinterseher
+```
+
+Delete a user:
+
+```php
+/**
+* UserVo:::crudGetSource() is the name of the table
+* based on the value object's name
+*/
+$sqlCrudManager->update(UserVo:::crudGetSource(), ['id' => 1]);
+```
 
 -------------------------------------------------
 
-## 7. Exceptions
+## 8. Exceptions
 
 For both access methods (direct, sqlmanager) occuring exceptions will be wrapped by a ```MysqlException```. All essential exception information will be summarised as ```JSON``` within the ```Exception Message```.
 
@@ -691,7 +842,7 @@ Houston we have a problem: {"query":"SELECT pro_id FROM names WHERE connector_ty
 
 # License
 
-Cirrus is freely distributable under the terms of the MIT license.
+Simplon/Mysql is freely distributable under the terms of the MIT license.
 
 Copyright (c) 2014 Tino Ehrich ([opensource@efides.com](mailto:opensource@efides.com))
 
@@ -700,6 +851,3 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/fightbulc/simplon_mysql/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
