@@ -64,11 +64,11 @@ $dbConn->fetchRow('SELECT * FROM names WHERE name = :name', ['name' => 'Peter'])
 In constrast to the prior method the SqlManager uses a [Builder Pattern](http://sourcemaking.com/design_patterns/builder) to deal with the database. What advantage does that offer? Well, in case that we want to do more things with our query before sending it off we encapsule it as a ```Builder Pattern```. From there on we could pass it throughout our application to add more data or alike before sending the query finally off to the database. Again, a quick example of how we would rewrite the above ```direct query```:
   
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT * FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
-(new \Simplon\Mysql\SqlManager($dbConn))->fetchRow($sqlBuilder);
+(new \Simplon\Mysql\Manager\SqlManager($dbConn))->fetchRow($sqlBuilder);
 ```
 
 -------------------------------------------------
@@ -102,7 +102,7 @@ $dbConn = new \Simplon\Mysql\Mysql(
 In case that you wanna use the ```SqlManager``` there is one piece missing:
 
 ```php
-$sqlManager = new \Simplon\Mysql\SqlManager($dbConn);
+$sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
 ```
 
 -------------------------------------------------
@@ -113,7 +113,7 @@ $sqlManager = new \Simplon\Mysql\SqlManager($dbConn);
 
 #### FetchColumn
 
-Returns a selected column from the first match. In the example below ```id``` will be returned or ```false``` if nothing was found.
+Returns a selected column from the first match. The example below returns ```id``` or ```false``` if nothing was found.
 
 ```php
 $result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
@@ -374,7 +374,7 @@ The following query examples will be a rewrite of the aforementioned ```direct a
 Returns a selected column from the first match. In the example below ```id``` will be returned or ```false``` if nothing was found.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT id FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
@@ -389,7 +389,7 @@ var_dump($result); // '1' || false
 Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT id FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
@@ -404,7 +404,7 @@ var_dump($result); // ['1', '15', '30', ...] || false
 Returns one matching dataset at a time. It is resource efficient and therefore handy when your result has many data. In the example below you either iterate through the foreach loop in case you have matchings or nothing will happen.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT id FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
@@ -419,7 +419,7 @@ foreach ($sqlManager->fetchColumnMany($sqlBuilder) as $result)
 Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT id, age FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
@@ -433,7 +433,7 @@ var_dump($result); // ['id' => '1', 'age' => '22'] || false
 Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT id, age FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
@@ -447,7 +447,7 @@ var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '
 Same explanation as for ```FetchColumnManyCursor``` except that we receive all selected columns.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setQuery('SELECT id, age FROM names WHERE name = :name')
     ->setConditions(['name' => 'Peter']);
 
@@ -472,7 +472,7 @@ $data = [
     'age'  => 45,
 ];
 
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setData($data);
 
@@ -501,7 +501,7 @@ $data = [
     ],
 ];
 
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setData($data);
 
@@ -524,7 +524,7 @@ $data = [
     'age'  => 50,
 ];
 
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setConditions(['id' => 50])
     ->setData($data);
@@ -544,7 +544,7 @@ $data = [
     'age'  => 50,
 ];
 
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setConditions(['id' => 50])
     ->setConditionsQuery('id = :id OR name =: name')
@@ -570,7 +570,7 @@ $data = [
     'age'  => 16,
 ];
 
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setData($data);
 
@@ -597,7 +597,7 @@ $data = [
     ],
 ];
 
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setData($data);
 
@@ -613,7 +613,7 @@ var_dump($result); // [5, 10]  || false
 The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setConditions(['id' => 50]);
 
@@ -627,7 +627,7 @@ var_dump($result); // true || false
 The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\SqlQueryBuilder())
+$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
     ->setConditions(['id' => 50, 'name' => 'Peter'])
     ->setConditionsQuery('id = :id OR name =: name');
