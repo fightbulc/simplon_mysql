@@ -58,7 +58,7 @@ class SqlCrudManager
     {
         $data = [];
 
-        foreach ($sqlCrudInterface->crudGetColumnVariableRelations() as $column => $variable)
+        foreach ($sqlCrudInterface->crudColumns() as $variable => $column)
         {
             $methodName = 'get' . ucfirst($variable);
             $data[$column] = $sqlCrudInterface->$methodName();
@@ -75,13 +75,13 @@ class SqlCrudManager
      */
     protected function setData(SqlCrudInterface &$sqlCrudInterface, array $data)
     {
-        $columnVariableRelations = $sqlCrudInterface->crudGetColumnVariableRelations();
+        $columns = array_flip($sqlCrudInterface->crudColumns());
 
         foreach ($data as $column => $value)
         {
-            if (isset($columnVariableRelations[$column]))
+            if (isset($columns[$column]))
             {
-                $methodName = 'set' . ucfirst($columnVariableRelations[$column]);
+                $methodName = 'set' . ucfirst($columns[$column]);
                 $sqlCrudInterface->$methodName($value);
             }
         }

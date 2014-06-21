@@ -17,12 +17,7 @@ interface SqlCrudInterface
     /**
      * @return array
      */
-    public function crudGetCrudVariableColumnRelations();
-
-    /**
-     * @return array
-     */
-    public function crudGetColumnVariableRelations();
+    public function crudColumns();
 
     /**
      * @param bool $isCreateEvent

@@ -11,7 +11,26 @@ abstract class SqlCrudVo implements SqlCrudInterface
     protected static $crudQuery = '';
 
     /** @var array */
-    protected $crudVariableColumnRelations = [];
+    protected $crudColumns = [];
+
+    /** @var array */
+    protected $crudIgnoreVariables = [];
+
+    /**
+     * @param $query
+     */
+    public static function crudSetQuery($query)
+    {
+        self::$crudQuery = $query;
+    }
+
+    /**
+     * @return string
+     */
+    public function crudGetQuery()
+    {
+        return self::$crudQuery;
+    }
 
     /**
      * @return string
@@ -31,59 +50,39 @@ abstract class SqlCrudVo implements SqlCrudInterface
     }
 
     /**
-     * @param $query
-     */
-    public static function crudSetQuery($query)
-    {
-        self::$crudQuery = $query;
-    }
-
-    /**
-     * @return string
-     */
-    public function crudGetQuery()
-    {
-        return self::$crudQuery;
-    }
-
-    /**
      * @return array
      */
     protected function crudParseVariables()
     {
-        if (!$this->crudVariableColumnRelations)
+        if (!$this->crudColumns)
         {
             $variables = get_class_vars(get_called_class());
 
             // remove this class's variables
-            unset($variables['crudVariableColumnRelations']);
+            unset($variables['crudIgnoreVariables']);
+            unset($variables['crudColumns']);
             unset($variables['crudSource']);
             unset($variables['crudQuery']);
 
             // render column names
             foreach ($variables as $name => $value)
             {
-                $this->crudVariableColumnRelations[$name] = strtolower(preg_replace('/([A-Z])/', '_\\1', $name));
+                if (in_array($name, $this->crudIgnoreVariables) === false)
+                {
+                    $this->crudColumns[$name] = strtolower(preg_replace('/([A-Z])/', '_\\1', $name));
+                }
             }
         }
 
-        return $this->crudVariableColumnRelations;
+        return $this->crudColumns;
     }
 
     /**
      * @return array
      */
-    public function crudGetCrudVariableColumnRelations()
+    public function crudColumns()
     {
         return $this->crudParseVariables();
-    }
-
-    /**
-     * @return array
-     */
-    public function crudGetColumnVariableRelations()
-    {
-        return array_flip($this->crudParseVariables());
     }
 
     /**

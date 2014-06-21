@@ -2,20 +2,28 @@
 
 class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
 {
+    protected $crudIgnoreVariables = ['undefined'];
     protected $id;
     protected $name;
     protected $email;
     protected $createdAt;
     protected $updatedAt;
+    protected $undefined;
 
-    /**
-     * @return string
-     */
-    public function crudGetQuery()
-    {
-        return 'SELECT u.* FROM items AS i INNER JOIN users AS u ON u.id = i.user_id WHERE i.id = :itemId';
-    }
-
+//    /**
+//     * @return array
+//     */
+//    public function crudColumns()
+//    {
+//        return [
+//            'id'        => 'id',
+//            'name'      => 'name',
+//            'email'     => 'email',
+//            'createdAt' => 'created_at',
+//            'updatedAt' => 'updated_at',
+//        ];
+//    }
+//
     /**
      * @param bool $isCreateEvent
      *
@@ -34,15 +42,15 @@ class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getCreatedAt()
     {
-        return $this->createdAt;
+        return (int)$this->createdAt;
     }
 
     /**
-     * @param mixed $createdAt
+     * @param int $createdAt
      *
      * @return UserVo
      */
@@ -54,15 +62,15 @@ class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getEmail()
     {
-        return $this->email;
+        return (string)$this->email;
     }
 
     /**
-     * @param mixed $email
+     * @param string $email
      *
      * @return UserVo
      */
@@ -74,15 +82,15 @@ class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getId()
     {
-        return $this->id;
+        return (int)$this->id;
     }
 
     /**
-     * @param mixed $id
+     * @param int $id
      *
      * @return UserVo
      */
@@ -94,15 +102,15 @@ class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getName()
     {
-        return $this->name;
+        return (string)$this->name;
     }
 
     /**
-     * @param mixed $name
+     * @param string $name
      *
      * @return UserVo
      */
@@ -114,15 +122,15 @@ class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getUpdatedAt()
     {
-        return $this->updatedAt;
+        return (int)$this->updatedAt;
     }
 
     /**
-     * @param mixed $updatedAt
+     * @param int $updatedAt
      *
      * @return UserVo
      */

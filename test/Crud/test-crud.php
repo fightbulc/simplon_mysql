@@ -20,8 +20,8 @@ $sqlCrudManager = new \Simplon\Mysql\Crud\SqlCrudManager($dbh);
 
 //$userVo = (new UserVo())
 //    ->setId(null)
-//    ->setName('Tino Ehrich')
-//    ->setEmail('ehrich@efides.com');
+//    ->setName('Johnny Stuff')
+//    ->setEmail('foo@bar.com');
 //
 ///** @var UserVo $userVo */
 //$userVo = $sqlCrudManager->create($userVo);
@@ -30,17 +30,17 @@ $sqlCrudManager = new \Simplon\Mysql\Crud\SqlCrudManager($dbh);
 // ----------------------------------------------
 
 /** @var UserVo $userVo */
-$userVo = $sqlCrudManager->read(new UserVo(), ['itemId' => 1]);
+$userVo = $sqlCrudManager->read(new UserVo(), ['id' => 1]);
 var_dump($userVo);
 echo '<hr>';
 
 // ----------------------------------------------
 
 // update
-//$userVo->setName('Hansi Hinterseher');
-//$userVo = $sqlCrudManager->update($userVo, ['id' => 1]);
-//var_dump($userVo);
-//echo '<hr>';
+$userVo->setName('Hansi Hinterseher');
+$userVo = $sqlCrudManager->update($userVo, ['id' => 1]);
+var_dump($userVo);
+echo '<hr>';
 
 // delete
 //$response = $sqlCrudManager->delete(UserVo::crudGetSource(), ['id' => 1]);
