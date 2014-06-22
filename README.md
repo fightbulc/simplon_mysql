@@ -93,8 +93,8 @@ The library requires a config value object in order to instantiate a connection 
 $config = [
     // required credentials
 
-    'server'     => 'localhost',
-    'username'   => 'rootuser',
+    'host'       => 'localhost',
+    'user'       => 'rootuser',
     'password'   => 'rootuser',
     'database'   => 'our_database',
     
@@ -106,8 +106,26 @@ $config = [
     'unixSocket' => null,
 ];
 
+// standard setup
 $dbConn = new \Simplon\Mysql\Mysql(
-    new \Simplon\Mysql\MysqlConfigVo($config)
+    $config['host'],
+    $config['user'],
+    $config['password'],
+    $config['database']
+);
+```
+
+The following code shows all possible parameters to setup a connection:
+
+```php
+\Simplon\Mysql\Mysql::__construct(
+    $host,
+    $user,
+    $password,
+    $database,
+    $fetchMode = \PDO::FETCH_ASSOC,
+    $charset = 'utf8',
+    array $options = ['port' => 3306, 'unixSocket' => '']
 );
 ```
 

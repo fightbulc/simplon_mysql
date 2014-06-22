@@ -4,51 +4,54 @@ namespace Simplon\Mysql;
 
 class Mysql
 {
+    /** @var  Mysql */
     protected $dbh;
+
+    /** @var  int */
     protected $fetchMode;
 
     /** @var  \PDOStatement */
     protected $lastStatement;
 
     /**
-     * @param MysqlConfigVo $mysqlConfigVo
+     * @param $host
+     * @param $user
+     * @param $password
+     * @param $database
+     * @param int $fetchMode
+     * @param string $charset
+     * @param array $options
      *
      * @throws MysqlException
      */
-    public function __construct(MysqlConfigVo $mysqlConfigVo)
+    public function __construct($host, $user, $password, $database, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', array $options = [])
     {
         try
         {
-            // set dns
-            $dns = [];
+            // use host
+            $dns = 'mysql:host=' . $host;
+
+            if (isset($options['port']))
+            {
+                $dns .= ';port=' . $options['port'];
+            }
 
             // use unix socket
-            if ($mysqlConfigVo->hasUnixSocket())
+            if (isset($options['unixSocket']))
             {
-                $dns[] = 'mysql:unix_socket=' . $mysqlConfigVo->getUnixSocket();
+                $dns = 'mysql:unix_socket=' . $options['unixSocket'];
             }
 
-            // use server
-            else
-            {
-                $dns[] = 'mysql:host=' . $mysqlConfigVo->getServer();
-
-                if ($mysqlConfigVo->hasPort())
-                {
-                    $dns[] = 'port=' . $mysqlConfigVo->getPort();
-                }
-            }
-
-            $dns[] = 'dbname=' . $mysqlConfigVo->getDatabase();
-            $dns[] = 'charset=' . $mysqlConfigVo->getCharset();
+            $dns .= ';dbname=' . $database;
+            $dns .= ';charset=' . $charset;
 
             // ------------------------------
 
             // create PDO instance
-            $this->setDbh(new \PDO(join(';', $dns), $mysqlConfigVo->getUsername(), $mysqlConfigVo->getPassword()));
+            $this->setDbh(new \PDO($dns, $user, $password));
 
             // set fetchMode
-            $this->setFetchMode($mysqlConfigVo->getFetchMode());
+            $this->setFetchMode($fetchMode);
         }
         catch (\PDOException $e)
         {
@@ -205,6 +208,13 @@ class Mysql
      */
     protected function handleInCondition(&$query, &$params)
     {
+        if (empty($params))
+        {
+            return true;
+        }
+
+        // --------------------------------------
+
         foreach ($params as $key => $val)
         {
             if (is_array($val))
