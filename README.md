@@ -70,17 +70,20 @@ Easy install via composer. Still no idea what composer is? Inform yourself [here
 
 I implemented two different ways of interacting with MySQL. The first option is the usual one which interacts directly with the database. Following a straight forward example to show you what I mean:
 ```php
-$dbConn->fetchRow('SELECT * FROM names WHERE name = :name', ['name' => 'Peter']); 
+$dbConn->fetchRow('SELECT * FROM names WHERE name = :name', array('name' => 'Peter'));
 ```
 
 In constrast to the prior method the SqlManager uses a [Builder Pattern](http://sourcemaking.com/design_patterns/builder) to deal with the database. What advantage does that offer? Well, in case that we want to do more things with our query before sending it off we encapsule it as a ```Builder Pattern```. From there on we could pass it throughout our application to add more data or alike before sending the query finally off to the database. Again, a quick example of how we would rewrite the above ```direct query```:
   
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
-    ->setQuery('SELECT * FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
 
-(new \Simplon\Mysql\Manager\SqlManager($dbConn))->fetchRow($sqlBuilder);
+$sqlBuilder
+    ->setQuery('SELECT * FROM names WHERE name = :name')
+    ->setConditions(array('name' => 'Peter'));
+
+$sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
+$sqlManager->fetchRow($sqlBuilder);
 ```
 
 -------------------------------------------------
@@ -125,7 +128,7 @@ The following code shows all possible parameters to setup a connection:
     $database,
     $fetchMode = \PDO::FETCH_ASSOC,
     $charset = 'utf8',
-    array $options = ['port' => 3306, 'unixSocket' => '']
+    array $options = array('port' => 3306, 'unixSocket' => '')
 );
 ```
 
@@ -146,7 +149,7 @@ $sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
 Returns a selected column from the first match. The example below returns ```id``` or ```false``` if nothing was found.
 
 ```php
-$result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
+$result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
 
 // result
 var_dump($result); // '1' || false
@@ -157,7 +160,7 @@ var_dump($result); // '1' || false
 Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
 
 ```php
-$result = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
+$result = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
 
 // result
 var_dump($result); // ['1', '15', '30', ...] || false
@@ -168,7 +171,7 @@ var_dump($result); // ['1', '15', '30', ...] || false
 Returns one matching dataset at a time. It is resource efficient and therefore handy when your result has many data. In the example below you either iterate through the foreach loop in case you have matchings or nothing will happen.
 
 ```php
-$cursor = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
+$cursor = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
 
 foreach ($cursor as $result)
 {
@@ -181,7 +184,7 @@ foreach ($cursor as $result)
 Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
 
 ```php
-$result = $dbConn->fetchRow('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
+$result = $dbConn->fetchRow('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
 
 var_dump($result); // ['id' => '1', 'age' => '22'] || false
 ```
@@ -191,7 +194,7 @@ var_dump($result); // ['id' => '1', 'age' => '22'] || false
 Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
 
 ```php
-$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
+$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
 
 var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || false
 ```
@@ -201,7 +204,7 @@ var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '
 Same explanation as for ```FetchColumnManyCursor``` except that we receive all selected columns.
 
 ```php
-$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
+$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
 
 foreach ($cursor as $result)
 {
@@ -218,11 +221,11 @@ foreach ($cursor as $result)
 Inserting data into the database is pretty straight forward. Follow the example below:
 
 ```php
-$data = [
+$data = array(
     'id'   => false,
     'name' => 'Peter',
     'age'  => 45,
-];
+);
 
 $id = $dbConn->insert('names', $data);
 
@@ -236,18 +239,18 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 Follow the example for inserting many datasets at once:
 
 ```php
-$data = [
-    [    
+$data = array(
+    array(
         'id'   => false,
         'name' => 'Peter',
         'age'  => 45,
-    ],
-    [    
+    ),
+    array(
         'id'   => false,
         'name' => 'Peter',
         'age'  => 16,
-    ],
-];
+    ),
+);
 
 $id = $dbConn->insertMany('names', $data);
 
@@ -265,14 +268,14 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
-$conds [
+$conds = array(
     'id' => 50,
-];
+);
 
-$data = [
+$data = array(
     'name' => 'Peter',
     'age'  => 50,
-];
+);
 
 $result = $dbConn->update('names', $conds, $data);
 
@@ -284,18 +287,18 @@ var_dump($result); // true || false
 Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
-$conds [
+$conds = array(
     'id'   => 50,
     'name' => 'Peter',
-];
+);
 
 // custom conditions query
 $condsQuery = 'id = :id OR name =: name';
 
-$data = [
+$data = array(
     'name' => 'Peter',
     'age'  => 50,
-];
+);
 
 $result = $dbConn->update('names', $conds, $data, $condsQuery);
 
@@ -313,11 +316,11 @@ As MySQL states it: ```REPLACE``` works exactly like ```INSERT```, except that i
 As a result you will either receive the ```INSERT ID``` or ```false``` in case something went wrong.
 
 ```php
-$data = [
+$data = array(
     'id'   => 5,
     'name' => 'Peter',
     'age'  => 16,
-];
+);
 
 $result = $dbConn->replace('names', $data);
 
@@ -329,18 +332,18 @@ var_dump($result); // 1 || false
 As a result you will either receive an array of ```INSERT IDs``` or ```false``` in case something went wrong.
 
 ```php
-$data = [
-    [
+$data = array(
+    array(
         'id'   => 5,
         'name' => 'Peter',
         'age'  => 16,
-    ],
-    [
+    ),
+    array(
         'id'   => 10,
         'name' => 'John',
         'age'  => 22,
-    ],
-];
+    ),
+);
 
 $result = $dbConn->replaceMany('names', $data);
 
@@ -356,7 +359,7 @@ var_dump($result); // [5, 10]  || false
 The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$result = $dbConn->delete('names', ['id' => 50]);
+$result = $dbConn->delete('names', array('id' => 50));
 
 var_dump($result); // true || false
 ```
@@ -366,10 +369,10 @@ var_dump($result); // true || false
 The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$conds = [
+$conds = array(
     'id'   => 50,
     'name' => 'John',
-];
+);
 
 // custom conditions query
 $condsQuery = 'id = :id OR name =: name';
@@ -404,9 +407,11 @@ The following query examples will be a rewrite of the aforementioned ```direct a
 Returns a selected column from the first match. In the example below ```id``` will be returned or ```false``` if nothing was found.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setQuery('SELECT id FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+    ->setConditions(array('name' => 'Peter'));
 
 $result = $sqlManager->fetchColumn($sqlBuilder);
 
@@ -419,9 +424,11 @@ var_dump($result); // '1' || false
 Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setQuery('SELECT id FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+    ->setConditions(array('name' => 'Peter'));
 
 $result = $sqlManager->fetchColumnMany($sqlBuilder);
 
@@ -434,9 +441,11 @@ var_dump($result); // ['1', '15', '30', ...] || false
 Returns one matching dataset at a time. It is resource efficient and therefore handy when your result has many data. In the example below you either iterate through the foreach loop in case you have matchings or nothing will happen.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setQuery('SELECT id FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+    ->setConditions(array('name' => 'Peter'));
 
 foreach ($sqlManager->fetchColumnMany($sqlBuilder) as $result)
 {
@@ -449,9 +458,11 @@ foreach ($sqlManager->fetchColumnMany($sqlBuilder) as $result)
 Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setQuery('SELECT id, age FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+    ->setConditions(array('name' => 'Peter'));
 
 $result = $sqlManager->fetchRow($sqlBuilder);
 
@@ -463,9 +474,11 @@ var_dump($result); // ['id' => '1', 'age' => '22'] || false
 Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setQuery('SELECT id, age FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+    ->setConditions(array('name' => 'Peter'));
 
 $result = $sqlManager->fetchRowMany($sqlBuilder);
 
@@ -477,9 +490,11 @@ var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '
 Same explanation as for ```FetchColumnManyCursor``` except that we receive all selected columns.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setQuery('SELECT id, age FROM names WHERE name = :name')
-    ->setConditions(['name' => 'Peter']);
+    ->setConditions(array('name' => 'Peter'));
 
 foreach ($sqlManager->fetchRowManyCursor($sqlBuilder) as $result)
 {
@@ -496,13 +511,15 @@ foreach ($sqlManager->fetchRowManyCursor($sqlBuilder) as $result)
 Inserting data into the database is pretty straight forward. Follow the example below:
 
 ```php
-$data = [
+$data = array(
     'id'   => false,
     'name' => 'Peter',
     'age'  => 45,
-];
+);
 
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
     ->setData($data);
 
@@ -518,18 +535,18 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 Follow the example for inserting many datasets at once:
 
 ```php
-$data = [
-    [    
+$data = array(
+    array(
         'id'   => false,
         'name' => 'Peter',
         'age'  => 45,
-    ],
-    [    
+    ),
+    array(
         'id'   => false,
         'name' => 'Peter',
         'age'  => 16,
-    ],
-];
+    ),
+);
 
 $sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
     ->setTableName('names')
@@ -549,14 +566,16 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
-$data = [
+$data = array(
     'name' => 'Peter',
     'age'  => 50,
-];
+);
 
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
-    ->setConditions(['id' => 50])
+    ->setConditions(array('id' => 50))
     ->setData($data);
 
 $result = $sqlManager->update($sqlBuilder);
@@ -569,14 +588,16 @@ var_dump($result); // true || false
 Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
 
 ```php
-$data = [
+$data = array(
     'name' => 'Peter',
     'age'  => 50,
-];
+);
 
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
-    ->setConditions(['id' => 50])
+    ->setConditions(array('id' => 50))
     ->setConditionsQuery('id = :id OR name =: name')
     ->setData($data)
 
@@ -594,13 +615,15 @@ As MySQL states it: ```REPLACE``` works exactly like ```INSERT```, except that i
 As a result you will either receive the ```INSERT ID``` or ```false``` in case something went wrong.
 
 ```php
-$data = [
+$data = array(
     'id'   => 5,
     'name' => 'Peter',
     'age'  => 16,
-];
+);
 
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
     ->setData($data);
 
@@ -614,20 +637,22 @@ var_dump($result); // 1 || false
 As a result you will either receive an array of ```INSERT IDs``` or ```false``` in case something went wrong.
 
 ```php
-$data = [
-    [
+$data = array(
+    array(
         'id'   => 5,
         'name' => 'Peter',
         'age'  => 16,
-    ],
-    [
+    ),
+    array(
         'id'   => 10,
         'name' => 'John',
         'age'  => 22,
-    ],
-];
+    ),
+);
 
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
     ->setData($data);
 
@@ -643,9 +668,11 @@ var_dump($result); // [5, 10]  || false
 The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
-    ->setConditions(['id' => 50]);
+    ->setConditions(array('id' => 50));
 
 $result = $sqlManager->delete($sqlBuilder);
 
@@ -657,9 +684,11 @@ var_dump($result); // true || false
 The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
+$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+
+$sqlBuilder
     ->setTableName('names')
-    ->setConditions(['id' => 50, 'name' => 'Peter'])
+    ->setConditions(array('id' => 50, 'name' => 'Peter'))
     ->setConditionsQuery('id = :id OR name =: name');
 
 $result = $sqlManager->delete($sqlBuilder);
@@ -676,7 +705,7 @@ var_dump($result); // true || false
 There is no way using an ```IN()``` clause via PDO. This functionality is simply not given. However, you could do something like the following:
 
 ```php
-$ids = [1,2,3,4,5];
+$ids = array(1,2,3,4,5);
 $query = "SELECT * FROM users WHERE id IN (" . join(',', $ids) . ")";
 ```
 
@@ -685,7 +714,7 @@ Looks good at first sight - not sexy but probably does the job, right? Wrong. Th
 Just for the record here is a string example which would not work:
 
 ```php
-$emails = ['johnny@me.com', 'peter@ibm.com'];
+$emails = array('johnny@me.com', 'peter@ibm.com');
 $query = "SELECT * FROM users WHERE email IN (" . join(',', $emails) . ")";
 ```
 
@@ -696,11 +725,11 @@ To take advantage of the built in ```IN() Clause``` with escaping and type handl
 
 ```php
 // integers
-$conds = [ 'ids' => [1,2,3,4,5] ];
+$conds = array('ids' => array(1,2,3,4,5));
 $query = "SELECT * FROM users WHERE id IN (:ids)";
 
 // strings
-$conds = [ 'emails' => ['johnny@me.com', 'peter@ibm.com'] ];
+$conds = array('emails' => array('johnny@me.com', 'peter@ibm.com'));
 $query = "SELECT * FROM users WHERE email IN (:emails)";
 ```
 
@@ -742,7 +771,7 @@ There are really __not many__ requirements/restrictions:
     will pass you a boolean to let you know what type of save process happens/happened. You could use this e.g. to set automatically ```created_at``` and ```updated_at``` fields. 
 
 - __Set columns yourself:__ If you have to define column-unrelated variables make use of ```SqlCrudVo::crudColumns()``` within the your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
-    __Example:__ ```['createdAt' => 'created_at']``` 
+    __Example:__ ```array('createdAt' => 'created_at')```
 
 - __Ignore variables:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement the array ```SqlCrudVo::$crudIgnoreVariables``` and fill it with those variables you want to ignore.  
 
@@ -799,7 +828,9 @@ $sqlCrudManager = new \Simplon\Mysql\Crud\SqlCrudManager($mysqlInstance);
 Create a user:
 
 ```php
-$userVo = (new UserVo())
+$userVo = new UserVo();
+
+$userVo
     ->setId(null)
     ->setName('Johnny Foobar')
     ->setEmail('foo@bar.com');
@@ -815,7 +846,7 @@ Read a user:
 
 ```php
 // conditions: where id = 1
-$conds = ['id' => 1];
+$conds = array('id' => 1);
 
 /** @var UserVo $userVo */
 $userVo = $sqlCrudManager->read(new UserVo(), $conds);
@@ -828,7 +859,7 @@ Update a user:
 
 ```php
 // conditions: where id = 1
-$conds = ['id' => 1];
+$conds = array('id' => 1);
 
 /** @var UserVo $userVo */
 $userVo = $sqlCrudManager->read(new UserVo(), $conds);
@@ -848,7 +879,7 @@ Delete a user:
 
 ```php
 // conditions: where id = 1
-$conds = ['id' => 1];
+$conds = array('id' => 1);
 
 /**
 * UserVo:::crudGetSource() is the name of the table
