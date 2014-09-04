@@ -9,8 +9,12 @@ $config = [
     'database' => 'beatguide_devel_service',
 ];
 
-$mysqlConfigVo = new \Simplon\Mysql\MysqlConfigVo($config);
-$dbh = new \Simplon\Mysql\Mysql($mysqlConfigVo);
+$dbh = new \Simplon\Mysql\Mysql(
+    $config['server'],
+    $config['username'],
+    $config['password'],
+    $config['database']
+);
 
 // ############################################
 
