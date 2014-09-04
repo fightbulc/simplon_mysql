@@ -9,9 +9,9 @@
 
 # Simplon/Mysql
 
-Current version: 0.3.*
+Current version: 0.4.*
 
-__Note:__ Version breaks w/ prior versions due to PSR-2/4 changes as well as some refactorings. Lots happened!
+__Note:__ Version breaks w/ prior versions (< 0.3) due to PSR-2/4 changes as well as some refactorings. Lots happened!
 
 -------------------------------------------------
 
@@ -69,6 +69,7 @@ Easy install via composer. Still no idea what composer is? Inform yourself [here
 ## 2. Direct vs. SqlManager
 
 I implemented two different ways of interacting with MySQL. The first option is the usual one which interacts directly with the database. Following a straight forward example to show you what I mean:
+
 ```php
 $dbConn->fetchRow('SELECT * FROM names WHERE name = :name', array('name' => 'Peter'));
 ```
