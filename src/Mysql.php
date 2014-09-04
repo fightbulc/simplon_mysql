@@ -483,6 +483,17 @@ class Mysql
     }
 
     /**
+     * @param $dbName
+     *
+     * @return bool
+     * @throws MysqlException
+     */
+    public function selectDb($dbName)
+    {
+        return $this->executeSql('use ' . $dbName);
+    }
+
+    /**
      * @param $query
      * @param array $conds
      *
