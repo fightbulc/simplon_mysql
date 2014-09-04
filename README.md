@@ -94,7 +94,7 @@ $sqlManager->fetchRow($sqlBuilder);
 The library requires a config value object in order to instantiate a connection with MySQL. See how it's done:
 
 ```php
-$config = [
+$config = array(
     // required credentials
 
     'host'       => 'localhost',
@@ -108,7 +108,7 @@ $config = [
     'charset'    => 'utf8',
     'port'       => 3306,
     'unixSocket' => null,
-];
+);
 
 // standard setup
 $dbConn = new \Simplon\Mysql\Mysql(
