@@ -80,6 +80,16 @@ class Mysql
     }
 
     /**
+     * @return Mysql
+     */
+    public function close()
+    {
+        $this->dbh = null;
+
+        return $this;
+    }
+
+    /**
      * @param mixed $fetchMode
      *
      * @return Mysql
