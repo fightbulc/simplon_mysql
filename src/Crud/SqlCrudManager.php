@@ -39,7 +39,7 @@ class SqlCrudManager
             return (string)$condsQuery;
         }
 
-        $condsString = [];
+        $condsString = array();
 
         foreach ($conds as $key => $val)
         {
@@ -56,7 +56,7 @@ class SqlCrudManager
      */
     protected function getData(SqlCrudInterface &$sqlCrudInterface)
     {
-        $data = [];
+        $data = array();
 
         foreach ($sqlCrudInterface->crudColumns() as $variable => $column)
         {
