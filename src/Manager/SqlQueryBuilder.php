@@ -14,13 +14,13 @@ class SqlQueryBuilder
     protected $enableInsertIgnore = false;
 
     /** @var array */
-    protected $conditions = [];
+    protected $conditions = array();
 
     /** @var  string */
     protected $conditionsQuery;
 
     /** @var array */
-    protected $data = [];
+    protected $data = array();
 
     /**
      * @param $query string
@@ -89,7 +89,7 @@ class SqlQueryBuilder
     {
         if (!isset($this->conditions))
         {
-            $this->conditions = [];
+            $this->conditions = array();
         }
 
         $this->conditions[$key] = $value;

@@ -11,10 +11,10 @@ abstract class SqlCrudVo implements SqlCrudInterface
     protected static $crudQuery = '';
 
     /** @var array */
-    protected $crudColumns = [];
+    protected $crudColumns = array();
 
     /** @var array */
-    protected $crudIgnoreVariables = [];
+    protected $crudIgnoreVariables = array();
 
     /**
      * @param $query
