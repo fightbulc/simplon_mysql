@@ -140,7 +140,7 @@ class SqlCrudManager
         // fallback to standard query
         if ($query === '')
         {
-            $query = 'SELECT * FROM ' . $sqlCrudInterface::crudGetSource() . ' WHERE ' . $this->getCondsQuery($conds, $condsQuery);
+            $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()} WHERE {$this->getCondsQuery($conds, $condsQuery)}";
         }
 
         // fetch data
