@@ -297,7 +297,7 @@ class Mysql
 
         $errorInfo = json_encode($error);
 
-        throw new MysqlException("Houston we have a problem: {$errorInfo}");
+        throw new MysqlException($errorInfo);
     }
 
     /**
@@ -337,7 +337,7 @@ class Mysql
 
                 $errorInfo = json_encode($error);
 
-                throw new MysqlException("Houston we have a problem: {$errorInfo}");
+                throw new MysqlException($errorInfo);
             }
 
             // last insert|null
@@ -392,7 +392,7 @@ class Mysql
 
             $errorInfo = json_encode($error);
 
-            throw new MysqlException("Houston we have a problem: {$errorInfo}");
+            throw new MysqlException($errorInfo);
         }
 
         if ($this->getRowCount() > 0)
@@ -441,7 +441,7 @@ class Mysql
 
             $errorInfo = json_encode($error);
 
-            throw new MysqlException("Houston we have a problem: {$errorInfo}");
+            throw new MysqlException($errorInfo);
         }
 
         if ($this->getRowCount() > 0)
@@ -489,7 +489,7 @@ class Mysql
 
         $errorInfo = json_encode($error);
 
-        throw new MysqlException("Houston we have a problem: {$errorInfo}");
+        throw new MysqlException($errorInfo);
     }
 
     /**
