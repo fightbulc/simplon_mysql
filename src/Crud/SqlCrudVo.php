@@ -10,26 +10,12 @@ abstract class SqlCrudVo implements SqlCrudInterface
     /** @var string */
     protected static $crudQuery = '';
 
-    /** @var array */
-    protected $crudColumns = array();
-
-    /** @var array */
-    protected $crudIgnoreVariables = array();
-
     /**
      * @param $query
      */
     public static function crudSetQuery($query)
     {
         self::$crudQuery = $query;
-    }
-
-    /**
-     * @return string
-     */
-    public function crudGetQuery()
-    {
-        return self::$crudQuery;
     }
 
     /**
@@ -50,31 +36,44 @@ abstract class SqlCrudVo implements SqlCrudInterface
     }
 
     /**
+     * @return string
+     */
+    public function crudGetQuery()
+    {
+        return self::$crudQuery;
+    }
+
+    /**
+     * @return array
+     */
+    public function crudIgnore()
+    {
+        return array();
+    }
+
+    /**
      * @return array
      */
     protected function crudParseVariables()
     {
-        if (!$this->crudColumns)
+        $variables = get_class_vars(get_called_class());
+        $ignore = $this->crudIgnore();
+        $columns = array();
+
+        // remove this class's variables
+        unset($variables['crudSource']);
+        unset($variables['crudQuery']);
+
+        // render column names
+        foreach ($variables as $name => $value)
         {
-            $variables = get_class_vars(get_called_class());
-
-            // remove this class's variables
-            unset($variables['crudIgnoreVariables']);
-            unset($variables['crudColumns']);
-            unset($variables['crudSource']);
-            unset($variables['crudQuery']);
-
-            // render column names
-            foreach ($variables as $name => $value)
+            if (in_array($name, $ignore) === false)
             {
-                if (in_array($name, $this->crudIgnoreVariables) === false)
-                {
-                    $this->crudColumns[$name] = strtolower(preg_replace('/([A-Z])/', '_\\1', $name));
-                }
+                $columns[$name] = strtolower(preg_replace('/([A-Z])/', '_\\1', $name));
             }
         }
 
-        return $this->crudColumns;
+        return $columns;
     }
 
     /**
