@@ -20,6 +20,11 @@ interface SqlCrudInterface
     public function crudColumns();
 
     /**
+     * @return array
+     */
+    public function crudIgnore();
+
+    /**
      * @param bool $isCreateEvent
      *
      * @return bool
