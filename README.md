@@ -9,7 +9,7 @@
 
 # Simplon/Mysql
 
-Current version: 0.4.*
+Current version: 0.5.*
 
 __Note:__ Version breaks w/ prior versions (< 0.3) due to PSR-2/4 changes as well as some refactorings. Lots happened!
 
@@ -41,7 +41,8 @@ __Note:__ Version breaks w/ prior versions (< 0.3) due to PSR-2/4 changes as wel
 7.3. Flexibility/Restrictions  
 7.4. Conclusion  
 7.5. Examples  
-8. [__Exceptions__](#8-exceptions)  
+7.6. Example Custom Vo
+8. [__Exceptions__](#8-exceptions)
 
 -------------------------------------------------
 
@@ -759,8 +760,8 @@ There are really __not many__ requirements/restrictions:
 - Table name should be in plural or set it via ```SqlCrudVo::$crudSource``` within the value object.
 - Value object's instance variables must match the table's column names in ```CamelCase``` (see example below).
 - Each value object reflects ```ONE OBJECT``` only - ```Mysql::fetchRow()``` fetches your data.
-- ```VARIABLE = COLUMN``` __Don't set any variable__ which doesn't reflect your database table. __If you have to__
-    set your columns via ```SqlCrudVo::crudColumns()```. See ```Flexibility``` for description.
+- ```VARIABLE = COLUMN``` __Don't set any property in your value object__ which doesn't reflect your database table. __If you have to__,
+    make either use of ```SqlCrudVo::crudColumns()``` or ```SqlCrudVo::crudIgnore()```. See ```Flexibility``` for description.
  
 #### 7.3. Flexibility
 
@@ -771,10 +772,10 @@ There are really __not many__ requirements/restrictions:
 - __Callbacks:__ You can implement two methods which will be called prior/after saving an object: ```SqlCrudVo::crudBeforeSave($isCreateEvent)``` and ```SqlCrudVo::crudAfterSave($isCreateEvent)```. The manager
     will pass you a boolean to let you know what type of save process happens/happened. You could use this e.g. to set automatically ```created_at``` and ```updated_at``` fields. 
 
-- __Set columns yourself:__ If you have to define column-unrelated variables make use of ```SqlCrudVo::crudColumns()``` within the your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
+- __Set columns:__ If you have to either match property- and column name or only want a selection of your properties make use of ```SqlCrudVo::crudColumns()``` within your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
     __Example:__ ```array('createdAt' => 'created_at')```
 
-- __Ignore variables:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement the array ```SqlCrudVo::$crudIgnoreVariables``` and fill it with those variables you want to ignore.  
+- __Ignore properties:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement ```SqlCrudVo::crudIgnore()``` which should return an array of properties you would like to ignore.
 
 - __No assumptions:__ There are no assumptions about primary keys or anything alike. You set all conditions for reading, updating and/or deleting objects.
 
@@ -889,6 +890,82 @@ $conds = array('id' => 1);
 $sqlCrudManager->update(UserVo:::crudGetSource(), $conds);
 ```
 
+#### 7.6. Example Custom Vo
+
+Setting a ```custom table name``` since the plural from person is not persons:
+
+```php
+class PersonVo extends \Simplon\Mysql\Crud\SqlCrudVo
+{
+    /**
+    * @return string
+    */
+    public static function crudGetSource()
+    {
+        return 'people';
+    }
+
+    // ... here goes the rest
+}
+```
+
+In case your ```column names``` are totally off there is a way to match them anyway against your ```properties```:
+
+```php
+class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
+{
+    protected $id;
+    protected $name;
+    protected $email;
+    protected $createdAt;
+    protected $updatedAt;
+
+    /**
+    * @return array
+    */
+    public function crudColumns()
+    {
+        return array(
+            'id'        => 'xx_id',
+            'name'      => 'xx_name',
+            'email'     => 'xx_email',
+            'createdAt' => 'xx_created_at',
+            'updatedAt' => 'xx_updated_at',
+        );
+    }
+
+    // ... here goes the rest
+}
+```
+
+Sometimes there are some ```helper properties``` which are not part of your database entry. Here is a way to ignore them:
+
+```php
+class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
+{
+    protected $id;
+    protected $name;
+    protected $email;
+    protected $createdAt;
+    protected $updatedAt;
+
+    // helper property: not part of the people table
+    protected $isOffline;
+
+    /**
+    * @return array
+    */
+    public function crudIgnore()
+    {
+        return array(
+            'isOffline',
+        );
+    }
+
+    // ... here goes the rest
+}
+```
+
 -------------------------------------------------
 
 ## 8. Exceptions
@@ -898,7 +975,7 @@ For both access methods (direct, sqlmanager) occuring exceptions will be wrapped
 Here is an example of how that might look like:
 
 ```bash
-Houston we have a problem: {"query":"SELECT pro_id FROM names WHERE connector_type = :connectorType","params":{"connectorType":"FB"},"errorInfo":{"sqlStateCode":"42S22","code":1054,"message":"Unknown column 'pro_id' in 'field list'"}}
+{"query":"SELECT pro_id FROM names WHERE connector_type = :connectorType","params":{"connectorType":"FB"},"errorInfo":{"sqlStateCode":"42S22","code":1054,"message":"Unknown column 'pro_id' in 'field list'"}}
 ```
 
 -------------------------------------------------
