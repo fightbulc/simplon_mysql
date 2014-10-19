@@ -159,6 +159,43 @@ class SqlCrudManager
      * @param array $conds
      * @param null $condsQuery
      *
+     * @return bool|SqlCrudInterface[]
+     */
+    public function readMany(SqlCrudInterface $sqlCrudInterface, array $conds, $condsQuery = null)
+    {
+        // handle custom query
+        $query = $sqlCrudInterface->crudGetQuery();
+
+        // fallback to standard query
+        if ($query === '')
+        {
+            $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()} WHERE {$this->getCondsQuery($conds, $condsQuery)}";
+        }
+
+        // fetch data
+        $cursor = $this->getMysql()->fetchRowManyCursor($query, $conds);
+
+        // build result
+        $sqlCrudInterfaceMany = [];
+
+        if ($cursor !== false)
+        {
+            foreach ($cursor as $data)
+            {
+                $sqlCrudInterfaceMany[] = $this->setData($sqlCrudInterface, $data);
+            }
+
+            return $sqlCrudInterfaceMany;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param SqlCrudInterface $sqlCrudInterface
+     * @param array $conds
+     * @param null $condsQuery
+     *
      * @return bool|SqlCrudInterface
      * @throws \Simplon\Mysql\MysqlException
      */
