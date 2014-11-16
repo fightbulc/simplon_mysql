@@ -176,7 +176,7 @@ class SqlCrudManager
         $cursor = $this->getMysql()->fetchRowManyCursor($query, $conds);
 
         // build result
-        $sqlCrudInterfaceMany = [];
+        $sqlCrudInterfaceMany = array();
 
         if ($cursor !== false)
         {
