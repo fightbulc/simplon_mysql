@@ -9,8 +9,6 @@
 
 # Simplon/Mysql
 
-Current version: 0.5.*
-
 __Note:__ Version breaks w/ prior versions (< 0.3) due to PSR-2/4 changes as well as some refactorings. Lots happened!
 
 -------------------------------------------------
