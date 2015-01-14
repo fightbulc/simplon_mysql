@@ -111,7 +111,7 @@ class SqlCrudManager
         if ($insertId !== false)
         {
             // set id
-            if (is_bool($insertId) !== true)
+            if (is_bool($insertId) !== true && method_exists($sqlCrudInterface, 'setId'))
             {
                 $sqlCrudInterface->setId($insertId);
             }
