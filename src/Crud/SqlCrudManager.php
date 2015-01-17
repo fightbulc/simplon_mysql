@@ -161,7 +161,7 @@ class SqlCrudManager
      *
      * @return bool|SqlCrudInterface[]
      */
-    public function readMany(SqlCrudInterface $sqlCrudInterface, array $conds, $condsQuery = null)
+    public function readMany(SqlCrudInterface $sqlCrudInterface, array $conds = array(), $condsQuery = null)
     {
         // handle custom query
         $query = $sqlCrudInterface->crudGetQuery();
@@ -169,7 +169,12 @@ class SqlCrudManager
         // fallback to standard query
         if ($query === '')
         {
-            $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()} WHERE {$this->getCondsQuery($conds, $condsQuery)}";
+            $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()}";
+        }
+
+        if(empty($conds) === false)
+        {
+            $query .= " WHERE {$this->getCondsQuery($conds, $condsQuery)}";
         }
 
         // fetch data
@@ -237,4 +242,4 @@ class SqlCrudManager
             $this->getCondsQuery($conds, $condsQuery)
         );
     }
-} 
+}
