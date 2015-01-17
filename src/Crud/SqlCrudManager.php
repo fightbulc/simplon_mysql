@@ -190,7 +190,7 @@ class SqlCrudManager
                 $sqlCrudInterfaceMany[] = $this->setData($sqlCrudInterface, $data);
             }
 
-            return $sqlCrudInterfaceMany;
+            return empty($sqlCrudInterfaceMany) ? false : $sqlCrudInterfaceMany;
         }
 
         return false;
