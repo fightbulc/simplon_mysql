@@ -73,7 +73,7 @@ class SqlCrudManager
      *
      * @return SqlCrudInterface
      */
-    protected function setData(SqlCrudInterface &$sqlCrudInterface, array $data)
+    protected function setData(SqlCrudInterface $sqlCrudInterface, array $data)
     {
         $columns = array_flip($sqlCrudInterface->crudColumns());
 
@@ -187,7 +187,7 @@ class SqlCrudManager
         {
             foreach ($cursor as $data)
             {
-                $sqlCrudInterfaceMany[] = $this->setData($sqlCrudInterface, $data);
+                $sqlCrudInterfaceMany[] = $this->setData(clone $sqlCrudInterface, $data);
             }
 
             return empty($sqlCrudInterfaceMany) ? false : $sqlCrudInterfaceMany;
