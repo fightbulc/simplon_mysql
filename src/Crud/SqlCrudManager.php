@@ -43,7 +43,14 @@ class SqlCrudManager
 
         foreach ($conds as $key => $val)
         {
-            $condsString[] = $key . ' = :' . $key;
+            $query = $key . ' = :' . $key;
+
+            if (is_array($val) === true)
+            {
+                $query = $key . ' IN (:' . $key . ')';
+            }
+
+            $condsString[] = $query;
         }
 
         return join(' AND ', $condsString);
