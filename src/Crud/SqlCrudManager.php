@@ -135,11 +135,12 @@ class SqlCrudManager
     /**
      * @param SqlCrudInterface $sqlCrudInterface
      * @param array $conds
+     * @param null $sortBy
      * @param null $condsQuery
      *
      * @return bool|SqlCrudInterface
      */
-    public function read(SqlCrudInterface $sqlCrudInterface, array $conds, $condsQuery = null)
+    public function read(SqlCrudInterface $sqlCrudInterface, array $conds, $sortBy = null, $condsQuery = null)
     {
         // handle custom query
         $query = $sqlCrudInterface->crudGetQuery();
@@ -148,6 +149,12 @@ class SqlCrudManager
         if ($query === '')
         {
             $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()} WHERE {$this->getCondsQuery($conds, $condsQuery)}";
+        }
+
+        // add sorting
+        if($sortBy !== null)
+        {
+            $query .= " ORDER BY {$sortBy}";
         }
 
         // fetch data
@@ -164,11 +171,12 @@ class SqlCrudManager
     /**
      * @param SqlCrudInterface $sqlCrudInterface
      * @param array $conds
+     * @param null $sortBy
      * @param null $condsQuery
      *
      * @return bool|SqlCrudInterface[]
      */
-    public function readMany(SqlCrudInterface $sqlCrudInterface, array $conds = array(), $condsQuery = null)
+    public function readMany(SqlCrudInterface $sqlCrudInterface, array $conds = array(), $sortBy = null, $condsQuery = null)
     {
         // handle custom query
         $query = $sqlCrudInterface->crudGetQuery();
@@ -179,9 +187,16 @@ class SqlCrudManager
             $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()}";
         }
 
-        if(empty($conds) === false)
+        // add conds
+        if (empty($conds) === false)
         {
             $query .= " WHERE {$this->getCondsQuery($conds, $condsQuery)}";
+        }
+
+        // add sorting
+        if($sortBy !== null)
+        {
+            $query .= " ORDER BY {$sortBy}";
         }
 
         // fetch data
