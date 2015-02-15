@@ -4,13 +4,19 @@ namespace Simplon\Mysql;
 
 class Mysql
 {
-    /** @var  Mysql */
+    /**
+     * @var Mysql
+     */
     protected $dbh;
 
-    /** @var  int */
+    /**
+     * @var int
+     */
     protected $fetchMode;
 
-    /** @var  \PDOStatement */
+    /**
+     * @var \PDOStatement
+     */
     protected $lastStatement;
 
     /**

@@ -2,6 +2,11 @@
 
 namespace Simplon\Mysql\Crud;
 
+/**
+ * Interface SqlCrudInterface
+ * @package Simplon\Mysql\Crud
+ * @author Tino Ehrich (tino@bigpun.me)
+ */
 interface SqlCrudInterface
 {
     /**
@@ -10,7 +15,7 @@ interface SqlCrudInterface
     public static function crudGetSource();
 
     /**
-     * @return string
+     * @return string|null
      */
     public function crudGetQuery();
 

@@ -3,7 +3,12 @@
     "description": "Simplon MySQL Library",
     "homepage": "https://github.com/fightbulc/simplon_mysql",
     "type": "library",
-    "keywords": ["db", "pdo", "mysql", "manager"],
+    "keywords": [
+        "db",
+        "pdo",
+        "mysql",
+        "manager"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -12,14 +17,11 @@
             "role": "developer"
         }
     ],
-
     "minimum-stability": "dev",
-
     "require": {
         "php": ">=5.3",
         "ext-pdo": "*"
     },
-
     "autoload": {
         "psr-4": {
             "Simplon\\Mysql\\": "src/"

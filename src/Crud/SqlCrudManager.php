@@ -5,9 +5,16 @@ namespace Simplon\Mysql\Crud;
 use Simplon\Mysql\Mysql;
 use Simplon\Mysql\MysqlException;
 
+/**
+ * SqlCrudManager
+ * @package Simplon\Mysql\Crud
+ * @author Tino Ehrich (tino@bigpun.me)
+ */
 class SqlCrudManager
 {
-    /** @var \Simplon\Mysql\Mysql */
+    /**
+     * @var Mysql
+     */
     protected $mysql;
 
     /**
@@ -16,84 +23,6 @@ class SqlCrudManager
     public function __construct(Mysql $mysql)
     {
         $this->mysql = $mysql;
-    }
-
-    /**
-     * @return Mysql
-     */
-    protected function getMysql()
-    {
-        return $this->mysql;
-    }
-
-    /**
-     * @param array $conds
-     * @param null $condsQuery
-     *
-     * @return string
-     */
-    protected function getCondsQuery(array $conds, $condsQuery = null)
-    {
-        if ($condsQuery !== null)
-        {
-            return (string)$condsQuery;
-        }
-
-        $condsString = array();
-
-        foreach ($conds as $key => $val)
-        {
-            $query = $key . ' = :' . $key;
-
-            if (is_array($val) === true)
-            {
-                $query = $key . ' IN (:' . $key . ')';
-            }
-
-            $condsString[] = $query;
-        }
-
-        return join(' AND ', $condsString);
-    }
-
-    /**
-     * @param SqlCrudInterface $sqlCrudInterface
-     *
-     * @return array
-     */
-    protected function getData(SqlCrudInterface &$sqlCrudInterface)
-    {
-        $data = array();
-
-        foreach ($sqlCrudInterface->crudColumns() as $variable => $column)
-        {
-            $methodName = 'get' . ucfirst($variable);
-            $data[$column] = $sqlCrudInterface->$methodName();
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param SqlCrudInterface $sqlCrudInterface
-     * @param array $data
-     *
-     * @return SqlCrudInterface
-     */
-    protected function setData(SqlCrudInterface $sqlCrudInterface, array $data)
-    {
-        $columns = array_flip($sqlCrudInterface->crudColumns());
-
-        foreach ($data as $column => $value)
-        {
-            if (isset($columns[$column]))
-            {
-                $methodName = 'set' . ucfirst($columns[$column]);
-                $sqlCrudInterface->$methodName($value);
-            }
-        }
-
-        return $sqlCrudInterface;
     }
 
     /**
@@ -146,13 +75,13 @@ class SqlCrudManager
         $query = $sqlCrudInterface->crudGetQuery();
 
         // fallback to standard query
-        if ($query === '')
+        if ($query === null)
         {
             $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()} WHERE {$this->getCondsQuery($conds, $condsQuery)}";
         }
 
         // add sorting
-        if($sortBy !== null)
+        if ($sortBy !== null)
         {
             $query .= " ORDER BY {$sortBy}";
         }
@@ -182,7 +111,7 @@ class SqlCrudManager
         $query = $sqlCrudInterface->crudGetQuery();
 
         // fallback to standard query
-        if ($query === '')
+        if ($query === null)
         {
             $query = "SELECT * FROM {$sqlCrudInterface::crudGetSource()}";
         }
@@ -194,7 +123,7 @@ class SqlCrudManager
         }
 
         // add sorting
-        if($sortBy !== null)
+        if ($sortBy !== null)
         {
             $query .= " ORDER BY {$sortBy}";
         }
@@ -224,7 +153,7 @@ class SqlCrudManager
      * @param null $condsQuery
      *
      * @return bool|SqlCrudInterface
-     * @throws \Simplon\Mysql\MysqlException
+     * @throws MysqlException
      */
     public function update(SqlCrudInterface $sqlCrudInterface, array $conds, $condsQuery = null)
     {
@@ -263,5 +192,83 @@ class SqlCrudManager
             $conds,
             $this->getCondsQuery($conds, $condsQuery)
         );
+    }
+
+    /**
+     * @return Mysql
+     */
+    private function getMysql()
+    {
+        return $this->mysql;
+    }
+
+    /**
+     * @param array $conds
+     * @param null $condsQuery
+     *
+     * @return string
+     */
+    private function getCondsQuery(array $conds, $condsQuery = null)
+    {
+        if ($condsQuery !== null)
+        {
+            return (string)$condsQuery;
+        }
+
+        $condsString = array();
+
+        foreach ($conds as $key => $val)
+        {
+            $query = $key . ' = :' . $key;
+
+            if (is_array($val) === true)
+            {
+                $query = $key . ' IN (:' . $key . ')';
+            }
+
+            $condsString[] = $query;
+        }
+
+        return join(' AND ', $condsString);
+    }
+
+    /**
+     * @param SqlCrudInterface $sqlCrudInterface
+     *
+     * @return array
+     */
+    private function getData(SqlCrudInterface &$sqlCrudInterface)
+    {
+        $data = array();
+
+        foreach ($sqlCrudInterface->crudColumns() as $variable => $column)
+        {
+            $methodName = 'get' . ucfirst($variable);
+            $data[$column] = $sqlCrudInterface->$methodName();
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param SqlCrudInterface $sqlCrudInterface
+     * @param array $data
+     *
+     * @return SqlCrudInterface
+     */
+    private function setData(SqlCrudInterface $sqlCrudInterface, array $data)
+    {
+        $columns = array_flip($sqlCrudInterface->crudColumns());
+
+        foreach ($data as $column => $value)
+        {
+            if (isset($columns[$column]))
+            {
+                $methodName = 'set' . ucfirst($columns[$column]);
+                $sqlCrudInterface->$methodName($value);
+            }
+        }
+
+        return $sqlCrudInterface;
     }
 }

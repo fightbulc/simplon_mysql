@@ -26,7 +26,7 @@ $conds = array('venueId' => 23);
 echo '<h3>fetchValue</h3>';
 $results = $dbh->fetchColumn($query, $conds);
 var_dump($results);
-die('END');
+
 // ############################################
 
 echo '<h3>fetchValueMany</h3>';
