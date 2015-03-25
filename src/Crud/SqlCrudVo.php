@@ -5,7 +5,7 @@ namespace Simplon\Mysql\Crud;
 /**
  * SqlCrudVo
  * @package Simplon\Mysql\Crud
- * @author Tino Ehrich (tino@bigpun.me)
+ * @author  Tino Ehrich (tino@bigpun.me)
  */
 abstract class SqlCrudVo implements SqlCrudInterface
 {
@@ -38,7 +38,7 @@ abstract class SqlCrudVo implements SqlCrudInterface
             $class = str_replace('CrudVo', '', get_called_class());
 
             // transform from CamelCase and pluralise
-            self::$crudSource = substr(strtolower(preg_replace('/([A-Z])/', '_\\1', $class)) . 's', 1);
+            self::$crudSource = substr(self::snakeCaseString($class) . 's', 1);
         }
 
         return self::$crudSource;
@@ -65,7 +65,68 @@ abstract class SqlCrudVo implements SqlCrudInterface
      */
     public function crudColumns()
     {
-        return $this->crudParseVariables();
+        return $this->iterateOverProcessableFields(
+            function ($result, $fieldName)
+            {
+                $result[$fieldName] = self::snakeCaseString($fieldName);
+
+                return $result;
+            }
+        );
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return static
+     */
+    public function fromArray(array $data)
+    {
+        foreach ($data as $fieldName => $val)
+        {
+            // format field name
+            if (strpos($fieldName, '_') !== false)
+            {
+                $fieldName = self::camelCaseString($fieldName);
+            }
+
+            $setMethodName = 'set' . ucfirst($fieldName);
+
+            if (method_exists($this, $setMethodName))
+            {
+                $this->$setMethodName($val);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param bool $snakeCase
+     *
+     * @return array
+     */
+    public function toArray($snakeCase = true)
+    {
+        return $this->iterateOverProcessableFields(
+            function ($result, $fieldName) use ($snakeCase)
+            {
+                $getMethodName = 'get' . ucfirst($fieldName);
+
+                // format field name
+                if ($snakeCase === true && strpos($fieldName, '_') === false)
+                {
+                    $fieldName = self::snakeCaseString($fieldName);
+                }
+
+                if (method_exists($this, $getMethodName))
+                {
+                    $result[$fieldName] = $this->$getMethodName();
+                }
+
+                return $result;
+            }
+        );
     }
 
     /**
@@ -89,9 +150,32 @@ abstract class SqlCrudVo implements SqlCrudInterface
     }
 
     /**
+     * @param $string
+     *
+     * @return string
+     */
+    private static function snakeCaseString($string)
+    {
+        return strtolower(preg_replace('/([A-Z])/', '_\\1', $string));
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    private static function camelCaseString($string)
+    {
+        $string = strtolower($string);
+        $string = ucwords(str_replace('_', ' ', $string));
+
+        return lcfirst(str_replace(' ', '', $string));
+    }
+
+    /**
      * @return array
      */
-    protected function crudParseVariables()
+    private function getProcessableFields()
     {
         $variables = get_class_vars(get_called_class());
         $ignore = $this->crudIgnore();
@@ -102,14 +186,33 @@ abstract class SqlCrudVo implements SqlCrudInterface
         unset($variables['crudQuery']);
 
         // render column names
-        foreach ($variables as $name => $value)
+        foreach ($variables as $fieldName => $value)
         {
-            if (in_array($name, $ignore) === false)
+            if (in_array($fieldName, $ignore) === false)
             {
-                $columns[$name] = strtolower(preg_replace('/([A-Z])/', '_\\1', $name));
+                $columns[] = $fieldName;
             }
         }
 
         return $columns;
+    }
+
+    /**
+     * @param \Closure $callable
+     *
+     * @return array
+     */
+    private function iterateOverProcessableFields(\Closure $callable)
+    {
+        $result = array();
+        $processableFields = $this->getProcessableFields();
+
+        // render column names
+        foreach ($processableFields as $fieldName)
+        {
+            $result = $callable($result, $fieldName);
+        }
+
+        return $result;
     }
 }
