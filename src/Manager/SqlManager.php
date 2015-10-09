@@ -5,25 +5,23 @@ namespace Simplon\Mysql\Manager;
 use Simplon\Mysql\Mysql;
 use Simplon\Mysql\MysqlQueryIterator;
 
+/**
+ * Class SqlManager
+ * @package Simplon\Mysql\Manager
+ */
 class SqlManager
 {
-    /** @var Mysql */
-    protected $mysqlInstance;
+    /**
+     * @var Mysql
+     */
+    protected $mysql;
 
     /**
      * @param Mysql $mysqlInstance
      */
     public function __construct(Mysql $mysqlInstance)
     {
-        $this->mysqlInstance = $mysqlInstance;
-    }
-
-    /**
-     * @return Mysql
-     */
-    protected function getMysqlInstance()
-    {
-        return $this->mysqlInstance;
+        $this->mysql = $mysqlInstance;
     }
 
     /**
@@ -31,199 +29,175 @@ class SqlManager
      */
     public function getRowCount()
     {
-        return $this
-            ->getMysqlInstance()
-            ->getRowCount();
+        return $this->getMysql()->getRowCount();
     }
 
     /**
-     * @param SqlQueryBuilder $sqlBuilder
+     * @param SqlQueryBuilder $builder
      *
      * @return bool
      */
-    public function executeSql(SqlQueryBuilder $sqlBuilder)
+    public function executeSql(SqlQueryBuilder $builder)
     {
-        return $this
-            ->getMysqlInstance()
-            ->executeSql($sqlBuilder->getQuery());
+        return $this->getMysql()->executeSql($builder->getQuery());
     }
 
     /**
-     * @param SqlQueryBuilder $sqlBuilder
+     * @param SqlQueryBuilder $builder
      *
-     * @return bool|string
+     * @return null|string
      */
-    public function fetchColumn(SqlQueryBuilder $sqlBuilder)
+    public function fetchColumn(SqlQueryBuilder $builder)
     {
-        $result = $this
-            ->getMysqlInstance()
-            ->fetchColumn($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-
-        if ($result !== null)
-        {
-            return (string)$result;
-        }
-
-        return false;
+        return $this->getMysql()->fetchColumn(
+            $builder->getQuery(),
+            $builder->getConditions()
+        );
     }
 
     /**
-     * @param SqlQueryBuilder $sqlBuilder
-     *
-     * @return array|bool
-     */
-    public function fetchColumnMany(SqlQueryBuilder $sqlBuilder)
-    {
-        $result = $this
-            ->getMysqlInstance()
-            ->fetchColumnMany($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-
-        if ($result !== null)
-        {
-            return (array)$result;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param SqlQueryBuilder $sqlBuilder
-     *
-     * @return MysqlQueryIterator
-     */
-    public function fetchColumnManyCursor(SqlQueryBuilder $sqlBuilder)
-    {
-        return $this
-            ->getMysqlInstance()
-            ->fetchColumnManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-    }
-
-    /**
-     * @param SqlQueryBuilder $sqlBuilder
-     *
-     * @return array|bool
-     */
-    public function fetchRow(SqlQueryBuilder $sqlBuilder)
-    {
-        $result = $this
-            ->getMysqlInstance()
-            ->fetchRow($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-
-        if ($result !== null)
-        {
-            return (array)$result;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param SqlQueryBuilder $sqlBuilder
-     *
-     * @return array|bool
-     */
-    public function fetchRowMany(SqlQueryBuilder $sqlBuilder)
-    {
-        $result = $this
-            ->getMysqlInstance()
-            ->fetchRowMany($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-
-        if ($result !== null)
-        {
-            return (array)$result;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param SqlQueryBuilder $sqlBuilder
-     *
-     * @return MysqlQueryIterator
-     */
-    public function fetchRowManyCursor(SqlQueryBuilder $sqlBuilder)
-    {
-        return $this
-            ->getMysqlInstance()
-            ->fetchRowManyCursor($sqlBuilder->getQuery(), $sqlBuilder->getConditions());
-    }
-
-    /**
-     * @param SqlQueryBuilder $sqlBuilder
+     * @param SqlQueryBuilder $builder
      *
      * @return array|null
      */
-    public function insert(SqlQueryBuilder $sqlBuilder)
+    public function fetchColumnMany(SqlQueryBuilder $builder)
     {
-        if ($sqlBuilder->hasMultiData())
-        {
-            return $this->getMysqlInstance()
-                ->insertMany(
-                    $sqlBuilder->getTableName(),
-                    $sqlBuilder->getData(),
-                    $sqlBuilder->hasInsertIgnore()
-                );
-        }
-
-        return $this->getMysqlInstance()
-            ->insert(
-                $sqlBuilder->getTableName(),
-                $sqlBuilder->getData(),
-                $sqlBuilder->hasInsertIgnore()
-            );
+        return $this->getMysql()->fetchColumnMany(
+            $builder->getQuery(),
+            $builder->getConditions()
+        );
     }
 
     /**
-     * @param SqlQueryBuilder $sqlBuilder
+     * @param SqlQueryBuilder $builder
+     *
+     * @return null|MysqlQueryIterator
+     */
+    public function fetchColumnManyCursor(SqlQueryBuilder $builder)
+    {
+        return $this->getMysql()->fetchColumnManyCursor(
+            $builder->getQuery(),
+            $builder->getConditions()
+        );
+    }
+
+    /**
+     * @param SqlQueryBuilder $builder
      *
      * @return array|null
      */
-    public function replace(SqlQueryBuilder $sqlBuilder)
+    public function fetchRow(SqlQueryBuilder $builder)
     {
-        if ($sqlBuilder->hasMultiData())
+        return $this->getMysql()->fetchRow(
+            $builder->getQuery(),
+            $builder->getConditions()
+        );
+    }
+
+    /**
+     * @param SqlQueryBuilder $builder
+     *
+     * @return array|null
+     */
+    public function fetchRowMany(SqlQueryBuilder $builder)
+    {
+        return $this->getMysql()->fetchRowMany(
+            $builder->getQuery(),
+            $builder->getConditions()
+        );
+    }
+
+    /**
+     * @param SqlQueryBuilder $builder
+     *
+     * @return null|MysqlQueryIterator
+     */
+    public function fetchRowManyCursor(SqlQueryBuilder $builder)
+    {
+        return $this->getMysql()->fetchRowManyCursor(
+            $builder->getQuery(),
+            $builder->getConditions()
+        );
+    }
+
+    /**
+     * @param SqlQueryBuilder $builder
+     *
+     * @return array|bool
+     */
+    public function insert(SqlQueryBuilder $builder)
+    {
+        if ($builder->hasMultiData())
         {
-            return $this->getMysqlInstance()
-                ->replaceMany(
-                    $sqlBuilder->getTableName(),
-                    $sqlBuilder->getData()
-                );
+            return $this->getMysql()->insertMany(
+                $builder->getTableName(),
+                $builder->getData(),
+                $builder->hasInsertIgnore()
+            );
         }
 
-        return $this->getMysqlInstance()
-            ->replace(
-                $sqlBuilder->getTableName(),
-                $sqlBuilder->getData()
-            );
+        return $this->getMysql()->insert(
+            $builder->getTableName(),
+            $builder->getData(),
+            $builder->hasInsertIgnore()
+        );
     }
 
     /**
-     * @param SqlQueryBuilder $sqlBuilder
+     * @param SqlQueryBuilder $builder
      *
-     * @return bool
+     * @return array|bool
      */
-    public function update(SqlQueryBuilder $sqlBuilder)
+    public function replace(SqlQueryBuilder $builder)
     {
-        return $this->getMysqlInstance()
-            ->update(
-                $sqlBuilder->getTableName(),
-                $sqlBuilder->getConditions(),
-                $sqlBuilder->getData(),
-                $sqlBuilder->getConditionsQuery()
+        if ($builder->hasMultiData())
+        {
+            return $this->getMysql()->replaceMany(
+                $builder->getTableName(),
+                $builder->getData()
             );
+        }
+
+        return $this->getMysql()->replace(
+            $builder->getTableName(),
+            $builder->getData()
+        );
     }
 
     /**
-     * @param SqlQueryBuilder $sqlBuilder
+     * @param SqlQueryBuilder $builder
      *
      * @return bool
      */
-    public function delete(SqlQueryBuilder $sqlBuilder)
+    public function update(SqlQueryBuilder $builder)
     {
-        return $this->getMysqlInstance()
-            ->delete(
-                $sqlBuilder->getTableName(),
-                $sqlBuilder->getConditions(),
-                $sqlBuilder->getConditionsQuery()
-            );
+        return $this->getMysql()->update(
+            $builder->getTableName(),
+            $builder->getConditions(),
+            $builder->getData(),
+            $builder->getConditionsQuery()
+        );
+    }
+
+    /**
+     * @param SqlQueryBuilder $builder
+     *
+     * @return bool
+     */
+    public function delete(SqlQueryBuilder $builder)
+    {
+        return $this->getMysql()->delete(
+            $builder->getTableName(),
+            $builder->getConditions(),
+            $builder->getConditionsQuery()
+        );
+    }
+
+    /**
+     * @return Mysql
+     */
+    private function getMysql()
+    {
+        return $this->mysql;
     }
 }

@@ -1,13 +1,15 @@
 <?php
 
 require __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/UserVo.php';
+
+use Simplon\Mysql\Crud\CrudStorage;
+use Test\Crud\SampleStorage;
 
 $config = [
-    'server'   => 'localhost',
+    'server'   => '127.0.0.1',
     'username' => 'root',
     'password' => 'root',
-    'database' => 'dhtest',
+    'database' => 'pushcast_devel_app',
 ];
 
 $dbh = new \Simplon\Mysql\Mysql(
@@ -19,33 +21,16 @@ $dbh = new \Simplon\Mysql\Mysql(
 
 // ############################################
 
-$sqlCrudManager = new \Simplon\Mysql\Crud\SqlCrudManager($dbh);
+$sampleStorage = new SampleStorage(new CrudStorage($dbh));
 
-//$userVo = (new UserVo())
-//    ->setId(null)
-//    ->setName('Johnny Stuff')
-//    ->setEmail('foo@bar.com');
-//
-///** @var UserVo $userVo */
-//$userVo = $sqlCrudManager->create($userVo);
-//var_dump($userVo);
+$sampleModel = $sampleStorage->readOne(['email' => 'tino@pushcast.io']);
 
-// ----------------------------------------------
-
-/** @var UserVo $userVo */
-$userVo = $sqlCrudManager->read(new UserVo(), ['id' => 1]);
-var_dump($userVo);
+var_dump($sampleModel);
 echo '<hr>';
 
-// ----------------------------------------------
+$sampleModel = $sampleStorage->update(
+    $sampleModel->setName('FOO BAR2')
+);
 
-// update
-$userVo->setName('Hansi Hinterseher');
-$userVo = $sqlCrudManager->update($userVo, ['id' => 1]);
-var_dump($userVo);
+var_dump($sampleModel);
 echo '<hr>';
-
-// delete
-//$response = $sqlCrudManager->delete(UserVo::crudGetSource(), ['id' => 1]);
-//var_dump($response);
-//echo '<hr>';

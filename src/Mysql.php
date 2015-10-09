@@ -2,6 +2,10 @@
 
 namespace Simplon\Mysql;
 
+/**
+ * Class Mysql
+ * @package Simplon\Mysql
+ */
 class Mysql
 {
     /**
@@ -30,7 +34,7 @@ class Mysql
      *
      * @throws MysqlException
      */
-    public function __construct($host, $user, $password, $database, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', array $options = array())
+    public function __construct($host, $user, $password, $database, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', array $options = [])
     {
         try
         {
@@ -96,7 +100,7 @@ class Mysql
     }
 
     /**
-     * @param mixed $fetchMode
+     * @param int $fetchMode
      *
      * @return Mysql
      */
@@ -122,11 +126,11 @@ class Mysql
      */
     protected function prepareErrorInfo(array $errorInfo)
     {
-        return array(
+        return [
             'sqlStateCode' => $errorInfo[0],
             'code'         => $errorInfo[1],
             'message'      => $errorInfo[2],
-        );
+        ];
     }
 
     /**
@@ -168,7 +172,7 @@ class Mysql
     }
 
     /**
-     * @param $paramValue
+     * @param mixed $paramValue
      *
      * @return int
      * @throws MysqlException
@@ -217,8 +221,8 @@ class Mysql
     }
 
     /**
-     * @param $query
-     * @param $params
+     * @param string $query
+     * @param array $params
      *
      * @return bool
      */
@@ -229,13 +233,11 @@ class Mysql
             return true;
         }
 
-        // --------------------------------------
-
         foreach ($params as $key => $val)
         {
             if (is_array($val))
             {
-                $keys = array();
+                $keys = [];
 
                 foreach ($val as $k => $v)
                 {
@@ -261,7 +263,7 @@ class Mysql
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
      * @return \PDOStatement
@@ -285,29 +287,27 @@ class Mysql
         $pdoStatement->execute();
 
         // check for errors
-        if ($pdoStatement->errorCode() === '00000')
+        if ($pdoStatement->errorCode() !== '00000')
         {
-            // cache statement
-            $this->setLastStatement($pdoStatement);
+            $error = [
+                'query'     => $query,
+                'params'    => $conds,
+                'errorInfo' => $this->prepareErrorInfo($pdoStatement->errorInfo()),
+            ];
 
-            return $pdoStatement;
+            $errorInfo = json_encode($error);
+
+            throw new MysqlException($errorInfo);
         }
 
-        // ----------------------------------
+        // cache statement
+        $this->setLastStatement($pdoStatement);
 
-        $error = array(
-            'query'     => $query,
-            'params'    => $conds,
-            'errorInfo' => $this->prepareErrorInfo($pdoStatement->errorInfo()),
-        );
-
-        $errorInfo = json_encode($error);
-
-        throw new MysqlException($errorInfo);
+        return $pdoStatement;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $rowsMany
      *
      * @return array
@@ -316,7 +316,7 @@ class Mysql
     protected function prepareInsertReplace($query, array $rowsMany)
     {
         $dbh = $this->getDbh();
-        $responses = array();
+        $responses = [];
 
         // clear last statement
         $this->clearLastStatement();
@@ -336,10 +336,10 @@ class Mysql
             // throw errors
             if ($pdoStatement->errorCode() !== '00000')
             {
-                $error = array(
+                $error = [
                     'query'     => $query,
                     'errorInfo' => $this->prepareErrorInfo($pdoStatement->errorInfo()),
-                );
+                ];
 
                 $errorInfo = json_encode($error);
 
@@ -357,11 +357,11 @@ class Mysql
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      * @param array $data
      *
-     * @return bool
+     * @return null|bool
      * @throws MysqlException
      */
     protected function prepareUpdate($query, array $conds, array $data)
@@ -390,30 +390,30 @@ class Mysql
         // throw errors
         if ($pdoStatement->errorCode() !== '00000')
         {
-            $error = array(
+            $error = [
                 'query'     => $query,
                 'conds'     => $conds,
                 'errorInfo' => $this->prepareErrorInfo($pdoStatement->errorInfo()),
-            );
+            ];
 
             $errorInfo = json_encode($error);
 
             throw new MysqlException($errorInfo);
         }
 
-        if ($this->getRowCount() > 0)
+        if ($this->getRowCount() === 0)
         {
-            return true;
+            return null;
         }
 
-        return false;
+        return true;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return bool
+     * @return null|bool
      * @throws MysqlException
      */
     protected function prepareDelete($query, array $conds)
@@ -439,23 +439,23 @@ class Mysql
         // throw errors
         if ($pdoStatement->errorCode() !== '00000')
         {
-            $error = array(
+            $error = [
                 'query'     => $query,
                 'conds'     => $conds,
                 'errorInfo' => $this->prepareErrorInfo($pdoStatement->errorInfo()),
-            );
+            ];
 
             $errorInfo = json_encode($error);
 
             throw new MysqlException($errorInfo);
         }
 
-        if ($this->getRowCount() > 0)
+        if ($this->getRowCount() === 0)
         {
-            return true;
+            return null;
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -463,16 +463,16 @@ class Mysql
      */
     public function getRowCount()
     {
-        if ($this->hasLastStatement() !== false)
+        if ($this->hasLastStatement() === false)
         {
-            return $this->getLastStatement()->rowCount();
+            return false;
         }
 
-        return false;
+        return $this->getLastStatement()->rowCount();
     }
 
     /**
-     * @param $query
+     * @param string $query
      *
      * @return bool
      * @throws MysqlException
@@ -488,10 +488,10 @@ class Mysql
             return true;
         }
 
-        $error = array(
+        $error = [
             'query'     => $query,
             'errorInfo' => $this->prepareErrorInfo($dbh->errorInfo()),
-        );
+        ];
 
         $errorInfo = json_encode($error);
 
@@ -499,7 +499,7 @@ class Mysql
     }
 
     /**
-     * @param $dbName
+     * @param string $dbName
      *
      * @return bool
      * @throws MysqlException
@@ -510,32 +510,32 @@ class Mysql
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return false|string
+     * @return null|string
      */
-    public function fetchColumn($query, array $conds = array())
+    public function fetchColumn($query, array $conds = [])
     {
         $response = $this->prepareSelect($query, $conds)->fetchColumn();
 
-        if ($response !== false)
+        if ($response === false)
         {
-            return (string)$response;
+            return null;
         }
 
-        return false;
+        return (string)$response;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return array|bool
+     * @return array|null
      */
-    public function fetchColumnMany($query, array $conds = array())
+    public function fetchColumnMany($query, array $conds = [])
     {
-        $responsesMany = array();
+        $responsesMany = [];
         $pdoStatment = $this->prepareSelect($query, $conds);
 
         while ($response = $pdoStatment->fetchColumn())
@@ -543,56 +543,61 @@ class Mysql
             $responsesMany[] = $response;
         }
 
-        if (!empty($responsesMany))
+        if (empty($responsesMany))
         {
-            return (array)$responsesMany;
+            return null;
         }
 
-        return false;
+        return (array)$responsesMany;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return MysqlQueryIterator
+     * @return MysqlQueryIterator|null
      */
-    public function fetchColumnManyCursor($query, array $conds = array())
+    public function fetchColumnManyCursor($query, array $conds = [])
     {
         $this->prepareSelect($query, $conds);
 
-        // ----------------------------------
+        $cursor = new MysqlQueryIterator($this->getLastStatement(), 'fetchColumn');
 
-        return new MysqlQueryIterator($this->getLastStatement(), 'fetchColumn');
+        if ($cursor === false)
+        {
+            return null;
+        }
+
+        return $cursor;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return array|bool
+     * @return array|null
      */
-    public function fetchRow($query, array $conds = array())
+    public function fetchRow($query, array $conds = [])
     {
         $response = $this->prepareSelect($query, $conds)->fetch($this->getFetchMode());
 
-        if ($response !== false)
+        if ($response === false)
         {
-            return (array)$response;
+            return null;
         }
 
-        return false;
+        return (array)$response;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return array|bool
+     * @return array|null
      */
-    public function fetchRowMany($query, array $conds = array())
+    public function fetchRowMany($query, array $conds = [])
     {
-        $responsesMany = array();
+        $responsesMany = [];
         $pdoStatment = $this->prepareSelect($query, $conds);
 
         while ($response = $pdoStatment->fetch($this->getFetchMode()))
@@ -600,31 +605,36 @@ class Mysql
             $responsesMany[] = $response;
         }
 
-        if (!empty($responsesMany))
+        if (empty($responsesMany))
         {
-            return (array)$responsesMany;
+            return null;
         }
 
-        return false;
+        return (array)$responsesMany;
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array $conds
      *
-     * @return MysqlQueryIterator
+     * @return MysqlQueryIterator|null
      */
-    public function fetchRowManyCursor($query, array $conds = array())
+    public function fetchRowManyCursor($query, array $conds = [])
     {
         $this->prepareSelect($query, $conds);
 
-        // ----------------------------------
+        $cursor = new MysqlQueryIterator($this->getLastStatement(), 'fetch');
 
-        return new MysqlQueryIterator($this->getLastStatement(), 'fetch');
+        if ($cursor === false)
+        {
+            return null;
+        }
+
+        return $cursor;
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $data
      * @param bool $insertIgnore
      *
@@ -638,18 +648,18 @@ class Mysql
             throw new MysqlException("Multi-dimensional datasets are not allowed. Use 'Mysql::insertMany()' instead");
         }
 
-        $response = $this->insertMany($tableName, array($data), $insertIgnore);
+        $response = $this->insertMany($tableName, [$data], $insertIgnore);
 
-        if ($response !== false)
+        if ($response === false)
         {
-            return array_pop($response);
+            return false;
         }
 
-        return false;
+        return array_pop($response);
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $data
      * @param bool $insertIgnore
      *
@@ -665,10 +675,10 @@ class Mysql
 
         $query = 'INSERT' . ($insertIgnore === true ? ' IGNORE ' : null) . ' INTO ' . $tableName . ' (:COLUMN_NAMES) VALUES (:PARAM_NAMES)';
 
-        $placeholder = array(
-            'column_names' => array(),
-            'param_names'  => array(),
-        );
+        $placeholder = [
+            'column_names' => [],
+            'param_names'  => [],
+        ];
 
         foreach ($data[0] as $columnName => $value)
         {
@@ -683,16 +693,16 @@ class Mysql
 
         $response = $this->prepareInsertReplace($query, $data);
 
-        if (!empty($response))
+        if (empty($response))
         {
-            return (array)$response;
+            return false;
         }
 
-        return false;
+        return (array)$response;
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $data
      *
      * @return array|bool
@@ -705,11 +715,11 @@ class Mysql
             throw new MysqlException("Multi-dimensional datasets are not allowed. Use 'Mysql::replaceMany()' instead");
         }
 
-        return $this->replaceMany($tableName, array($data));
+        return $this->replaceMany($tableName, [$data]);
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $data
      *
      * @return array|bool
@@ -724,10 +734,10 @@ class Mysql
 
         $query = 'REPLACE INTO ' . $tableName . ' (:COLUMN_NAMES) VALUES (:PARAM_NAMES)';
 
-        $placeholder = array(
-            'column_names' => array(),
-            'param_names'  => array(),
-        );
+        $placeholder = [
+            'column_names' => [],
+            'param_names'  => [],
+        ];
 
         foreach ($data[0] as $columnName => $value)
         {
@@ -742,16 +752,16 @@ class Mysql
 
         $response = $this->prepareInsertReplace($query, $data);
 
-        if (!empty($response))
+        if (empty($response))
         {
-            return (array)$response;
+            return false;
         }
 
-        return false;
+        return (array)$response;
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $conds
      * @param array $data
      * @param null $condsQuery
@@ -768,10 +778,10 @@ class Mysql
 
         $query = 'UPDATE ' . $tableName . ' SET :PARAMS WHERE :CONDS';
 
-        $placeholder = array(
-            'params' => array(),
-            'conds'  => array(),
-        );
+        $placeholder = [
+            'params' => [],
+            'conds'  => [],
+        ];
 
         foreach ($data as $columnName => $value)
         {
@@ -780,13 +790,11 @@ class Mysql
 
         $query = str_replace(':PARAMS', join(', ', $placeholder['params']), $query);
 
-        // ----------------------------------
-
         if (!empty($conds))
         {
             if ($condsQuery === null)
             {
-                $placeholder = array();
+                $placeholder = [];
 
                 foreach ($conds as $columnName => $value)
                 {
@@ -805,26 +813,17 @@ class Mysql
             $query = str_replace(' WHERE :CONDS', '', $query);
         }
 
-        // ----------------------------------
-
-        $response = $this->prepareUpdate($query, $conds, $data);
-
-        if ($response === true)
-        {
-            return true;
-        }
-
-        return false;
+        return $this->prepareUpdate($query, $conds, $data);
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $conds
      * @param null $condsQuery
      *
      * @return bool
      */
-    public function delete($tableName, array $conds = array(), $condsQuery = null)
+    public function delete($tableName, array $conds = [], $condsQuery = null)
     {
         $query = 'DELETE FROM ' . $tableName . ' WHERE :CONDS';
 
@@ -832,7 +831,7 @@ class Mysql
         {
             if ($condsQuery === null)
             {
-                $placeholder = array();
+                $placeholder = [];
 
                 foreach ($conds as $columnName => $value)
                 {
@@ -850,8 +849,6 @@ class Mysql
         {
             $query = str_replace(' WHERE :CONDS', '', $query);
         }
-
-        // ----------------------------------
 
         $response = $this->prepareDelete($query, $conds);
 

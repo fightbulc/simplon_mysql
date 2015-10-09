@@ -146,24 +146,24 @@ $sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
 
 #### FetchColumn
 
-Returns a selected column from the first match. The example below returns ```id``` or ```false``` if nothing was found.
+Returns a selected column from the first match. The example below returns ```id``` or ```null``` if nothing was found.
 
 ```php
 $result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
 
 // result
-var_dump($result); // '1' || false
+var_dump($result); // '1' || null
 ```
 
 #### FetchColumnMany
 
-Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
+Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```null``` if nothing was found.
 
 ```php
 $result = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
 
 // result
-var_dump($result); // ['1', '15', '30', ...] || false
+var_dump($result); // ['1', '15', '30', ...] || null
 ```
 
 #### FetchColumnManyCursor
@@ -181,22 +181,22 @@ foreach ($cursor as $result)
 
 #### FetchRow
 
-Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
+Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```null``` will be returned.
 
 ```php
 $result = $dbConn->fetchRow('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
 
-var_dump($result); // ['id' => '1', 'age' => '22'] || false
+var_dump($result); // ['id' => '1', 'age' => '22'] || null
 ```
 
 #### FetchRowMany
 
-Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
+Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```null``` will be returned.
 
 ```php
 $result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
 
-var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || false
+var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || null
 ```
 
 #### FetchRowManyCursor
@@ -265,7 +265,7 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 
 #### Simple update statement
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
 
 ```php
 $conds = array(
@@ -279,12 +279,12 @@ $data = array(
 
 $result = $dbConn->update('names', $conds, $data);
 
-var_dump($result); // true || false
+var_dump($result); // true || null
 ```
 
 #### Custom update conditions query
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
 
 ```php
 $conds = array(
@@ -302,7 +302,7 @@ $data = array(
 
 $result = $dbConn->update('names', $conds, $data, $condsQuery);
 
-var_dump($result); // true || false
+var_dump($result); // true || null
 ```
 
 -------------------------------------------------
@@ -404,7 +404,7 @@ The following query examples will be a rewrite of the aforementioned ```direct a
 
 #### FetchColumn
 
-Returns a selected column from the first match. In the example below ```id``` will be returned or ```false``` if nothing was found.
+Returns a selected column from the first match. In the example below ```id``` will be returned or ```null``` if nothing was found.
 
 ```php
 $sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
@@ -416,12 +416,12 @@ $sqlBuilder
 $result = $sqlManager->fetchColumn($sqlBuilder);
 
 // result
-var_dump($result); // '1' || false
+var_dump($result); // '1' || null
 ```
 
 #### FetchColumnMany
 
-Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```false``` if nothing was found.
+Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```null``` if nothing was found.
 
 ```php
 $sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
@@ -433,7 +433,7 @@ $sqlBuilder
 $result = $sqlManager->fetchColumnMany($sqlBuilder);
 
 // result
-var_dump($result); // ['1', '15', '30', ...] || false
+var_dump($result); // ['1', '15', '30', ...] || null
 ```
 
 #### FetchColumnManyCursor
@@ -455,7 +455,7 @@ foreach ($sqlManager->fetchColumnMany($sqlBuilder) as $result)
 
 #### FetchRow
 
-Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```false``` will be returned.
+Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```null``` will be returned.
 
 ```php
 $sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
@@ -466,12 +466,12 @@ $sqlBuilder
 
 $result = $sqlManager->fetchRow($sqlBuilder);
 
-var_dump($result); // ['id' => '1', 'age' => '22'] || false
+var_dump($result); // ['id' => '1', 'age' => '22'] || null
 ```
 
 #### FetchRowMany
 
-Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```false``` will be returned.
+Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```null``` will be returned.
 
 ```php
 $sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
@@ -482,7 +482,7 @@ $sqlBuilder
 
 $result = $sqlManager->fetchRowMany($sqlBuilder);
 
-var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || false
+var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || null
 ```
 
 #### FetchRowManyCursor
@@ -563,7 +563,7 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 
 #### Simple update statement
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
 
 ```php
 $data = array(
@@ -580,12 +580,12 @@ $sqlBuilder
 
 $result = $sqlManager->update($sqlBuilder);
 
-var_dump($result); // true || false
+var_dump($result); // true || null
 ```
 
 #### Custom update conditions query
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If something went wrong you will receive ```false```.
+Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
 
 ```php
 $data = array(
@@ -603,7 +603,7 @@ $sqlBuilder
 
 $result = $sqlManager->update($sqlBuilder);
 
-var_dump($result); // true || false
+var_dump($result); // true || null
 ```
 
 ### 5.4. Replace
@@ -735,7 +735,7 @@ $query = "SELECT * FROM users WHERE email IN (:emails)";
 
 -------------------------------------------------
 
-## 7. CRUD Helper
+## 7. CRUD Helper (CONTENT IS OUTDATED. UPDATE WILL FOLLLOW)
 
 #### 7.1. Intro
 
@@ -982,7 +982,7 @@ Here is an example of how that might look like:
 
 Simplon/Mysql is freely distributable under the terms of the MIT license.
 
-Copyright (c) 2014 Tino Ehrich ([tino@bigpun.me](mailto:tino@bigpun.me))
+Copyright (c) 2015 Tino Ehrich ([tino@bigpun.me](mailto:tino@bigpun.me))
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
