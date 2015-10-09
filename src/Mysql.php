@@ -822,6 +822,7 @@ class Mysql
      * @param null $condsQuery
      *
      * @return bool
+     * @throws MysqlException
      */
     public function delete($tableName, array $conds = [], $condsQuery = null)
     {

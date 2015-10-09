@@ -2,6 +2,7 @@
 
 namespace Test\Crud;
 
+use Simplon\Mysql\Crud\CrudModelInterface;
 use Simplon\Mysql\Crud\CrudStorage;
 use Simplon\Mysql\Crud\CrudStorageInterface;
 use Simplon\Mysql\MysqlException;
@@ -46,17 +47,17 @@ class SampleStorage implements CrudStorageInterface
     }
 
     /**
-     * @param SampleModel $model
+     * @param CrudModelInterface $model
      *
      * @return SampleModel
      * @throws MysqlException
      */
-    public function create(SampleModel $model)
+    public function create(CrudModelInterface $model)
     {
         return $this->crudStorage->create(
             (new CreateQueryBuilder())
-                ->setTableName($this->getTableName())
                 ->setModel($model)
+                ->setTableName($this->getTableName())
         );
     }
 
@@ -110,33 +111,30 @@ class SampleStorage implements CrudStorageInterface
     }
 
     /**
-     * @param SampleModel $model
+     * @param CrudModelInterface $model
      *
      * @return SampleModel
      * @throws MysqlException
      */
-    public function update(SampleModel $model)
+    public function update(CrudModelInterface $model)
     {
         return $this->crudStorage->update(
             (new UpdateQueryBuilder())
-                ->setTableName($this->getTableName())
                 ->setModel($model)
+                ->setTableName($this->getTableName())
                 ->setConds(['id' => $model->getId()])
         );
     }
 
     /**
-     * @param SampleModel $model
-     *
-     * @return bool
-     * @throws MysqlException
+     * @param array $conds
      */
-    public function delete(SampleModel $model)
+    public function delete(array $conds)
     {
-        return $this->crudStorage->delete(
+        $this->crudStorage->delete(
             (new DeleteQueryBuilder())
                 ->setTableName($this->getTableName())
-                ->setConds(['id' => $model->getId()])
+                ->setConds($conds)
         );
     }
 }

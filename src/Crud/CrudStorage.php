@@ -118,7 +118,6 @@ class CrudStorage
     /**
      * @param DeleteQueryBuilder $builder
      *
-     * @return void
      * @throws MysqlException
      */
     public function delete(DeleteQueryBuilder $builder)
