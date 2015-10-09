@@ -11,10 +11,10 @@ use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 
 /**
- * Class CrudStorage
+ * Class CrudManager
  * @package Simplon\Mysql\Crud
  */
-class CrudStorage
+class CrudManager
 {
     /**
      * @var Mysql

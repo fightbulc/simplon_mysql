@@ -2,7 +2,7 @@
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use Simplon\Mysql\Crud\CrudStorage;
+use Simplon\Mysql\Crud\CrudManager;
 use Test\Crud\SampleStorage;
 
 $config = [
@@ -21,7 +21,7 @@ $dbh = new \Simplon\Mysql\Mysql(
 
 // ############################################
 
-$sampleStorage = new SampleStorage(new CrudStorage($dbh));
+$sampleStorage = new SampleStorage(new CrudManager($dbh));
 
 $sampleModel = $sampleStorage->readOne(['email' => 'tino@pushcast.io']);
 

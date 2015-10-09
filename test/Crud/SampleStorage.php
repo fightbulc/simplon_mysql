@@ -3,7 +3,7 @@
 namespace Test\Crud;
 
 use Simplon\Mysql\Crud\CrudModelInterface;
-use Simplon\Mysql\Crud\CrudStorage;
+use Simplon\Mysql\Crud\CrudManager;
 use Simplon\Mysql\Crud\CrudStorageInterface;
 use Simplon\Mysql\MysqlException;
 use Simplon\Mysql\QueryBuilder\CreateQueryBuilder;
@@ -18,14 +18,14 @@ use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 class SampleStorage implements CrudStorageInterface
 {
     /**
-     * @var CrudStorage
+     * @var CrudManager
      */
     private $crudStorage;
 
     /**
-     * @param CrudStorage $crudStorage
+     * @param CrudManager $crudStorage
      */
-    public function __construct(CrudStorage $crudStorage)
+    public function __construct(CrudManager $crudStorage)
     {
         $this->crudStorage = $crudStorage;
     }

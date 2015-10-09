@@ -11,6 +11,11 @@ use Simplon\Mysql\MysqlException;
 interface CrudStorageInterface
 {
     /**
+     * @param CrudManager $crudManager
+     */
+    public function __construct(CrudManager $crudManager);
+
+    /**
      * @return string
      */
     public function getTableName();
