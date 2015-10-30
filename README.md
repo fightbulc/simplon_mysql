@@ -1,3 +1,5 @@
+__Note:__ Version breaks 1.x will break when it comes to CRUD. Will try to bring documentation up to speed.
+
 <pre>
      _                 _                                         _ 
  ___(_)_ __ ___  _ __ | | ___  _ __    _ __ ___  _   _ ___  __ _| |
@@ -8,8 +10,6 @@
 </pre>
 
 # Simplon/Mysql
-
-__Note:__ Version breaks w/ prior versions (< 0.3) due to PSR-2/4 changes as well as some refactorings. Lots happened!
 
 -------------------------------------------------
 
