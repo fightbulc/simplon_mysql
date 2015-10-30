@@ -1,4 +1,4 @@
-__Note:__ Version breaks 1.x will break when it comes to CRUD. Will try to bring documentation up to speed.
+__Note:__ Version 1.x will break when it comes to CRUD. Changed a lot here. Will try to bring documentation up to speed.
 
 <pre>
      _                 _                                         _ 
