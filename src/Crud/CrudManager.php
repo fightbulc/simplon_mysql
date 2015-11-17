@@ -151,6 +151,7 @@ class CrudManager
      */
     private function buildReadQuery(ReadQueryBuilder $builder)
     {
+        /** @noinspection SqlNoDataSourceInspection */
         $query = "SELECT {$builder->getColumns()} FROM {$builder->getTableName()}";
 
         if ($builder->getJoins())
