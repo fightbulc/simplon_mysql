@@ -2,8 +2,6 @@
 
 namespace Simplon\Mysql\QueryBuilder;
 
-use Simplon\Mysql\Crud\CrudModelInterface;
-
 /**
  * Class ReadQueryBuilder
  * @package Simplon\Mysql\QueryBuilder
@@ -31,7 +29,7 @@ class ReadQueryBuilder
     /**
      * @var array
      */
-    protected $conds;
+    protected $conds = [];
 
     /**
      * @var string
