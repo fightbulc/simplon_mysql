@@ -2,6 +2,7 @@
 
 namespace Simplon\Mysql\Crud;
 
+use Simplon\Mysql\Mysql;
 use Simplon\Mysql\MysqlException;
 
 /**
@@ -11,9 +12,10 @@ use Simplon\Mysql\MysqlException;
 interface CrudStorageInterface
 {
     /**
+     * @param Mysql $mysql
      * @param CrudManager $crudManager
      */
-    public function __construct(CrudManager $crudManager);
+    public function __construct(Mysql $mysql, CrudManager $crudManager);
 
     /**
      * @return string
