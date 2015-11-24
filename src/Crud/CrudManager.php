@@ -69,7 +69,7 @@ class CrudManager
             ->getMysql()
             ->fetchRowManyCursor(
                 $this->buildReadQuery($builder),
-                $builder->getConds()
+                $builder->getConditions()
             );
     }
 
@@ -84,7 +84,7 @@ class CrudManager
             ->getMysql()
             ->fetchRow(
                 $this->buildReadQuery($builder),
-                $builder->getConds()
+                $builder->getConditions()
             );
     }
 
@@ -159,9 +159,9 @@ class CrudManager
             $query .= " " . join("\n", $builder->getJoins());
         }
 
-        if ($builder->getConds())
+        if ($builder->getConditions())
         {
-            $query .= " WHERE {$this->buildCondsQuery($builder->getConds(), $builder->getCondsQuery())}";
+            $query .= " WHERE {$this->buildCondsQuery($builder->getConditions(), $builder->getCondsQuery())}";
         }
 
         if ($builder->getSorting())

@@ -17,9 +17,9 @@ class ReadQueryBuilder
     protected $tableName;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $columns = '*';
+    protected $select = [];
 
     /**
      * @var array
@@ -29,7 +29,7 @@ class ReadQueryBuilder
     /**
      * @var array
      */
-    protected $conds = [];
+    protected $conditions = [];
 
     /**
      * @var string
@@ -40,6 +40,11 @@ class ReadQueryBuilder
      * @var array
      */
     protected $sorting;
+
+    /**
+     * @var string
+     */
+    protected $group;
 
     /**
      * @var string
@@ -73,21 +78,55 @@ class ReadQueryBuilder
     }
 
     /**
+     * @deprecated Use getSelect
+     *
      * @return string
      */
     public function getColumns()
     {
-        return $this->columns;
+        return join(', ', $this->getSelect());
     }
 
     /**
-     * @param string $columns
+     * @deprecated Use setSelect or addSelect
+     *
+     * @param string $fields
      *
      * @return ReadQueryBuilder
      */
-    public function setColumns($columns)
+    public function setColumns($fields)
     {
-        $this->columns = $columns;
+        return $this->setSelect([$fields]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getSelect()
+    {
+        return empty($this->select) ? ['*'] : $this->select;
+    }
+
+    /**
+     * @param string $select
+     *
+     * @return ReadQueryBuilder
+     */
+    public function addSelect($select)
+    {
+        $this->select[] = $select;
+
+        return $this;
+    }
+
+    /**
+     * @param array $select
+     *
+     * @return ReadQueryBuilder
+     */
+    public function setSelect(array $select)
+    {
+        $this->select = $select;
 
         return $this;
     }
@@ -127,9 +166,22 @@ class ReadQueryBuilder
     /**
      * @return array
      */
-    public function getConds()
+    public function getConditions()
     {
-        return $this->conds;
+        return $this->conditions;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $val
+     *
+     * @return ReadQueryBuilder
+     */
+    public function addCondition($key, $val)
+    {
+        $this->conditions[$key] = $val;
+
+        return $this;
     }
 
     /**
@@ -137,9 +189,9 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setConds($conds)
+    public function setConditions($conds)
     {
-        $this->conds = $conds;
+        $this->conditions = $conds;
 
         return $this;
     }
@@ -200,6 +252,26 @@ class ReadQueryBuilder
     /**
      * @return string
      */
+    public function getGroup()
+    {
+        return $this->group;
+    }
+
+    /**
+     * @param string $group
+     *
+     * @return ReadQueryBuilder
+     */
+    public function setGroup($group)
+    {
+        $this->group = $group;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getLimit()
     {
         return $this->limit;
@@ -216,6 +288,62 @@ class ReadQueryBuilder
         $this->limit = $offset . ', ' . $rows;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function renderQuery()
+    {
+        $query = ['SELECT', join(', ', $this->getSelect()), 'FROM ' . $this->getTableName()];
+
+        if ($this->getJoins())
+        {
+            $query = array_merge($query, $this->getJoins());
+        }
+
+        if ($this->getConditions())
+        {
+            $conds = [];
+
+            if ($this->getCondsQuery())
+            {
+                $conds[] = $this->getCondsQuery();
+            }
+            else
+            {
+                $resetConds = [];
+
+                foreach ($this->getConditions() as $key => $value)
+                {
+                    $formattedKey = str_replace('.', '', $key);
+                    $resetConds[$formattedKey] = $value;
+                    $conds[] = $key . ' = :' . $formattedKey;
+                }
+
+                $this->setConditions($resetConds);
+            }
+
+            $query[] = 'WHERE ' . join(' AND ', $conds);
+        }
+
+        if ($this->getGroup())
+        {
+            $query[] = 'GROUP BY ' . $this->getGroup();
+        }
+
+        if ($this->getSorting())
+        {
+            $query[] = 'ORDER BY ';
+            $query = array_merge($query, $this->getSorting());
+        }
+
+        if ($this->getLimit())
+        {
+            $query[] = 'LIMIT ' . $this->getLimit();
+        }
+
+        return join(' ', $query);
     }
 
     /**
