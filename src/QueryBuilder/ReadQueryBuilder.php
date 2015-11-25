@@ -42,7 +42,7 @@ class ReadQueryBuilder
     protected $sorting;
 
     /**
-     * @var string
+     * @var array
      */
     protected $group;
 
@@ -250,7 +250,7 @@ class ReadQueryBuilder
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getGroup()
     {
@@ -258,13 +258,25 @@ class ReadQueryBuilder
     }
 
     /**
-     * @param string $group
+     * @param string $column
      *
      * @return ReadQueryBuilder
      */
-    public function setGroup($group)
+    public function addGroup($column)
     {
-        $this->group = $group;
+        $this->group[] = $column;
+
+        return $this;
+    }
+
+    /**
+     * @param array $columns
+     *
+     * @return ReadQueryBuilder
+     */
+    public function setGroup(array $columns)
+    {
+        $this->group = $columns;
 
         return $this;
     }
@@ -304,14 +316,13 @@ class ReadQueryBuilder
 
         if ($this->getConditions())
         {
-            $conds = [];
-
             if ($this->getCondsQuery())
             {
-                $conds[] = $this->getCondsQuery();
+                $query[] = $this->getCondsQuery();
             }
             else
             {
+                $conds = [];
                 $resetConds = [];
 
                 foreach ($this->getConditions() as $key => $value)
@@ -322,20 +333,19 @@ class ReadQueryBuilder
                 }
 
                 $this->setConditions($resetConds);
-            }
 
-            $query[] = 'WHERE ' . join(' AND ', $conds);
+                $query[] = 'WHERE ' . join(' AND ', $conds);
+            }
         }
 
         if ($this->getGroup())
         {
-            $query[] = 'GROUP BY ' . $this->getGroup();
+            $query[] = 'GROUP BY ' . join(', ', $this->getGroup());
         }
 
         if ($this->getSorting())
         {
-            $query[] = 'ORDER BY ';
-            $query = array_merge($query, $this->getSorting());
+            $query[] = 'ORDER BY ' . join(', ', $this->getSorting());
         }
 
         if ($this->getLimit())

@@ -68,7 +68,7 @@ class CrudManager
         return $this
             ->getMysql()
             ->fetchRowManyCursor(
-                $this->buildReadQuery($builder),
+                $builder->renderQuery(),
                 $builder->getConditions()
             );
     }
@@ -83,7 +83,7 @@ class CrudManager
         return $this
             ->getMysql()
             ->fetchRow(
-                $this->buildReadQuery($builder),
+                $builder->renderQuery(),
                 $builder->getConditions()
             );
     }
@@ -142,35 +142,6 @@ class CrudManager
     private function getMysql()
     {
         return $this->mysql;
-    }
-
-    /**
-     * @param ReadQueryBuilder $builder
-     *
-     * @return string
-     */
-    private function buildReadQuery(ReadQueryBuilder $builder)
-    {
-        /** @noinspection SqlNoDataSourceInspection */
-        $query = "SELECT {$builder->getColumns()} FROM {$builder->getTableName()}";
-
-        if ($builder->getJoins())
-        {
-            $query .= " " . join("\n", $builder->getJoins());
-        }
-
-        if ($builder->getConditions())
-        {
-            $query .= " WHERE {$this->buildCondsQuery($builder->getConditions(), $builder->getCondsQuery())}";
-        }
-
-        if ($builder->getSorting())
-        {
-            $sorting = join(', ', $builder->getSorting());
-            $query .= " ORDER BY {$sorting}";
-        }
-
-        return $query;
     }
 
     /**

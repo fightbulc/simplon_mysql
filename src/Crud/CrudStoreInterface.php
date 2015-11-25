@@ -6,10 +6,10 @@ use Simplon\Mysql\Mysql;
 use Simplon\Mysql\MysqlException;
 
 /**
- * Interface CrudStorageInterface
+ * Interface CrudStoreInterface
  * @package Simplon\Mysql\Crud
  */
-interface CrudStorageInterface
+interface CrudStoreInterface
 {
     /**
      * @param Mysql $mysql
