@@ -314,15 +314,16 @@ class ReadQueryBuilder
             $query = array_merge($query, $this->getJoins());
         }
 
-        if ($this->getConditions())
+        if ($this->getConditions() || $this->getCondsQuery())
         {
+            $conds = [];
+
             if ($this->getCondsQuery())
             {
-                $query[] = $this->getCondsQuery();
+                $conds[] = $this->getCondsQuery();
             }
             else
             {
-                $conds = [];
                 $resetConds = [];
 
                 foreach ($this->getConditions() as $key => $value)
@@ -333,9 +334,9 @@ class ReadQueryBuilder
                 }
 
                 $this->setConditions($resetConds);
-
-                $query[] = 'WHERE ' . join(' AND ', $conds);
             }
+
+            $query[] = 'WHERE ' . join(' AND ', $conds);
         }
 
         if ($this->getGroup())
