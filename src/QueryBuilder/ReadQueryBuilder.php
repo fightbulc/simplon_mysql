@@ -14,7 +14,7 @@ class ReadQueryBuilder
     /**
      * @var string
      */
-    protected $tableName;
+    protected $from;
 
     /**
      * @var array
@@ -54,25 +54,25 @@ class ReadQueryBuilder
     /**
      * @return string
      */
-    public function getTableName()
+    public function getFrom()
     {
-        return $this->tableName;
+        return $this->from;
     }
 
     /**
-     * @param string $tableName
+     * @param string $from
      * @param string $alias
      *
      * @return ReadQueryBuilder
      */
-    public function setTableName($tableName, $alias = null)
+    public function setFrom($from, $alias = null)
     {
         if ($alias !== null)
         {
-            $tableName = $tableName . ' AS ' . $alias;
+            $from = $from . ' AS ' . $alias;
         }
 
-        $this->tableName = $tableName;
+        $this->from = $from;
 
         return $this;
     }
@@ -108,13 +108,13 @@ class ReadQueryBuilder
     }
 
     /**
-     * @param string $select
+     * @param string $column
      *
      * @return ReadQueryBuilder
      */
-    public function addSelect($select)
+    public function addSelect($column)
     {
-        $this->select[] = $select;
+        $this->select[] = $column;
 
         return $this;
     }
@@ -126,7 +126,10 @@ class ReadQueryBuilder
      */
     public function setSelect(array $select)
     {
-        $this->select = $select;
+        foreach ($select as $column)
+        {
+            $this->addSelect($column);
+        }
 
         return $this;
     }
@@ -232,7 +235,7 @@ class ReadQueryBuilder
      */
     public function addSorting($field, $direction)
     {
-        $this->sorting[] = $field . ' ' . $direction;
+        $this->sorting[] = '`' . $field . '` ' . $direction;
 
         return $this;
     }
@@ -244,7 +247,11 @@ class ReadQueryBuilder
      */
     public function setSorting(array $sorting)
     {
-        $this->sorting = $sorting;
+        foreach ($sorting as $val)
+        {
+            list($field, $direction) = explode(' ', $val);
+            $this->addSorting($field, $direction);
+        }
 
         return $this;
     }
@@ -264,7 +271,7 @@ class ReadQueryBuilder
      */
     public function addGroup($column)
     {
-        $this->group[] = $column;
+        $this->group[] = '`' . $column . '`';
 
         return $this;
     }
@@ -276,7 +283,10 @@ class ReadQueryBuilder
      */
     public function setGroup(array $columns)
     {
-        $this->group = $columns;
+        foreach ($columns as $column)
+        {
+            $this->addGroup($column);
+        }
 
         return $this;
     }
@@ -307,7 +317,7 @@ class ReadQueryBuilder
      */
     public function renderQuery()
     {
-        $query = ['SELECT', join(', ', $this->getSelect()), 'FROM ' . $this->getTableName()];
+        $query = ['SELECT', join(', ', $this->getSelect()), 'FROM ' . $this->getFrom()];
 
         if ($this->getJoins())
         {
@@ -328,9 +338,22 @@ class ReadQueryBuilder
 
                 foreach ($this->getConditions() as $key => $value)
                 {
+                    // handle db named columns e.g. "db.id"
                     $formattedKey = str_replace('.', '', $key);
                     $resetConds[$formattedKey] = $value;
-                    $conds[] = $key . ' = :' . $formattedKey;
+
+                    // handle only columns (non-column conds are prepend with _)
+                    if (strpos($key, '_') === false)
+                    {
+                        $condQuery = '`' . $key . '` = :' . $formattedKey;
+
+                        if (is_array($value))
+                        {
+                            $condQuery = '`' . $key . '` IN(:' . $formattedKey . ')';
+                        }
+
+                        $conds[] = $condQuery;
+                    }
                 }
 
                 $this->setConditions($resetConds);
