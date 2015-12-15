@@ -14,7 +14,7 @@ class ReadQueryBuilder
     /**
      * @var string
      */
-    protected $tableName;
+    protected $from;
 
     /**
      * @var array
@@ -54,25 +54,25 @@ class ReadQueryBuilder
     /**
      * @return string
      */
-    public function getTableName()
+    public function getFrom()
     {
-        return $this->tableName;
+        return $this->from;
     }
 
     /**
-     * @param string $tableName
+     * @param string $from
      * @param string $alias
      *
      * @return ReadQueryBuilder
      */
-    public function setTableName($tableName, $alias = null)
+    public function setFrom($from, $alias = null)
     {
         if ($alias !== null)
         {
-            $tableName = $tableName . ' AS ' . $alias;
+            $from = $from . ' AS ' . $alias;
         }
 
-        $this->tableName = $tableName;
+        $this->from = $from;
 
         return $this;
     }
@@ -307,7 +307,7 @@ class ReadQueryBuilder
      */
     public function renderQuery()
     {
-        $query = ['SELECT', join(', ', $this->getSelect()), 'FROM ' . $this->getTableName()];
+        $query = ['SELECT', join(', ', $this->getSelect()), 'FROM ' . $this->getFrom()];
 
         if ($this->getJoins())
         {
@@ -330,7 +330,14 @@ class ReadQueryBuilder
                 {
                     $formattedKey = str_replace('.', '', $key);
                     $resetConds[$formattedKey] = $value;
-                    $conds[] = $key . ' = :' . $formattedKey;
+                    $condQuery = $key . ' = :' . $formattedKey;
+
+                    if (is_array($value))
+                    {
+                        $condQuery = $key . ' IN(:' . $formattedKey . ')';
+                    }
+
+                    $conds[] = $condQuery;
                 }
 
                 $this->setConditions($resetConds);
