@@ -682,7 +682,7 @@ class Mysql
 
         foreach ($data[0] as $columnName => $value)
         {
-            $placeholder['column_names'][] = $columnName;
+            $placeholder['column_names'][] = '`' . $columnName . '`';
             $placeholder['param_names'][] = ':' . $columnName;
         }
 
@@ -741,7 +741,7 @@ class Mysql
 
         foreach ($data[0] as $columnName => $value)
         {
-            $placeholder['column_names'][] = $columnName;
+            $placeholder['column_names'][] = '`' . $columnName . '`';
             $placeholder['param_names'][] = ':' . $columnName;
         }
 
@@ -785,33 +785,15 @@ class Mysql
 
         foreach ($data as $columnName => $value)
         {
-            $placeholder['params'][] = $columnName . ' = :' . $columnName;
+            $placeholder['params'][] = '`' . $columnName . '` = :DATA_' . $columnName;
+
+            // mark data keys in case CONDS and DATA hold the same keys
+            unset($data[$columnName]);
+            $data['DATA_' . $columnName] = $value;
         }
 
         $query = str_replace(':PARAMS', join(', ', $placeholder['params']), $query);
-
-        if (!empty($conds))
-        {
-            if ($condsQuery === null)
-            {
-                $placeholder = [];
-
-                foreach ($conds as $columnName => $value)
-                {
-                    $placeholder[] = $columnName . '= :' . $columnName;
-                }
-
-                $query = str_replace(':CONDS', join(' AND ', $placeholder), $query);
-            }
-            else
-            {
-                $query = str_replace(':CONDS', $condsQuery, $query);
-            }
-        }
-        else
-        {
-            $query = str_replace(' WHERE :CONDS', '', $query);
-        }
+        $query = $this->buildCondsQuery($query, $conds, $condsQuery);
 
         return $this->prepareUpdate($query, $conds, $data);
     }
@@ -826,8 +808,26 @@ class Mysql
      */
     public function delete($tableName, array $conds = [], $condsQuery = null)
     {
-        $query = 'DELETE FROM ' . $tableName . ' WHERE :CONDS';
+        $query = $this->buildCondsQuery('DELETE FROM ' . $tableName . ' WHERE :CONDS', $conds, $condsQuery);
+        $response = $this->prepareDelete($query, $conds);
 
+        if ($response === true)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $query
+     * @param array $conds
+     * @param string|null $condsQuery
+     *
+     * @return string
+     */
+    private function buildCondsQuery($query, array $conds, $condsQuery = null)
+    {
         if (!empty($conds))
         {
             if ($condsQuery === null)
@@ -836,7 +836,10 @@ class Mysql
 
                 foreach ($conds as $columnName => $value)
                 {
-                    $placeholder[] = $columnName . '= :' . $columnName;
+                    if ($this->isColum($columnName))
+                    {
+                        $placeholder[] = '`' . $columnName . '` = :' . $columnName;
+                    }
                 }
 
                 $query = str_replace(':CONDS', join(' AND ', $placeholder), $query);
@@ -851,13 +854,16 @@ class Mysql
             $query = str_replace(' WHERE :CONDS', '', $query);
         }
 
-        $response = $this->prepareDelete($query, $conds);
+        return $query;
+    }
 
-        if ($response === true)
-        {
-            return true;
-        }
-
-        return false;
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    private function isColum($key)
+    {
+        return substr($key, 0, 1) !== '_';
     }
 }

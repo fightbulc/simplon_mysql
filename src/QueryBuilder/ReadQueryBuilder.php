@@ -108,13 +108,13 @@ class ReadQueryBuilder
     }
 
     /**
-     * @param string $select
+     * @param string $column
      *
      * @return ReadQueryBuilder
      */
-    public function addSelect($select)
+    public function addSelect($column)
     {
-        $this->select[] = $select;
+        $this->select[] = $column;
 
         return $this;
     }
@@ -126,7 +126,10 @@ class ReadQueryBuilder
      */
     public function setSelect(array $select)
     {
-        $this->select = $select;
+        foreach ($select as $column)
+        {
+            $this->addSelect($column);
+        }
 
         return $this;
     }
@@ -232,7 +235,7 @@ class ReadQueryBuilder
      */
     public function addSorting($field, $direction)
     {
-        $this->sorting[] = $field . ' ' . $direction;
+        $this->sorting[] = '`' . $field . '` ' . $direction;
 
         return $this;
     }
@@ -244,7 +247,11 @@ class ReadQueryBuilder
      */
     public function setSorting(array $sorting)
     {
-        $this->sorting = $sorting;
+        foreach ($sorting as $val)
+        {
+            list($field, $direction) = explode(' ', $val);
+            $this->addSorting($field, $direction);
+        }
 
         return $this;
     }
@@ -264,7 +271,7 @@ class ReadQueryBuilder
      */
     public function addGroup($column)
     {
-        $this->group[] = $column;
+        $this->group[] = '`' . $column . '`';
 
         return $this;
     }
@@ -276,7 +283,10 @@ class ReadQueryBuilder
      */
     public function setGroup(array $columns)
     {
-        $this->group = $columns;
+        foreach ($columns as $column)
+        {
+            $this->addGroup($column);
+        }
 
         return $this;
     }
@@ -328,16 +338,22 @@ class ReadQueryBuilder
 
                 foreach ($this->getConditions() as $key => $value)
                 {
+                    // handle db named columns e.g. "db.id"
                     $formattedKey = str_replace('.', '', $key);
                     $resetConds[$formattedKey] = $value;
-                    $condQuery = $key . ' = :' . $formattedKey;
 
-                    if (is_array($value))
+                    // handle only columns (non-column conds are prepend with _)
+                    if (substr($key, 0, 1) !== '_')
                     {
-                        $condQuery = $key . ' IN(:' . $formattedKey . ')';
-                    }
+                        $condQuery = '`' . $key . '` = :' . $formattedKey;
 
-                    $conds[] = $condQuery;
+                        if (is_array($value))
+                        {
+                            $condQuery = '`' . $key . '` IN(:' . $formattedKey . ')';
+                        }
+
+                        $conds[] = $condQuery;
+                    }
                 }
 
                 $this->setConditions($resetConds);
