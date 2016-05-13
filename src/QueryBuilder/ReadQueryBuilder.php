@@ -343,7 +343,7 @@ class ReadQueryBuilder
                     $resetConds[$formattedKey] = $value;
 
                     // handle only columns (non-column conds are prepend with _)
-                    if (strpos($key, '_') === false)
+                    if (substr($key, 0, 1) !== '_')
                     {
                         $condQuery = '`' . $key . '` = :' . $formattedKey;
 
