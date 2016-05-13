@@ -235,7 +235,8 @@ class ReadQueryBuilder
      */
     public function addSorting($field, $direction)
     {
-        $this->sorting[] = '`' . $field . '` ' . $direction;
+        $field = strpos($field, '.') !== false ? $field : '`' . $field . '`';
+        $this->sorting[] = $field . ' ' . $direction;
 
         return $this;
     }
@@ -271,7 +272,7 @@ class ReadQueryBuilder
      */
     public function addGroup($column)
     {
-        $this->group[] = '`' . $column . '`';
+        $this->group[] = strpos($column, '.') !== false ? $column : '`' . $column . '`';
 
         return $this;
     }
@@ -345,11 +346,12 @@ class ReadQueryBuilder
                     // handle only columns (non-column conds are prepend with _)
                     if (substr($key, 0, 1) !== '_')
                     {
-                        $condQuery = '`' . $key . '` = :' . $formattedKey;
+                        $key = strpos($key, '.') !== false ? $key : '`' . $key . '`';
+                        $condQuery = $key . ' = :' . $formattedKey;
 
                         if (is_array($value))
                         {
-                            $condQuery = '`' . $key . '` IN(:' . $formattedKey . ')';
+                            $condQuery = $key . ' IN(:' . $formattedKey . ')';
                         }
 
                         $conds[] = $condQuery;
@@ -359,7 +361,10 @@ class ReadQueryBuilder
                 $this->setConditions($resetConds);
             }
 
-            $query[] = 'WHERE ' . join(' AND ', $conds);
+            if (empty($conds) === false)
+            {
+                $query[] = 'WHERE ' . join(' AND ', $conds);
+            }
         }
 
         if ($this->getGroup())
