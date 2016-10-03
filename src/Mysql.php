@@ -9,7 +9,7 @@ namespace Simplon\Mysql;
 class Mysql
 {
     /**
-     * @var Mysql
+     * @var \PDO
      */
     protected $dbh;
 
@@ -575,7 +575,7 @@ class Mysql
      * @param string $query
      * @param array $conds
      *
-     * @return array|null
+     * @return mixed
      */
     public function fetchRow($query, array $conds = [])
     {
@@ -586,7 +586,7 @@ class Mysql
             return null;
         }
 
-        return (array)$response;
+        return $response;
     }
 
     /**
