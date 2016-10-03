@@ -2,12 +2,31 @@
 
 namespace Simplon\Mysql;
 
+/**
+ * Class MysqlQueryIterator
+ * @package Simplon\Mysql
+ */
 class MysqlQueryIterator implements \Iterator
 {
+    /**
+     * @var int
+     */
     protected $position;
+    /**
+     * @var \PDOStatement
+     */
     protected $pdoStatement;
+    /**
+     * @var string
+     */
     protected $fetchType;
+    /**
+     * @var int
+     */
     protected $fetchMode;
+    /**
+     * @var mixed
+     */
     protected $data;
 
     /**
