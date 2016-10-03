@@ -65,7 +65,8 @@ class Mysql
         }
         catch (\PDOException $e)
         {
-            throw new MysqlException($e->getMessage(), $e->getCode());
+            $message = str_replace($password, '********', $e->getMessage());
+            throw new MysqlException($message, $e->getCode());
         }
     }
 
