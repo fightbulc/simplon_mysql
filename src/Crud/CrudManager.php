@@ -69,7 +69,7 @@ class CrudManager
             ->getMysql()
             ->fetchRowManyCursor(
                 $builder->renderQuery(),
-                $builder->getConditions()
+                $this->removeNullValuesFromConds($builder->getConditions())
             );
     }
 
@@ -84,7 +84,7 @@ class CrudManager
             ->getMysql()
             ->fetchRow(
                 $builder->renderQuery(),
-                $builder->getConditions()
+                $this->removeNullValuesFromConds($builder->getConditions())
             );
     }
 
@@ -98,16 +98,18 @@ class CrudManager
     {
         $builder->getModel()->beforeUpdate();
 
+        $conds = [];
         $condsQuery = null;
 
         if ($builder->getConds())
         {
             $condsQuery = $this->buildCondsQuery($builder->getConds(), $builder->getCondsQuery());
+            $conds = $this->removeNullValuesFromConds($builder->getConds());
         }
 
         $this->getMysql()->update(
             $builder->getTableName(),
-            $builder->getConds(),
+            $conds,
             $builder->getData(),
             $condsQuery
         );
@@ -122,16 +124,18 @@ class CrudManager
      */
     public function delete(DeleteQueryBuilder $builder)
     {
+        $conds = [];
         $condsQuery = null;
 
         if ($builder->getConds())
         {
             $condsQuery = $this->buildCondsQuery($builder->getConds(), $builder->getCondsQuery());
+            $conds = $this->removeNullValuesFromConds($builder->getConds());
         }
 
         $this->getMysql()->delete(
             $builder->getTableName(),
-            $builder->getConds(),
+            $conds,
             $condsQuery
         );
     }
@@ -163,6 +167,11 @@ class CrudManager
         {
             $query = $key . ' = :' . $key;
 
+            if ($val === null)
+            {
+                $query = $key . ' IS NULL';
+            }
+
             if (is_array($val) === true)
             {
                 $query = $key . ' IN (:' . $key . ')';
@@ -172,5 +181,25 @@ class CrudManager
         }
 
         return join(' AND ', $condsString);
+    }
+
+    /**
+     * @param array $conds
+     *
+     * @return array
+     */
+    private function removeNullValuesFromConds(array $conds)
+    {
+        $new = [];
+
+        foreach ($conds as $key => $val)
+        {
+            if ($val !== null)
+            {
+                $new[$key] = $val;
+            }
+        }
+
+        return $new;
     }
 }
