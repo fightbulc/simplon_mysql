@@ -3,7 +3,6 @@
 namespace Simplon\Mysql;
 
 /**
- * Class Mysql
  * @package Simplon\Mysql
  */
 class Mysql
@@ -12,29 +11,27 @@ class Mysql
      * @var \PDO
      */
     protected $dbh;
-
     /**
      * @var int
      */
     protected $fetchMode;
-
     /**
      * @var \PDOStatement
      */
     protected $lastStatement;
 
     /**
-     * @param $host
-     * @param $user
-     * @param $password
-     * @param $database
+     * @param string $host
+     * @param string $user
+     * @param string $password
+     * @param string $database
      * @param int $fetchMode
      * @param string $charset
      * @param array $options
      *
      * @throws MysqlException
      */
-    public function __construct($host, $user, $password, $database, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', array $options = [])
+    public function __construct(string $host, string $user, string $password, string $database, int $fetchMode = \PDO::FETCH_ASSOC, string $charset = 'utf8', array $options = [])
     {
         try
         {
@@ -71,11 +68,11 @@ class Mysql
     }
 
     /**
-     * @param $dbh
+     * @param \PDO $dbh
      *
      * @return Mysql
      */
-    protected function setDbh($dbh)
+    protected function setDbh(\PDO $dbh): self
     {
         $this->dbh = $dbh;
 
@@ -85,7 +82,7 @@ class Mysql
     /**
      * @return \PDO
      */
-    protected function getDbh()
+    protected function getDbh(): \PDO
     {
         return $this->dbh;
     }
@@ -93,7 +90,7 @@ class Mysql
     /**
      * @return Mysql
      */
-    public function close()
+    public function close(): self
     {
         $this->dbh = null;
 
@@ -105,7 +102,7 @@ class Mysql
      *
      * @return Mysql
      */
-    protected function setFetchMode($fetchMode)
+    protected function setFetchMode(int $fetchMode): self
     {
         $this->fetchMode = $fetchMode;
 
@@ -115,9 +112,9 @@ class Mysql
     /**
      * @return int
      */
-    protected function getFetchMode()
+    protected function getFetchMode(): int
     {
-        return (int)$this->fetchMode;
+        return $this->fetchMode;
     }
 
     /**
@@ -125,7 +122,7 @@ class Mysql
      *
      * @return array
      */
-    protected function prepareErrorInfo(array $errorInfo)
+    protected function prepareErrorInfo(array $errorInfo): array
     {
         return [
             'sqlStateCode' => $errorInfo[0],
@@ -139,7 +136,7 @@ class Mysql
      *
      * @return Mysql
      */
-    protected function setLastStatement(\PDOStatement $cursor)
+    protected function setLastStatement(\PDOStatement $cursor): self
     {
         $this->lastStatement = $cursor;
 
@@ -149,7 +146,7 @@ class Mysql
     /**
      * @return \PDOStatement
      */
-    protected function getLastStatement()
+    protected function getLastStatement(): \PDOStatement
     {
         return $this->lastStatement;
     }
@@ -157,15 +154,15 @@ class Mysql
     /**
      * @return bool
      */
-    protected function hasLastStatement()
+    protected function hasLastStatement(): bool
     {
-        return $this->lastStatement ? true : false;
+        return $this->lastStatement !== null;
     }
 
     /**
      * @return Mysql
      */
-    protected function clearLastStatement()
+    protected function clearLastStatement(): self
     {
         $this->lastStatement = null;
 
@@ -178,7 +175,7 @@ class Mysql
      * @return int
      * @throws MysqlException
      */
-    protected function getParamType($paramValue)
+    protected function getParamType($paramValue): int
     {
         switch ($paramValue)
         {
@@ -210,8 +207,9 @@ class Mysql
      * @param array $params
      *
      * @return \PDOStatement
+     * @throws MysqlException
      */
-    protected function setParams(\PDOStatement $pdoStatement, array $params)
+    protected function setParams(\PDOStatement $pdoStatement, array $params): \PDOStatement
     {
         foreach ($params as $key => &$val)
         {
@@ -224,43 +222,37 @@ class Mysql
     /**
      * @param string $query
      * @param array $params
-     *
-     * @return bool
      */
-    protected function handleInCondition(&$query, &$params)
+    protected function handleInCondition(string &$query, array &$params): void
     {
-        if (empty($params))
+        if (!empty($params))
         {
-            return true;
-        }
-
-        foreach ($params as $key => $val)
-        {
-            if (is_array($val))
+            foreach ($params as $key => $val)
             {
-                $keys = [];
-
-                foreach ($val as $k => $v)
+                if (is_array($val))
                 {
-                    // new param name
-                    $keyString = ':' . $key . $k;
+                    $keys = [];
 
-                    // cache new params
-                    $keys[] = $keyString;
+                    foreach ($val as $k => $v)
+                    {
+                        // new param name
+                        $keyString = ':' . $key . $k;
 
-                    // add new params
-                    $params[$keyString] = $v;
+                        // cache new params
+                        $keys[] = $keyString;
+
+                        // add new params
+                        $params[$keyString] = $v;
+                    }
+
+                    // include new params
+                    $query = str_replace(':' . $key, join(',', $keys), $query);
+
+                    // remove actual param
+                    unset($params[$key]);
                 }
-
-                // include new params
-                $query = str_replace(':' . $key, join(',', $keys), $query);
-
-                // remove actual param
-                unset($params[$key]);
             }
         }
-
-        return true;
     }
 
     /**
@@ -270,7 +262,7 @@ class Mysql
      * @return \PDOStatement
      * @throws MysqlException
      */
-    protected function prepareSelect($query, array $conds)
+    protected function prepareSelect(string $query, array $conds): \PDOStatement
     {
         // clear last statement
         $this->clearLastStatement();
@@ -314,7 +306,7 @@ class Mysql
      * @return array
      * @throws MysqlException
      */
-    protected function prepareInsertReplace($query, array $rowsMany)
+    protected function prepareInsertReplace(string $query, array $rowsMany): array
     {
         $dbh = $this->getDbh();
         $responses = [];
@@ -362,10 +354,10 @@ class Mysql
      * @param array $conds
      * @param array $data
      *
-     * @return null|bool
+     * @return bool
      * @throws MysqlException
      */
-    protected function prepareUpdate($query, array $conds, array $data)
+    protected function prepareUpdate(string $query, array $conds, array $data): bool
     {
         // clear last statement
         $this->clearLastStatement();
@@ -402,22 +394,17 @@ class Mysql
             throw new MysqlException($errorInfo);
         }
 
-        if ($this->getRowCount() === 0)
-        {
-            return null;
-        }
-
-        return true;
+        return $this->getRowCount() === 0 ? false : true;
     }
 
     /**
      * @param string $query
      * @param array $conds
      *
-     * @return null|bool
+     * @return bool
      * @throws MysqlException
      */
-    protected function prepareDelete($query, array $conds)
+    protected function prepareDelete(string $query, array $conds): bool
     {
         // clear last statement
         $this->clearLastStatement();
@@ -451,22 +438,17 @@ class Mysql
             throw new MysqlException($errorInfo);
         }
 
-        if ($this->getRowCount() === 0)
-        {
-            return null;
-        }
-
-        return true;
+        return $this->getRowCount() === 0 ? false : true;
     }
 
     /**
-     * @return bool|int
+     * @return int
      */
-    public function getRowCount()
+    public function getRowCount(): int
     {
         if ($this->hasLastStatement() === false)
         {
-            return false;
+            return 0;
         }
 
         return $this->getLastStatement()->rowCount();
@@ -478,7 +460,7 @@ class Mysql
      * @return bool
      * @throws MysqlException
      */
-    public function executeSql($query)
+    public function executeSql(string $query): bool
     {
         $dbh = $this->getDbh();
 
@@ -505,7 +487,7 @@ class Mysql
      * @return bool
      * @throws MysqlException
      */
-    public function selectDb($dbName)
+    public function selectDb(string $dbName): bool
     {
         return $this->executeSql('use ' . $dbName);
     }
@@ -515,8 +497,9 @@ class Mysql
      * @param array $conds
      *
      * @return null|string
+     * @throws MysqlException
      */
-    public function fetchColumn($query, array $conds = [])
+    public function fetchColumn(string $query, array $conds = []): ?string
     {
         $response = $this->prepareSelect($query, $conds)->fetchColumn();
 
@@ -533,8 +516,9 @@ class Mysql
      * @param array $conds
      *
      * @return array|null
+     * @throws MysqlException
      */
-    public function fetchColumnMany($query, array $conds = [])
+    public function fetchColumnMany(string $query, array $conds = []): ?array
     {
         $responsesMany = [];
         $pdoStatment = $this->prepareSelect($query, $conds);
@@ -556,9 +540,10 @@ class Mysql
      * @param string $query
      * @param array $conds
      *
-     * @return MysqlQueryIterator|null
+     * @return null|MysqlQueryIterator
+     * @throws MysqlException
      */
-    public function fetchColumnManyCursor($query, array $conds = [])
+    public function fetchColumnManyCursor(string $query, array $conds = []): ?MysqlQueryIterator
     {
         $this->prepareSelect($query, $conds);
 
@@ -576,9 +561,10 @@ class Mysql
      * @param string $query
      * @param array $conds
      *
-     * @return mixed
+     * @return array|null
+     * @throws MysqlException
      */
-    public function fetchRow($query, array $conds = [])
+    public function fetchRow(string $query, array $conds = []): ?array
     {
         $response = $this->prepareSelect($query, $conds)->fetch($this->getFetchMode());
 
@@ -595,8 +581,9 @@ class Mysql
      * @param array $conds
      *
      * @return array|null
+     * @throws MysqlException
      */
-    public function fetchRowMany($query, array $conds = [])
+    public function fetchRowMany(string $query, array $conds = []): ?array
     {
         $responsesMany = [];
         $pdoStatment = $this->prepareSelect($query, $conds);
@@ -618,9 +605,10 @@ class Mysql
      * @param string $query
      * @param array $conds
      *
-     * @return MysqlQueryIterator|null
+     * @return null|MysqlQueryIterator
+     * @throws MysqlException
      */
-    public function fetchRowManyCursor($query, array $conds = [])
+    public function fetchRowManyCursor(string $query, array $conds = []): ?MysqlQueryIterator
     {
         $this->prepareSelect($query, $conds);
 
@@ -642,7 +630,7 @@ class Mysql
      * @return int|bool
      * @throws MysqlException
      */
-    public function insert($tableName, array $data, $insertIgnore = false)
+    public function insert(string $tableName, array $data, bool $insertIgnore = false)
     {
         if (isset($data[0]))
         {
@@ -667,7 +655,7 @@ class Mysql
      * @return array|bool
      * @throws MysqlException
      */
-    public function insertMany($tableName, array $data, $insertIgnore = false)
+    public function insertMany(string $tableName, array $data, bool $insertIgnore = false)
     {
         if (!isset($data[0]))
         {
@@ -690,8 +678,6 @@ class Mysql
         $query = str_replace(':COLUMN_NAMES', join(', ', $placeholder['column_names']), $query);
         $query = str_replace(':PARAM_NAMES', join(', ', $placeholder['param_names']), $query);
 
-        // ----------------------------------
-
         $response = $this->prepareInsertReplace($query, $data);
 
         if (empty($response))
@@ -709,7 +695,7 @@ class Mysql
      * @return array|bool
      * @throws MysqlException
      */
-    public function replace($tableName, array $data)
+    public function replace(string $tableName, array $data)
     {
         if (isset($data[0]))
         {
@@ -726,7 +712,7 @@ class Mysql
      * @return array|bool
      * @throws MysqlException
      */
-    public function replaceMany($tableName, array $data)
+    public function replaceMany(string $tableName, array $data)
     {
         if (!isset($data[0]))
         {
@@ -749,8 +735,6 @@ class Mysql
         $query = str_replace(':COLUMN_NAMES', join(', ', $placeholder['column_names']), $query);
         $query = str_replace(':PARAM_NAMES', join(', ', $placeholder['param_names']), $query);
 
-        // ----------------------------------
-
         $response = $this->prepareInsertReplace($query, $data);
 
         if (empty($response))
@@ -765,12 +749,12 @@ class Mysql
      * @param string $tableName
      * @param array $conds
      * @param array $data
-     * @param null $condsQuery
+     * @param null|string $condsQuery
      *
      * @return bool
      * @throws MysqlException
      */
-    public function update($tableName, array $conds, array $data, $condsQuery = null)
+    public function update(string $tableName, array $conds, array $data, ?string $condsQuery = null): bool
     {
         if (isset($data[0]))
         {
@@ -802,12 +786,12 @@ class Mysql
     /**
      * @param string $tableName
      * @param array $conds
-     * @param null $condsQuery
+     * @param null|string $condsQuery
      *
      * @return bool
      * @throws MysqlException
      */
-    public function delete($tableName, array $conds = [], $condsQuery = null)
+    public function delete(string $tableName, array $conds = [], ?string $condsQuery = null): bool
     {
         $query = $this->buildCondsQuery('DELETE FROM ' . $tableName . ' WHERE :CONDS', $conds, $condsQuery);
         $response = $this->prepareDelete($query, $conds);
@@ -823,11 +807,11 @@ class Mysql
     /**
      * @param string $query
      * @param array $conds
-     * @param string|null $condsQuery
+     * @param null|string $condsQuery
      *
      * @return string
      */
-    private function buildCondsQuery($query, array $conds, $condsQuery = null)
+    private function buildCondsQuery(string $query, array $conds, ?string $condsQuery = null): string
     {
         if (!empty($conds))
         {
@@ -863,7 +847,7 @@ class Mysql
      *
      * @return bool
      */
-    private function isColum($key)
+    private function isColum(string $key): bool
     {
         return substr($key, 0, 1) !== '_';
     }

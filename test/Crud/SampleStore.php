@@ -3,9 +3,7 @@
 namespace Test\Crud;
 
 use Simplon\Mysql\Crud\CrudModelInterface;
-use Simplon\Mysql\Crud\CrudManager;
-use Simplon\Mysql\Crud\CrudStoreInterface;
-use Simplon\Mysql\Mysql;
+use Simplon\Mysql\Crud\CrudStore;
 use Simplon\Mysql\MysqlException;
 use Simplon\Mysql\QueryBuilder\CreateQueryBuilder;
 use Simplon\Mysql\QueryBuilder\DeleteQueryBuilder;
@@ -13,136 +11,90 @@ use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 
 /**
- * Class SampleStore
  * @package Test\Crud
  */
-class SampleStore implements CrudStoreInterface
+class SampleStore extends CrudStore
 {
-    /**
-     * @var Mysql
-     */
-    private $mysql;
-
-    /**
-     * @var CrudManager
-     */
-    private $crudStorage;
-
-    /**
-     * @param Mysql $mysql
-     * @param CrudManager $crudStorage
-     */
-    public function __construct(Mysql $mysql, CrudManager $crudStorage)
-    {
-        $this->mysql = $mysql;
-        $this->crudStorage = $crudStorage;
-    }
-
     /**
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return 'users_user';
     }
 
     /**
-     * @return SampleModel
+     * @return CrudModelInterface
      */
-    public function getModel()
+    public function getModel(): CrudModelInterface
     {
         return new SampleModel();
     }
 
     /**
-     * @param CrudModelInterface $model
+     * @param CreateQueryBuilder $builder
      *
      * @return SampleModel
      * @throws MysqlException
      */
-    public function create(CrudModelInterface $model)
+    public function create(CreateQueryBuilder $builder): SampleModel
     {
-        return $this->crudStorage->create(
-            (new CreateQueryBuilder())
-                ->setModel($model)
-                ->setTableName($this->getTableName())
-        );
+        /** @var SampleModel $model */
+        $model = $this->crudCreate($builder);
+
+        return $model;
     }
 
     /**
-     * @param array $conds
+     * @param ReadQueryBuilder $builder
      *
-     * @return null|SampleModel[]
+     * @return SampleModel[]|null
+     * @throws MysqlException
      */
-    public function read(array $conds)
+    public function read(ReadQueryBuilder $builder): ?array
     {
-        $rows = $this->crudStorage->read(
-            (new ReadQueryBuilder())
-                ->setTableName($this->getTableName())
-                ->setConds($conds)
-        );
+        /** @var SampleModel[]|null $response */
+        $response = $this->crudRead($builder);
 
-        if ($rows === null)
-        {
-            return null;
-        }
-
-        $models = [];
-
-        foreach ($rows as $data)
-        {
-            $models[] = $this->getModel()->fromArray($data);
-        }
-
-        return $models;
+        return $response;
     }
 
     /**
-     * @param array $conds
+     * @param ReadQueryBuilder $builder
      *
      * @return null|SampleModel
+     * @throws MysqlException
      */
-    public function readOne(array $conds)
+    public function readOne(ReadQueryBuilder $builder): ?SampleModel
     {
-        $row = $this->crudStorage->readOne(
-            (new ReadQueryBuilder())
-                ->setTableName($this->getTableName())
-                ->setConds($conds)
-        );
+        /** @var SampleModel|null $response */
+        $response = $this->crudReadOne($builder);
 
-        if ($row === null)
-        {
-            return null;
-        }
-
-        return $this->getModel()->fromArray($row);
+        return $response;
     }
 
     /**
-     * @param CrudModelInterface $model
+     * @param UpdateQueryBuilder $builder
      *
      * @return SampleModel
      * @throws MysqlException
      */
-    public function update(CrudModelInterface $model)
+    public function update(UpdateQueryBuilder $builder): SampleModel
     {
-        return $this->crudStorage->update(
-            (new UpdateQueryBuilder())
-                ->setModel($model)
-                ->setTableName($this->getTableName())
-                ->setConds(['id' => $model->getId()])
-        );
+        /** @var SampleModel|null $model */
+        $model = $this->crudUpdate($builder);
+
+        return $model;
     }
 
     /**
-     * @param array $conds
+     * @param DeleteQueryBuilder $builder
+     *
+     * @return bool
+     * @throws MysqlException
      */
-    public function delete(array $conds)
+    public function delete(DeleteQueryBuilder $builder): bool
     {
-        $this->crudStorage->delete(
-            (new DeleteQueryBuilder())
-                ->setTableName($this->getTableName())
-                ->setConds($conds)
-        );
+        return $this->crudDelete($builder);
     }
 }

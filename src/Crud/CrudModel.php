@@ -3,7 +3,6 @@
 namespace Simplon\Mysql\Crud;
 
 /**
- * Class CrudModel
  * @package Simplon\Mysql\Crud
  */
 abstract class CrudModel implements CrudModelInterface
@@ -31,25 +30,32 @@ abstract class CrudModel implements CrudModelInterface
      */
     public function fromArray(array $data)
     {
-        foreach ($data as $fieldName => $val)
+        if ($data)
         {
-            // format field name
-            if (strpos($fieldName, '_') !== false)
+            foreach ($data as $fieldName => $val)
             {
-                $fieldName = self::camelCaseString($fieldName);
+                // format field name
+                if (strpos($fieldName, '_') !== false)
+                {
+                    $fieldName = self::camelCaseString($fieldName);
+                }
+
+                $setMethodName = 'set' . ucfirst($fieldName);
+
+                // set on setter
+                if (method_exists($this, $setMethodName))
+                {
+                    $this->$setMethodName($val);
+                    continue;
+                }
+
+                // set on field
+                if (property_exists($this, $fieldName))
+                {
+                    $this->$fieldName = $val;
+                    continue;
+                }
             }
-
-            $setMethodName = 'set' . ucfirst($fieldName);
-
-            // set by setter
-            if (method_exists($this, $setMethodName))
-            {
-                $this->$setMethodName($val);
-                continue;
-            }
-
-            // set directly on field
-            $this->$fieldName = $val;
         }
 
         return $this;
@@ -60,7 +66,7 @@ abstract class CrudModel implements CrudModelInterface
      *
      * @return array
      */
-    public function toArray($snakeCase = true)
+    public function toArray($snakeCase = true): array
     {
         $result = [];
 
@@ -69,6 +75,7 @@ abstract class CrudModel implements CrudModelInterface
         // render column names
         foreach ($visibleFields as $fieldName => $value)
         {
+            $propertyName = $fieldName;
             $getMethodName = 'get' . ucfirst($fieldName);
 
             // format field name
@@ -77,7 +84,7 @@ abstract class CrudModel implements CrudModelInterface
                 $fieldName = self::snakeCaseString($fieldName);
             }
 
-            // set by getter
+            // get from getter
             if (method_exists($this, $getMethodName))
             {
                 $result[$fieldName] = $this->$getMethodName();
@@ -85,7 +92,11 @@ abstract class CrudModel implements CrudModelInterface
             }
 
             // get from field
-            $result[$fieldName] = $this->$fieldName;
+            if (property_exists($this, $propertyName))
+            {
+                $result[$fieldName] = $this->$propertyName;
+                continue;
+            }
         }
 
         return $result;
@@ -96,7 +107,7 @@ abstract class CrudModel implements CrudModelInterface
      *
      * @return string
      */
-    protected static function snakeCaseString($string)
+    protected static function snakeCaseString(string $string)
     {
         return strtolower(preg_replace('/([A-Z])/', '_\\1', $string));
     }
@@ -106,7 +117,7 @@ abstract class CrudModel implements CrudModelInterface
      *
      * @return string
      */
-    protected static function camelCaseString($string)
+    protected static function camelCaseString(string $string)
     {
         $string = strtolower($string);
         $string = ucwords(str_replace('_', ' ', $string));

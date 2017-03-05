@@ -3,30 +3,29 @@
 namespace Simplon\Mysql\Crud;
 
 /**
- * Interface CrudModelInterface
  * @package Simplon\Mysql\Crud
  */
 interface CrudModelInterface
 {
     /**
-     * @return CrudModelInterface
+     * @return static
      */
     public function beforeSave();
 
     /**
-     * @return CrudModelInterface
+     * @return static
      */
     public function beforeUpdate();
 
     /**
      * @param array $data
      *
-     * @return CrudModelInterface
+     * @return static
      */
     public function fromArray(array $data);
 
     /**
      * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 }

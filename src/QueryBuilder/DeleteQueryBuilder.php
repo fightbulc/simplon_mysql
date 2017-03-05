@@ -5,7 +5,6 @@ namespace Simplon\Mysql\QueryBuilder;
 use Simplon\Mysql\Crud\CrudModelInterface;
 
 /**
- * Class DeleteQueryBuilder
  * @package Simplon\Mysql\QueryBuilder
  */
 class DeleteQueryBuilder
@@ -14,22 +13,18 @@ class DeleteQueryBuilder
      * @var CrudModelInterface
      */
     protected $model;
-
     /**
      * @var string
      */
     protected $tableName;
-
     /**
      * @var string
      */
     protected $query;
-
     /**
      * @var array
      */
     protected $conds;
-
     /**
      * @var string
      */
@@ -38,7 +33,7 @@ class DeleteQueryBuilder
     /**
      * @return CrudModelInterface
      */
-    public function getModel()
+    public function getModel(): CrudModelInterface
     {
         return $this->model;
     }
@@ -48,7 +43,7 @@ class DeleteQueryBuilder
      *
      * @return DeleteQueryBuilder
      */
-    public function setModel(CrudModelInterface $model)
+    public function setModel(CrudModelInterface $model): self
     {
         $this->model = $model;
 
@@ -58,7 +53,7 @@ class DeleteQueryBuilder
     /**
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return $this->tableName;
     }
@@ -68,7 +63,7 @@ class DeleteQueryBuilder
      *
      * @return DeleteQueryBuilder
      */
-    public function setTableName($tableName)
+    public function setTableName(string $tableName): self
     {
         $this->tableName = $tableName;
 
@@ -78,7 +73,7 @@ class DeleteQueryBuilder
     /**
      * @return string
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->query;
     }
@@ -88,7 +83,7 @@ class DeleteQueryBuilder
      *
      * @return DeleteQueryBuilder
      */
-    public function setQuery($query)
+    public function setQuery(string $query): self
     {
         $this->query = $query;
 
@@ -98,7 +93,7 @@ class DeleteQueryBuilder
     /**
      * @return array
      */
-    public function getConds()
+    public function getConds(): array
     {
         return $this->conds;
     }
@@ -108,7 +103,7 @@ class DeleteQueryBuilder
      *
      * @return DeleteQueryBuilder
      */
-    public function setConds(array $conds)
+    public function setConds(array $conds): self
     {
         $this->conds = $conds;
 
@@ -118,7 +113,7 @@ class DeleteQueryBuilder
     /**
      * @return string
      */
-    public function getCondsQuery()
+    public function getCondsQuery(): string
     {
         return $this->condsQuery;
     }
@@ -128,7 +123,7 @@ class DeleteQueryBuilder
      *
      * @return DeleteQueryBuilder
      */
-    public function setCondsQuery($condsQuery)
+    public function setCondsQuery(string $condsQuery): self
     {
         $this->condsQuery = $condsQuery;
 

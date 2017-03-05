@@ -5,46 +5,40 @@ namespace Test\Crud;
 use Simplon\Mysql\Crud\CrudModel;
 
 /**
- * Class SampleModel
  * @package Test\Crud
  */
 class SampleModel extends CrudModel
 {
+    const COLUMN_EMAIL = 'email';
+
     /**
      * @var int
      */
     protected $id;
-
     /**
      * @var string
      */
     protected $pubToken;
-
     /**
      * @var string
      */
     protected $name;
-
     /**
      * @var string
      */
     protected $email;
-
     /**
      * @var string
      */
     protected $passwordHash;
-
     /**
      * @var string
      */
     protected $timeZone;
-
     /**
      * @var int
      */
     protected $createdAt;
-
     /**
      * @var int
      */

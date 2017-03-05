@@ -2,65 +2,33 @@
 
 namespace Simplon\Mysql\Crud;
 
-use Simplon\Mysql\Mysql;
-use Simplon\Mysql\MysqlException;
+use Simplon\Mysql\QueryBuilder\CreateQueryBuilder;
+use Simplon\Mysql\QueryBuilder\DeleteQueryBuilder;
+use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
+use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 
 /**
- * Interface CrudStoreInterface
  * @package Simplon\Mysql\Crud
  */
 interface CrudStoreInterface
 {
     /**
-     * @param Mysql $mysql
-     * @param CrudManager $crudManager
-     */
-    public function __construct(Mysql $mysql, CrudManager $crudManager);
-
-    /**
      * @return string
      */
-    public function getTableName();
+    public function getTableName(): string;
 
     /**
      * @return CrudModelInterface
      */
-    public function getModel();
+    public function getModel(): CrudModelInterface;
 
-    /**
-     * @param CrudModelInterface $model
-     *
-     * @return CrudModelInterface
-     */
-    public function crudCreate(CrudModelInterface $model);
+    public function create(CreateQueryBuilder $builder);
 
-    /**
-     * @param array $conds
-     * @param array $sorting
-     *
-     * @return null|CrudModelInterface[]
-     */
-    public function crudRead(array $conds = [], array $sorting = []);
+    public function read(ReadQueryBuilder $builder);
 
-    /**
-     * @param array $conds
-     *
-     * @return null|CrudModelInterface
-     */
-    public function crudReadOne(array $conds);
+    public function readOne(ReadQueryBuilder $builder);
 
-    /**
-     * @param CrudModelInterface $model
-     * @param array $conds
-     *
-     * @return CrudModelInterface
-     */
-    public function crudUpdate(CrudModelInterface $model, array $conds);
+    public function update(UpdateQueryBuilder $builder);
 
-    /**
-     * @param array $conds
-     *
-     * @throws MysqlException
-     */
-    public function crudDelete(array $conds);
+    public function delete(DeleteQueryBuilder $builder);
 }

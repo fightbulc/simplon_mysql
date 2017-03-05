@@ -1,18 +1,17 @@
 <?php
+/**
+ * @var array $config
+ */
 
 require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/config.php';
 
-use Simplon\Mysql\Crud\CrudManager;
+use Simplon\Mysql\Mysql;
+use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
+use Test\Crud\SampleModel;
 use Test\Crud\SampleStore;
 
-$config = [
-    'server'   => '127.0.0.1',
-    'username' => 'root',
-    'password' => 'root',
-    'database' => 'pushcast_devel_app',
-];
-
-$dbh = new \Simplon\Mysql\Mysql(
+$dbh = new Mysql(
     $config['server'],
     $config['username'],
     $config['password'],
@@ -21,18 +20,25 @@ $dbh = new \Simplon\Mysql\Mysql(
 
 // ############################################
 
-$sampleStorage = new SampleStore(
-    $dbh, new CrudManager($dbh)
+$store = new SampleStore($dbh);
+
+//$sampleModel = $store->create(
+//    (new CreateQueryBuilder())->setModel(
+//        (new SampleModel())
+//            ->setName('Foo bar')
+//            ->setEmail('foo@bar.com')
+//            ->setPasswordHash('12345')
+//            ->setPubToken('XXXXX')
+//            ->setTimeZone('Europe/Berlin')
+//    )
+//);
+
+$model = $store->read(
+    (new ReadQueryBuilder())->addCondition(SampleModel::COLUMN_EMAIL, ['tino@pushcast.io', 'foo@bar.com'])
 );
 
-$sampleModel = $sampleStorage->readOne(['email' => 'tino@pushcast.io']);
+//$model = $store->readOne(
+//    (new ReadQueryBuilder())->addCondition(SampleModel::COLUMN_EMAIL, 'foo@bar.com')
+//);
 
-var_dump($sampleModel);
-echo '<hr>';
-
-$sampleModel = $sampleStorage->update(
-    $sampleModel->setName('FOO BAR2')
-);
-
-var_dump($sampleModel);
-echo '<hr>';
+var_dump($model);
