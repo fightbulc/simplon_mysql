@@ -11,6 +11,8 @@ __Note:__ Version 1.x will break when it comes to CRUD. Changed a lot here. Will
 
 # Simplon/Mysql
 
+!! NOTE: 2.0 is experimental, works only with PHP 7.1+ and works with `QueryBuilder` !!
+
 -------------------------------------------------
 
 1. [__Installing__](#1-installing)  
