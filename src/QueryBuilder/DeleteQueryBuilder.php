@@ -24,7 +24,7 @@ class DeleteQueryBuilder
     /**
      * @var array
      */
-    protected $conds;
+    protected $conditions;
     /**
      * @var string
      */
@@ -93,27 +93,40 @@ class DeleteQueryBuilder
     /**
      * @return array
      */
-    public function getConds(): array
+    public function getConditions(): array
     {
-        return $this->conds;
+        return $this->conditions;
     }
 
     /**
-     * @param array $conds
+     * @param string $key
+     * @param mixed $val
      *
      * @return DeleteQueryBuilder
      */
-    public function setConds(array $conds): self
+    public function addCondition(string $key, $val): self
     {
-        $this->conds = $conds;
+        $this->conditions[$key] = $val;
 
         return $this;
     }
 
     /**
-     * @return string
+     * @param array $conditions
+     *
+     * @return DeleteQueryBuilder
      */
-    public function getCondsQuery(): string
+    public function setConditions(array $conditions): self
+    {
+        $this->conditions = $conditions;
+
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCondsQuery(): ?string
     {
         return $this->condsQuery;
     }

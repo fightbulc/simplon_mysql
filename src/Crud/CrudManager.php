@@ -113,10 +113,10 @@ class CrudManager
         $conds = [];
         $condsQuery = null;
 
-        if ($builder->getConds())
+        if ($builder->getConditions())
         {
-            $condsQuery = $this->buildCondsQuery($builder->getConds(), $builder->getCondsQuery());
-            $conds = $this->removeNullValuesFromConds($builder->getConds());
+            $condsQuery = $this->buildCondsQuery($builder->getConditions(), $builder->getCondsQuery());
+            $conds = $this->removeNullValuesFromConds($builder->getConditions());
         }
 
         $this->getMysql()->update(
@@ -141,10 +141,10 @@ class CrudManager
         $conds = [];
         $condsQuery = null;
 
-        if ($builder->getConds())
+        if ($builder->getConditions())
         {
-            $condsQuery = $this->buildCondsQuery($builder->getConds(), $builder->getCondsQuery());
-            $conds = $this->removeNullValuesFromConds($builder->getConds());
+            $condsQuery = $this->buildCondsQuery($builder->getConditions(), $builder->getCondsQuery());
+            $conds = $this->removeNullValuesFromConds($builder->getConditions());
         }
 
         return $this->getMysql()->delete($builder->getTableName(), $conds, $condsQuery);

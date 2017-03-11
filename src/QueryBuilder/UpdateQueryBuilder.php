@@ -24,7 +24,7 @@ class UpdateQueryBuilder
     /**
      * @var array
      */
-    protected $conds;
+    protected $conditions;
     /**
      * @var string
      */
@@ -95,11 +95,24 @@ class UpdateQueryBuilder
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getConds(): array
+    public function getConditions(): ?array
     {
-        return $this->conds;
+        return $this->conditions;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $val
+     *
+     * @return UpdateQueryBuilder
+     */
+    public function addCondition(string $key, $val): self
+    {
+        $this->conditions[$key] = $val;
+
+        return $this;
     }
 
     /**
@@ -107,17 +120,17 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setConds(array $conds): self
+    public function setConditions(array $conds): self
     {
-        $this->conds = $conds;
+        $this->conditions = $conds;
 
         return $this;
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getCondsQuery(): string
+    public function getCondsQuery(): ?string
     {
         return $this->condsQuery;
     }
