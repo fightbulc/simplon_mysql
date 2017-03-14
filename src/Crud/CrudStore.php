@@ -41,13 +41,18 @@ abstract class CrudStore implements CrudStoreInterface
     }
 
     /**
-     * @param ReadQueryBuilder $builder
+     * @param ReadQueryBuilder|null $builder
      *
      * @return CrudModelInterface[]|null
      * @throws MysqlException
      */
-    protected function crudRead(ReadQueryBuilder $builder): ?array
+    protected function crudRead(?ReadQueryBuilder $builder = null): ?array
     {
+        if (!$builder)
+        {
+            $builder = new ReadQueryBuilder();
+        }
+
         $response = $this->crudManager->read(
             $builder->setFrom($this->getTableName())
         );
