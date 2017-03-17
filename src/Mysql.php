@@ -10,81 +10,22 @@ class Mysql
     /**
      * @var \PDO
      */
-    protected $dbh;
+    protected $pdo;
     /**
      * @var int
      */
-    protected $fetchMode;
+    protected $fetchMode = \PDO::FETCH_ASSOC;
     /**
      * @var \PDOStatement
      */
     protected $lastStatement;
 
     /**
-     * @param string $host
-     * @param string $user
-     * @param string $password
-     * @param string $database
-     * @param int $fetchMode
-     * @param string $charset
-     * @param array $options
-     *
-     * @throws MysqlException
+     * @param \PDO $pdo
      */
-    public function __construct(string $host, string $user, string $password, string $database, int $fetchMode = \PDO::FETCH_ASSOC, string $charset = 'utf8', array $options = [])
+    public function __construct(\PDO $pdo)
     {
-        try
-        {
-            // use host
-            $dns = 'mysql:host=' . $host;
-
-            if (isset($options['port']))
-            {
-                $dns .= ';port=' . $options['port'];
-            }
-
-            // use unix socket
-            if (isset($options['unixSocket']))
-            {
-                $dns = 'mysql:unix_socket=' . $options['unixSocket'];
-            }
-
-            $dns .= ';dbname=' . $database;
-            $dns .= ';charset=' . $charset;
-
-            // ------------------------------
-
-            // create PDO instance
-            $this->setDbh(new \PDO($dns, $user, $password));
-
-            // set fetchMode
-            $this->setFetchMode($fetchMode);
-        }
-        catch (\PDOException $e)
-        {
-            $message = str_replace($password, '********', $e->getMessage());
-            throw new MysqlException($message, $e->getCode());
-        }
-    }
-
-    /**
-     * @param \PDO $dbh
-     *
-     * @return Mysql
-     */
-    protected function setDbh(\PDO $dbh): self
-    {
-        $this->dbh = $dbh;
-
-        return $this;
-    }
-
-    /**
-     * @return \PDO
-     */
-    protected function getDbh(): \PDO
-    {
-        return $this->dbh;
+        $this->pdo = $pdo;
     }
 
     /**
@@ -92,7 +33,7 @@ class Mysql
      */
     public function close(): self
     {
-        $this->dbh = null;
+        $this->pdo = null;
 
         return $this;
     }
@@ -102,11 +43,19 @@ class Mysql
      *
      * @return Mysql
      */
-    protected function setFetchMode(int $fetchMode): self
+    public function setFetchMode(int $fetchMode): self
     {
         $this->fetchMode = $fetchMode;
 
         return $this;
+    }
+
+    /**
+     * @return \PDO
+     */
+    protected function getPdo(): \PDO
+    {
+        return $this->pdo;
     }
 
     /**
@@ -271,7 +220,7 @@ class Mysql
         $this->handleInCondition($query, $conds);
 
         // set query
-        $pdoStatement = $this->getDbh()->prepare($query);
+        $pdoStatement = $this->getPdo()->prepare($query);
 
         // bind named params
         $pdoStatement = $this->setParams($pdoStatement, $conds);
@@ -308,7 +257,7 @@ class Mysql
      */
     protected function prepareInsertReplace(string $query, array $rowsMany): array
     {
-        $dbh = $this->getDbh();
+        $dbh = $this->getPdo();
         $responses = [];
 
         // clear last statement
@@ -366,7 +315,7 @@ class Mysql
         $this->handleInCondition($query, $conds);
 
         // set query
-        $pdoStatement = $this->getDbh()->prepare($query);
+        $pdoStatement = $this->getPdo()->prepare($query);
 
         // bind conds params
         $pdoStatement = $this->setParams($pdoStatement, $conds);
@@ -413,7 +362,7 @@ class Mysql
         $this->handleInCondition($query, $conds);
 
         // set query
-        $pdoStatement = $this->getDbh()->prepare($query);
+        $pdoStatement = $this->getPdo()->prepare($query);
 
         // bind conds params
         $pdoStatement = $this->setParams($pdoStatement, $conds);
@@ -462,7 +411,7 @@ class Mysql
      */
     public function executeSql(string $query): bool
     {
-        $dbh = $this->getDbh();
+        $dbh = $this->getPdo();
 
         $response = $dbh->exec($query);
 

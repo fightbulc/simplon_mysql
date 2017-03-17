@@ -1,20 +1,16 @@
 <?php
+/**
+ * @var array $config
+ */
+
+use Simplon\Mysql\Mysql;
+use Simplon\Mysql\PDOConnector;
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/config.php';
 
-$config = [
-    'server'   => 'localhost',
-    'username' => 'rootuser',
-    'password' => 'rootuser',
-    'database' => 'beatguide_devel_service',
-];
-
-$dbh = new \Simplon\Mysql\Mysql(
-    $config['server'],
-    $config['username'],
-    $config['password'],
-    $config['database']
-);
+$pdoConnector = new PDOConnector($config['server'], $config['username'], $config['password'], $config['database']);
+$dbh = new Mysql($pdoConnector->connect());
 
 // ############################################
 

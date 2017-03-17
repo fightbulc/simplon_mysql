@@ -4,19 +4,16 @@
  */
 
 require __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/config.php';
+require __DIR__ . '/../config.php';
 
 use Simplon\Mysql\Mysql;
+use Simplon\Mysql\PDOConnector;
 use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 use Test\Crud\SampleModel;
 use Test\Crud\SampleStore;
 
-$dbh = new Mysql(
-    $config['server'],
-    $config['username'],
-    $config['password'],
-    $config['database']
-);
+$pdoConnector = new PDOConnector($config['server'], $config['username'], $config['password'], $config['database']);
+$dbh = new Mysql($pdoConnector->connect());
 
 // ############################################
 
