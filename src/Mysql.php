@@ -719,19 +719,28 @@ class Mysql
         return $this->replaceMany($tableName, [$data]);
     }
 
+    /**
+     * @return bool
+     */
     public function beginTransaction()
     {
-        $this->dbh->beginTransaction();
+        return $this->dbh->beginTransaction();
     }
 
+    /**
+     * @return bool
+     */
     public function commit()
     {
-        $this->dbh->commit();
+        return $this->dbh->commit();
     }
 
+    /**
+     * @return bool
+     */
     public function rollback()
     {
-        $this->dbh->rollBack();
+        return $this->dbh->rollBack();
     }
 
     /**
