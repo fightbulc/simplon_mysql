@@ -30,11 +30,13 @@ class Mysql
      * @param $database
      * @param int $fetchMode
      * @param string $charset
+     * @param array $pdo_options
      * @param array $options
      *
      * @throws MysqlException
      */
-    public function __construct($host, $user, $password, $database, $fetchMode = \PDO::FETCH_ASSOC, $charset = 'utf8', array $options = [])
+    public function __construct($host, $user, $password, $database, $fetchMode = \PDO::FETCH_ASSOC,
+                                $charset = 'utf8', array $pdo_options = array(), array $options = [])
     {
         try
         {
@@ -68,6 +70,15 @@ class Mysql
             $message = str_replace($password, '********', $e->getMessage());
             throw new MysqlException($message, $e->getCode());
         }
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    public function setAttribute($key, $value)
+    {
+        $this->dbh->setAttribute($key, $value);
     }
 
     /**
