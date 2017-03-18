@@ -132,6 +132,30 @@ class Mysql
     }
 
     /**
+     * @return bool
+     */
+    public function beginTransaction()
+    {
+        return $this->dbh->beginTransaction();
+    }
+
+    /**
+     * @return bool
+     */
+    public function commit()
+    {
+        return $this->dbh->commit();
+    }
+
+    /**
+     * @return bool
+     */
+    public function rollback()
+    {
+        return $this->dbh->rollBack();
+    }
+
+    /**
      * @param string $query
      * @param array $conds
      *
