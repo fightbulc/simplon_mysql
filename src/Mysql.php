@@ -134,7 +134,7 @@ class Mysql
     /**
      * @return bool
      */
-    public function beginTransaction()
+    public function transactionBegin()
     {
         return $this->dbh->beginTransaction();
     }
@@ -142,7 +142,7 @@ class Mysql
     /**
      * @return bool
      */
-    public function commit()
+    public function transactionCommit()
     {
         return $this->dbh->commit();
     }
@@ -150,7 +150,7 @@ class Mysql
     /**
      * @return bool
      */
-    public function rollback()
+    public function transactionRollback()
     {
         return $this->dbh->rollBack();
     }

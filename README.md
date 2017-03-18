@@ -25,6 +25,7 @@ __Note:__ Version 1.x will break when it comes to CRUD. Changed a lot here. Will
 4.4. Replace  
 4.5. Delete  
 4.6. Execute  
+4.7. Transactions    
 5. [__Usage: SqlManager__](#5-usage-sqlmanager)  
 5.1. Query  
 5.2. Insert  
@@ -394,6 +395,24 @@ This method is ment for calls which do not require any parameters such as ```TRU
 $result = $dbConn->executeSql('TRUNCATE names');
 
 var_dump($result); // true
+```
+
+-------------------------------------------------
+
+### 4.7. Transaction
+
+You can run `transactions` by using the following methods: 
+
+```php
+$dbConn->transactionBegin();
+
+// some sql e.g. inserts etc.
+
+$dbConn->transactionCommit();
+
+// upps! if we made a mistake we can rollback
+
+$dbConn->transactionRollback();
 ```
 
 -------------------------------------------------
