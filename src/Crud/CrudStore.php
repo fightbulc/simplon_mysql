@@ -161,9 +161,11 @@ abstract class CrudStore implements CrudStoreInterface
             );
 
             $this->runBehaviour($model, $this->afterUpdateBehaviour);
+
+            return $model;
         }
 
-        return $model;
+        return $builder->getModel();
     }
 
     /**
