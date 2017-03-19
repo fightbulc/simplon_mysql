@@ -56,7 +56,13 @@ class PDOConnector
             if (!$this->pdo)
             {
                 $dns = $this->buildDns($this->host, $this->database, $charset, $options);
-                $this->pdo = new \PDO($dns, $this->user, $this->password);
+
+                if (empty($options['pdo']))
+                {
+                    $options['pdo'] = [];
+                }
+
+                $this->pdo = new \PDO($dns, $this->user, $this->password, $options['pdo']);
             }
 
             return $this->pdo;
