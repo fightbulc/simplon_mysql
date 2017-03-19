@@ -18,6 +18,18 @@ abstract class CrudStore implements CrudStoreInterface
      * @var CrudManager
      */
     private $crudManager;
+    /**
+     * @var null|callable
+     */
+    private $afterCreateBehaviour;
+    /**
+     * @var null|callable
+     */
+    private $afterUpdateBehaviour;
+    /**
+     * @var null|callable
+     */
+    private $afterDeleteBehaviour;
 
     /**
      * @param Mysql $mysql
@@ -28,6 +40,42 @@ abstract class CrudStore implements CrudStoreInterface
     }
 
     /**
+     * @param callable $callable
+     *
+     * @return static
+     */
+    public function setAfterCreateBehaviour(callable $callable)
+    {
+        $this->afterCreateBehaviour = $callable;
+
+        return $this;
+    }
+
+    /**
+     * @param callable $callable
+     *
+     * @return static
+     */
+    public function setAfterUpdateBehaviour(callable $callable)
+    {
+        $this->afterUpdateBehaviour = $callable;
+
+        return $this;
+    }
+
+    /**
+     * @param callable $callable
+     *
+     * @return static
+     */
+    public function setAfterDeleteBehaviour(callable $callable)
+    {
+        $this->afterDeleteBehaviour = $callable;
+
+        return $this;
+    }
+
+    /**
      * @param CreateQueryBuilder $builder
      *
      * @return CrudModelInterface
@@ -35,9 +83,13 @@ abstract class CrudStore implements CrudStoreInterface
      */
     protected function crudCreate(CreateQueryBuilder $builder): CrudModelInterface
     {
-        return $this->crudManager->create(
+        $model = $this->crudManager->create(
             $builder->setTableName($this->getTableName())
         );
+
+        $this->runBehaviour($model, $this->afterCreateBehaviour);
+
+        return $model;
     }
 
     /**
@@ -100,9 +152,13 @@ abstract class CrudStore implements CrudStoreInterface
      */
     protected function crudUpdate(UpdateQueryBuilder $builder): CrudModelInterface
     {
-        return $this->crudManager->update(
+        $model = $this->crudManager->update(
             $builder->setTableName($this->getTableName())
         );
+
+        $this->runBehaviour($model, $this->afterUpdateBehaviour);
+
+        return $model;
     }
 
     /**
@@ -113,8 +169,27 @@ abstract class CrudStore implements CrudStoreInterface
      */
     protected function crudDelete(DeleteQueryBuilder $builder): bool
     {
-        return $this->crudManager->delete(
+        $response = $this->crudManager->delete(
             $builder->setTableName($this->getTableName())
         );
+
+        if ($response)
+        {
+            $this->runBehaviour($builder->getModel(), $this->afterDeleteBehaviour);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param CrudModelInterface $model
+     * @param null|callable $behaviour
+     */
+    private function runBehaviour(CrudModelInterface $model, ?callable $behaviour = null): void
+    {
+        if ($behaviour)
+        {
+            $behaviour($model);
+        }
     }
 }
