@@ -57,8 +57,12 @@ class Mysql
 
             // ------------------------------
 
-            // create PDO instance
-            $this->setDbh(new \PDO($dns, $user, $password));
+            if (empty($options['pdo']))
+            {
+                $options['pdo'] = [];
+            }
+
+            $this->setDbh(new \PDO($dns, $user, $password, $options['pdo']));
 
             // set fetchMode
             $this->setFetchMode($fetchMode);
