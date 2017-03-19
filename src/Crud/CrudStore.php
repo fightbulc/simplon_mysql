@@ -153,7 +153,9 @@ abstract class CrudStore implements CrudStoreInterface
     protected function crudUpdate(UpdateQueryBuilder $builder): CrudModelInterface
     {
         $model = $this->crudManager->update(
-            $builder->setTableName($this->getTableName())
+            $this->buildIdConditionFallback(
+                $builder->setTableName($this->getTableName())
+            )
         );
 
         $this->runBehaviour($model, $this->afterUpdateBehaviour);
@@ -170,7 +172,9 @@ abstract class CrudStore implements CrudStoreInterface
     protected function crudDelete(DeleteQueryBuilder $builder): bool
     {
         $response = $this->crudManager->delete(
-            $builder->setTableName($this->getTableName())
+            $this->buildIdConditionFallback(
+                $builder->setTableName($this->getTableName())
+            )
         );
 
         if ($response)
@@ -179,6 +183,24 @@ abstract class CrudStore implements CrudStoreInterface
         }
 
         return $response;
+    }
+
+    /**
+     * @param UpdateQueryBuilder|DeleteQueryBuilder $builder
+     *
+     * @return UpdateQueryBuilder|DeleteQueryBuilder
+     */
+    private function buildIdConditionFallback($builder)
+    {
+        if (!$builder->getConditions())
+        {
+            if (method_exists($builder->getModel(), 'getId'))
+            {
+                $builder->addCondition('id', $builder->getModel()->getId());
+            }
+        }
+
+        return $builder;
     }
 
     /**

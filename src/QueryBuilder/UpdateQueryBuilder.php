@@ -22,7 +22,7 @@ class UpdateQueryBuilder
      */
     protected $query;
     /**
-     * @var array
+     * @var null|array
      */
     protected $conditions;
     /**

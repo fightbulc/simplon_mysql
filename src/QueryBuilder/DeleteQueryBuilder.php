@@ -22,7 +22,7 @@ class DeleteQueryBuilder
      */
     protected $query;
     /**
-     * @var array
+     * @var null|array
      */
     protected $conditions;
     /**
@@ -91,9 +91,9 @@ class DeleteQueryBuilder
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getConditions(): array
+    public function getConditions(): ?array
     {
         return $this->conditions;
     }
