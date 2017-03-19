@@ -152,13 +152,16 @@ abstract class CrudStore implements CrudStoreInterface
      */
     protected function crudUpdate(UpdateQueryBuilder $builder): CrudModelInterface
     {
-        $model = $this->crudManager->update(
-            $this->buildIdConditionFallback(
-                $builder->setTableName($this->getTableName())
-            )
-        );
+        if ($builder->getModel()->isChanged())
+        {
+            $model = $this->crudManager->update(
+                $this->buildIdConditionFallback(
+                    $builder->setTableName($this->getTableName())
+                )
+            );
 
-        $this->runBehaviour($model, $this->afterUpdateBehaviour);
+            $this->runBehaviour($model, $this->afterUpdateBehaviour);
+        }
 
         return $model;
     }

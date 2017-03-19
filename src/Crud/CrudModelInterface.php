@@ -18,6 +18,11 @@ interface CrudModelInterface
     public function beforeUpdate();
 
     /**
+     * @return bool
+     */
+    public function isChanged(): bool;
+
+    /**
      * @param array $data
      *
      * @return static

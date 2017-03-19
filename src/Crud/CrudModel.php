@@ -8,6 +8,11 @@ namespace Simplon\Mysql\Crud;
 abstract class CrudModel implements CrudModelInterface
 {
     /**
+     * @var string
+     */
+    private $internalChecksum;
+
+    /**
      * @return static
      */
     public function beforeSave()
@@ -21,6 +26,14 @@ abstract class CrudModel implements CrudModelInterface
     public function beforeUpdate()
     {
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChanged(): bool
+    {
+        return $this->internalChecksum !== $this->calcMd5($this->toArray());
     }
 
     /**
@@ -56,6 +69,9 @@ abstract class CrudModel implements CrudModelInterface
                     continue;
                 }
             }
+
+            // lets create checksum here
+            $this->internalChecksum = $this->calcMd5($this->toArray());
         }
 
         return $this;
@@ -94,8 +110,11 @@ abstract class CrudModel implements CrudModelInterface
             // get from field
             if (property_exists($this, $propertyName))
             {
-                $result[$fieldName] = $this->$propertyName;
-                continue;
+                if ($propertyName !== 'internalChecksum')
+                {
+                    $result[$fieldName] = $this->$propertyName;
+                    continue;
+                }
             }
         }
 
@@ -123,5 +142,17 @@ abstract class CrudModel implements CrudModelInterface
         $string = ucwords(str_replace('_', ' ', $string));
 
         return lcfirst(str_replace(' ', '', $string));
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return string
+     */
+    private function calcMd5(array $data): string
+    {
+        ksort($data);
+
+        return md5(json_encode($data));
     }
 }
