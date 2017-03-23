@@ -513,29 +513,32 @@ class Mysql
      */
     protected function getParamType($paramValue): int
     {
-        switch ($paramValue)
+        if (is_null($paramValue))
         {
-            case is_int($paramValue):
-                return \PDO::PARAM_INT;
-
-            case is_bool($paramValue):
-                return \PDO::PARAM_INT;
-
-            case is_string($paramValue):
-                return \PDO::PARAM_STR;
-
-            case is_float($paramValue):
-                return \PDO::PARAM_STR;
-
-            case is_double($paramValue):
-                return \PDO::PARAM_STR;
-
-            case is_null($paramValue):
-                return \PDO::PARAM_NULL;
-
-            default:
-                throw new MysqlException("Invalid param type: {$paramValue} with type {gettype($paramValue)}");
+            return \PDO::PARAM_NULL;
         }
+        elseif (is_int($paramValue))
+        {
+            return \PDO::PARAM_INT;
+        }
+        elseif (is_bool($paramValue))
+        {
+            return \PDO::PARAM_INT;
+        }
+        elseif (is_string($paramValue))
+        {
+            return \PDO::PARAM_STR;
+        }
+        elseif (is_float($paramValue))
+        {
+            return \PDO::PARAM_STR;
+        }
+        elseif (is_double($paramValue))
+        {
+            return \PDO::PARAM_STR;
+        }
+
+        throw new MysqlException("Invalid param type: {$paramValue} with type {gettype($paramValue)}");
     }
 
     /**
@@ -545,7 +548,8 @@ class Mysql
      * @return \PDOStatement
      * @throws MysqlException
      */
-    protected function setParams(\PDOStatement $pdoStatement, array $params): \PDOStatement
+    protected
+    function setParams(\PDOStatement $pdoStatement, array $params): \PDOStatement
     {
         foreach ($params as $key => &$val)
         {
@@ -559,7 +563,8 @@ class Mysql
      * @param string $query
      * @param array $params
      */
-    protected function handleInCondition(string &$query, array &$params): void
+    protected
+    function handleInCondition(string &$query, array &$params): void
     {
         if (!empty($params))
         {
@@ -598,7 +603,8 @@ class Mysql
      * @return \PDOStatement
      * @throws MysqlException
      */
-    protected function prepareSelect(string $query, array $conds): \PDOStatement
+    protected
+    function prepareSelect(string $query, array $conds): \PDOStatement
     {
         // clear last statement
         $this->clearLastStatement();
@@ -642,7 +648,8 @@ class Mysql
      * @return array
      * @throws MysqlException
      */
-    protected function prepareInsertReplace(string $query, array $rowsMany): array
+    protected
+    function prepareInsertReplace(string $query, array $rowsMany): array
     {
         $dbh = $this->getPdo();
         $responses = [];
@@ -693,7 +700,8 @@ class Mysql
      * @return bool
      * @throws MysqlException
      */
-    protected function prepareUpdate(string $query, array $conds, array $data): bool
+    protected
+    function prepareUpdate(string $query, array $conds, array $data): bool
     {
         // clear last statement
         $this->clearLastStatement();
@@ -740,7 +748,8 @@ class Mysql
      * @return bool
      * @throws MysqlException
      */
-    protected function prepareDelete(string $query, array $conds): bool
+    protected
+    function prepareDelete(string $query, array $conds): bool
     {
         // clear last statement
         $this->clearLastStatement();
@@ -784,7 +793,8 @@ class Mysql
      *
      * @return string
      */
-    private function buildCondsQuery(string $query, array $conds, ?string $condsQuery = null): string
+    private
+    function buildCondsQuery(string $query, array $conds, ?string $condsQuery = null): string
     {
         if (!empty($conds))
         {
@@ -820,7 +830,8 @@ class Mysql
      *
      * @return bool
      */
-    private function isColum(string $key): bool
+    private
+    function isColum(string $key): bool
     {
         return substr($key, 0, 1) !== '_';
     }
