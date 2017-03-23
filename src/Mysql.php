@@ -575,29 +575,32 @@ class Mysql
      */
     protected function getParamType($paramValue)
     {
-        switch ($paramValue)
+        if (is_null($paramValue))
         {
-            case is_int($paramValue):
-                return \PDO::PARAM_INT;
-
-            case is_bool($paramValue):
-                return \PDO::PARAM_INT;
-
-            case is_string($paramValue):
-                return \PDO::PARAM_STR;
-
-            case is_float($paramValue):
-                return \PDO::PARAM_STR;
-
-            case is_double($paramValue):
-                return \PDO::PARAM_STR;
-
-            case is_null($paramValue):
-                return \PDO::PARAM_NULL;
-
-            default:
-                throw new MysqlException("Invalid param type: {$paramValue} with type {gettype($paramValue)}");
+            return \PDO::PARAM_NULL;
         }
+        elseif (is_int($paramValue))
+        {
+            return \PDO::PARAM_INT;
+        }
+        elseif (is_bool($paramValue))
+        {
+            return \PDO::PARAM_INT;
+        }
+        elseif (is_string($paramValue))
+        {
+            return \PDO::PARAM_STR;
+        }
+        elseif (is_float($paramValue))
+        {
+            return \PDO::PARAM_STR;
+        }
+        elseif (is_double($paramValue))
+        {
+            return \PDO::PARAM_STR;
+        }
+
+        throw new MysqlException("Invalid param type: {$paramValue} with type {gettype($paramValue)}");
     }
 
     /**
