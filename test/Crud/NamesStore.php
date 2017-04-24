@@ -13,14 +13,14 @@ use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 /**
  * @package Test\Crud
  */
-class SampleStore extends CrudStore
+class NamesStore extends CrudStore
 {
     /**
      * @return string
      */
     public function getTableName(): string
     {
-        return 'users_user';
+        return 'names';
     }
 
     /**
@@ -28,18 +28,18 @@ class SampleStore extends CrudStore
      */
     public function getModel(): CrudModelInterface
     {
-        return new SampleModel();
+        return new NameModel();
     }
 
     /**
      * @param CreateQueryBuilder $builder
      *
-     * @return SampleModel
+     * @return NameModel
      * @throws MysqlException
      */
-    public function create(CreateQueryBuilder $builder): SampleModel
+    public function create(CreateQueryBuilder $builder): NameModel
     {
-        /** @var SampleModel $model */
+        /** @var NameModel $model */
         $model = $this->crudCreate($builder);
 
         return $model;
@@ -48,12 +48,12 @@ class SampleStore extends CrudStore
     /**
      * @param ReadQueryBuilder $builder
      *
-     * @return SampleModel[]|null
+     * @return NameModel[]|null
      * @throws MysqlException
      */
     public function read(ReadQueryBuilder $builder): ?array
     {
-        /** @var SampleModel[]|null $response */
+        /** @var NameModel[]|null $response */
         $response = $this->crudRead($builder);
 
         return $response;
@@ -62,12 +62,12 @@ class SampleStore extends CrudStore
     /**
      * @param ReadQueryBuilder $builder
      *
-     * @return null|SampleModel
+     * @return null|NameModel
      * @throws MysqlException
      */
-    public function readOne(ReadQueryBuilder $builder): ?SampleModel
+    public function readOne(ReadQueryBuilder $builder): ?NameModel
     {
-        /** @var SampleModel|null $response */
+        /** @var NameModel|null $response */
         $response = $this->crudReadOne($builder);
 
         return $response;
@@ -76,12 +76,12 @@ class SampleStore extends CrudStore
     /**
      * @param UpdateQueryBuilder $builder
      *
-     * @return SampleModel
+     * @return NameModel
      * @throws MysqlException
      */
-    public function update(UpdateQueryBuilder $builder): SampleModel
+    public function update(UpdateQueryBuilder $builder): NameModel
     {
-        /** @var SampleModel|null $model */
+        /** @var NameModel|null $model */
         $model = $this->crudUpdate($builder);
 
         return $model;
@@ -96,5 +96,23 @@ class SampleStore extends CrudStore
     public function delete(DeleteQueryBuilder $builder): bool
     {
         return $this->crudDelete($builder);
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return null|NameModel
+     * @throws MysqlException
+     */
+    public function customMethod(int $id): ?NameModel
+    {
+        $query = 'SELECT * FROM ' . $this->getTableName() . ' WHERE id=:id';
+
+        if ($result = $this->getCrudManager()->getMysql()->fetchRow($query, ['id' => $id]))
+        {
+            return (new NameModel())->fromArray($result);
+        }
+
+        return null;
     }
 }

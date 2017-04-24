@@ -40,6 +40,14 @@ abstract class CrudStore implements CrudStoreInterface
     }
 
     /**
+     * @return CrudManager
+     */
+    public function getCrudManager(): CrudManager
+    {
+        return $this->crudManager;
+    }
+
+    /**
      * @param callable $callable
      *
      * @return static

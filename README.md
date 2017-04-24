@@ -1,5 +1,3 @@
-__Note:__ Version 1.x will break when it comes to CRUD. Changed a lot here. Will try to bring documentation up to speed.
-
 <pre>
      _                 _                                         _ 
  ___(_)_ __ ___  _ __ | | ___  _ __    _ __ ___  _   _ ___  __ _| |
@@ -14,7 +12,7 @@ __Note:__ Version 1.x will break when it comes to CRUD. Changed a lot here. Will
 -------------------------------------------------
 
 1. [__Installing__](#1-installing)  
-2. [__Direct vs. SqlManager__](#2-direct-vs-sqlmanager)  
+2. [__Direct vs. CRUD__](#2-direct-vs-crud)  
 3. [__Setup connection__](#3-setup-connection)  
 4. [__Usage: Direct access__](#4-usage-direct-access)  
 4.1. Query  
@@ -23,30 +21,25 @@ __Note:__ Version 1.x will break when it comes to CRUD. Changed a lot here. Will
 4.4. Replace  
 4.5. Delete  
 4.6. Execute  
-5. [__Usage: SqlManager__](#5-usage-sqlmanager)  
-5.1. Query  
-5.2. Insert  
-5.3. Update  
-5.4. Replace    
-5.5. Delete  
-5.6. Execute  
+5. [__Usage: CRUD__](#5-usage-crud)  
+5.1. Setup store  
+5.2. Setup model  
+5.3. Connect to store  
+5.4. Query  
+5.5. Insert  
+5.6. Update  
+5.7. Delete  
+5.8. Custom queries  
 6. [__IN() Clause Handling__](#6-in-clause-handling)  
 6.1. The issue  
 6.2. The solution  
-7. [__CRUD Helper__](#7-crud-helper)  
-7.1. Intro  
-7.2. Requirements  
-7.3. Flexibility/Restrictions  
-7.4. Conclusion  
-7.5. Examples  
-7.6. Example Custom Vo
-8. [__Exceptions__](#8-exceptions)
+7. [__Exceptions__](#7-exceptions)
 
 -------------------------------------------------
 
 ### Dependecies
 
-- PHP >= 5.3
+- PHP >= 7.1
 - PDO
 
 -------------------------------------------------
@@ -65,25 +58,30 @@ Easy install via composer. Still no idea what composer is? Inform yourself [here
 
 -------------------------------------------------
 
-## 2. Direct vs. SqlManager
+## 2. Direct vs. CRUD
 
 I implemented two different ways of interacting with MySQL. The first option is the usual one which interacts directly with the database. Following a straight forward example to show you what I mean:
 
 ```php
-$dbConn->fetchRow('SELECT * FROM names WHERE name = :name', array('name' => 'Peter'));
+$data = $dbConn->fetchRow('SELECT * FROM names WHERE name = :name', ['name' => 'Peter']);
+
+//
+// $data is an array with our result
+//
 ```
 
-In constrast to the prior method the SqlManager uses a [Builder Pattern](http://sourcemaking.com/design_patterns/builder) to deal with the database. What advantage does that offer? Well, in case that we want to do more things with our query before sending it off we encapsule it as a ```Builder Pattern```. From there on we could pass it throughout our application to add more data or alike before sending the query finally off to the database. Again, a quick example of how we would rewrite the above ```direct query```:
+In constrast to the prior method CRUD is more structured with `store` and `model`. Further, it uses [Builder Patterns](http://sourcemaking.com/design_patterns/builder) to interact with the database. A quick example of how we would rewrite the above ```direct query```:
   
 ```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+$store = new NamesStore($dbConn);
 
-$sqlBuilder
-    ->setQuery('SELECT * FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
+$model = $store->read(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
+);
 
-$sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
-$sqlManager->fetchRow($sqlBuilder);
+//
+// $model is a class with our result data abstracted
+//
 ```
 
 -------------------------------------------------
@@ -93,49 +91,21 @@ $sqlManager->fetchRow($sqlBuilder);
 The library requires a config value object in order to instantiate a connection with MySQL. See how it's done:
 
 ```php
-$config = array(
-    // required credentials
-
-    'host'       => 'localhost',
-    'user'       => 'rootuser',
-    'password'   => 'rootuser',
-    'database'   => 'our_database',
-    
-    // optional
-    
-    'fetchMode'  => \PDO::FETCH_ASSOC,
-    'charset'    => 'utf8',
-    'port'       => 3306,
-    'unixSocket' => null,
+$pdo = new PDOConnector(
+	'localhost', // server
+	'root',      // user
+	'root',      // password
+	'database'   // database
 );
 
-// standard setup
-$dbConn = new \Simplon\Mysql\Mysql(
-    $config['host'],
-    $config['user'],
-    $config['password'],
-    $config['database']
-);
-```
+$pdoConn = $pdo->connect('utf8', []); // charset, options
 
-The following code shows all possible parameters to setup a connection:
+//
+// you could now interact with PDO for instance setting attributes etc:
+// $pdoConn->setAttribute($attribute, $value);
+//
 
-```php
-\Simplon\Mysql\Mysql::__construct(
-    $host,
-    $user,
-    $password,
-    $database,
-    $fetchMode = \PDO::FETCH_ASSOC,
-    $charset = 'utf8',
-    array $options = array('port' => 3306, 'unixSocket' => '')
-);
-```
-
-In case that you wanna use the ```SqlManager``` there is one piece missing:
-
-```php
-$sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
+$dbConn = new Mysql($pdoConn);
 ```
 
 -------------------------------------------------
@@ -149,7 +119,7 @@ $sqlManager = new \Simplon\Mysql\Manager\SqlManager($dbConn);
 Returns a selected column from the first match. The example below returns ```id``` or ```null``` if nothing was found.
 
 ```php
-$result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
+$result = $dbConn->fetchColumn('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
 
 // result
 var_dump($result); // '1' || null
@@ -160,7 +130,7 @@ var_dump($result); // '1' || null
 Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```null``` if nothing was found.
 
 ```php
-$result = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
+$result = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
 
 // result
 var_dump($result); // ['1', '15', '30', ...] || null
@@ -171,7 +141,7 @@ var_dump($result); // ['1', '15', '30', ...] || null
 Returns one matching dataset at a time. It is resource efficient and therefore handy when your result has many data. In the example below you either iterate through the foreach loop in case you have matchings or nothing will happen.
 
 ```php
-$cursor = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', array('name' => 'Peter'));
+$cursor = $dbConn->fetchColumnMany('SELECT id FROM names WHERE name = :name', ['name' => 'Peter']);
 
 foreach ($cursor as $result)
 {
@@ -184,7 +154,7 @@ foreach ($cursor as $result)
 Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```null``` will be returned.
 
 ```php
-$result = $dbConn->fetchRow('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
+$result = $dbConn->fetchRow('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
 
 var_dump($result); // ['id' => '1', 'age' => '22'] || null
 ```
@@ -194,7 +164,7 @@ var_dump($result); // ['id' => '1', 'age' => '22'] || null
 Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```null``` will be returned.
 
 ```php
-$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
+$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
 
 var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || null
 ```
@@ -204,7 +174,7 @@ var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '
 Same explanation as for ```FetchColumnManyCursor``` except that we receive all selected columns.
 
 ```php
-$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', array('name' => 'Peter'));
+$result = $dbConn->fetchRowMany('SELECT id, age FROM names WHERE name = :name', ['name' => 'Peter']);
 
 foreach ($cursor as $result)
 {
@@ -221,11 +191,11 @@ foreach ($cursor as $result)
 Inserting data into the database is pretty straight forward. Follow the example below:
 
 ```php
-$data = array(
+$data = [
     'id'   => false,
     'name' => 'Peter',
     'age'  => 45,
-);
+];
 
 $id = $dbConn->insert('names', $data);
 
@@ -239,18 +209,18 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 Follow the example for inserting many datasets at once:
 
 ```php
-$data = array(
-    array(
+$data = [
+    [
         'id'   => false,
         'name' => 'Peter',
         'age'  => 45,
-    ),
-    array(
+    ],
+    [
         'id'   => false,
         'name' => 'Peter',
         'age'  => 16,
-    ),
-);
+    ],
+];
 
 $id = $dbConn->insertMany('names', $data);
 
@@ -268,14 +238,14 @@ The result depends on the table. If the table holds an ```autoincrementing ID```
 Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
 
 ```php
-$conds = array(
+$conds = [
     'id' => 50,
-);
+];
 
-$data = array(
+$data = [
     'name' => 'Peter',
     'age'  => 50,
-);
+];
 
 $result = $dbConn->update('names', $conds, $data);
 
@@ -287,18 +257,18 @@ var_dump($result); // true || null
 Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
 
 ```php
-$conds = array(
+$conds = [
     'id'   => 50,
     'name' => 'Peter',
-);
+];
 
 // custom conditions query
 $condsQuery = 'id = :id OR name =: name';
 
-$data = array(
+$data = [
     'name' => 'Peter',
     'age'  => 50,
-);
+];
 
 $result = $dbConn->update('names', $conds, $data, $condsQuery);
 
@@ -316,11 +286,11 @@ As MySQL states it: ```REPLACE``` works exactly like ```INSERT```, except that i
 As a result you will either receive the ```INSERT ID``` or ```false``` in case something went wrong.
 
 ```php
-$data = array(
+$data = [
     'id'   => 5,
     'name' => 'Peter',
     'age'  => 16,
-);
+];
 
 $result = $dbConn->replace('names', $data);
 
@@ -332,18 +302,18 @@ var_dump($result); // 1 || false
 As a result you will either receive an array of ```INSERT IDs``` or ```false``` in case something went wrong.
 
 ```php
-$data = array(
-    array(
+$data = [
+    [
         'id'   => 5,
         'name' => 'Peter',
         'age'  => 16,
-    ),
-    array(
+    ],
+    [
         'id'   => 10,
         'name' => 'John',
         'age'  => 22,
-    ),
-);
+    ],
+];
 
 $result = $dbConn->replaceMany('names', $data);
 
@@ -359,7 +329,7 @@ var_dump($result); // [5, 10]  || false
 The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$result = $dbConn->delete('names', array('id' => 50));
+$result = $dbConn->delete('names', ['id' => 50]);
 
 var_dump($result); // true || false
 ```
@@ -369,10 +339,10 @@ var_dump($result); // true || false
 The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
 
 ```php
-$conds = array(
+$conds = [
     'id'   => 50,
     'name' => 'John',
-);
+];
 
 // custom conditions query
 $condsQuery = 'id = :id OR name =: name';
@@ -396,311 +366,354 @@ var_dump($result); // true
 
 -------------------------------------------------
 
-## 5. Usage: SqlManager
+## 5. Usage: CRUD
 
-The following query examples will be a rewrite of the aforementioned ```direct access``` examples. __Remember:__ We need an instance of the ```SqlManager```. Paragraph ```3. Setup connection``` shows how to get your hands on it. 
+The following query examples will be a rewrite of the aforementioned ```direct access``` examples. For this we need a `Store` and a related `Model`.
 
-### 5.1. Query
-
-#### FetchColumn
-
-Returns a selected column from the first match. In the example below ```id``` will be returned or ```null``` if nothing was found.
+### 5.1. Setup store
 
 ```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+namespace Test\Crud;
 
-$sqlBuilder
-    ->setQuery('SELECT id FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
+use Simplon\Mysql\Crud\CrudModelInterface;
+use Simplon\Mysql\Crud\CrudStore;
+use Simplon\Mysql\MysqlException;
+use Simplon\Mysql\QueryBuilder\CreateQueryBuilder;
+use Simplon\Mysql\QueryBuilder\DeleteQueryBuilder;
+use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
+use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 
-$result = $sqlManager->fetchColumn($sqlBuilder);
-
-// result
-var_dump($result); // '1' || null
-```
-
-#### FetchColumnMany
-
-Returns an array with the selected column from all matching datasets. In the example below an array with all ```ids``` will be returned or ```null``` if nothing was found.
-
-```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setQuery('SELECT id FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
-
-$result = $sqlManager->fetchColumnMany($sqlBuilder);
-
-// result
-var_dump($result); // ['1', '15', '30', ...] || null
-```
-
-#### FetchColumnManyCursor
-
-Returns one matching dataset at a time. It is resource efficient and therefore handy when your result has many data. In the example below you either iterate through the foreach loop in case you have matchings or nothing will happen.
-
-```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setQuery('SELECT id FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
-
-foreach ($sqlManager->fetchColumnMany($sqlBuilder) as $result)
+/**
+ * @package Test\Crud
+ */
+class NamesStore extends CrudStore
 {
-    var_dump($result); // '1'
+    /**
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return 'names';
+    }
+
+    /**
+     * @return CrudModelInterface
+     */
+    public function getModel(): CrudModelInterface
+    {
+        return new NameModel();
+    }
+
+    /**
+     * @param CreateQueryBuilder $builder
+     *
+     * @return NameModel
+     * @throws MysqlException
+     */
+    public function create(CreateQueryBuilder $builder): NameModel
+    {
+        /** @var NameModel $model */
+        $model = $this->crudCreate($builder);
+
+        return $model;
+    }
+
+    /**
+     * @param ReadQueryBuilder $builder
+     *
+     * @return NameModel[]|null
+     * @throws MysqlException
+     */
+    public function read(ReadQueryBuilder $builder): ?array
+    {
+        /** @var NameModel[]|null $response */
+        $response = $this->crudRead($builder);
+
+        return $response;
+    }
+
+    /**
+     * @param ReadQueryBuilder $builder
+     *
+     * @return null|NameModel
+     * @throws MysqlException
+     */
+    public function readOne(ReadQueryBuilder $builder): ?NameModel
+    {
+        /** @var NameModel|null $response */
+        $response = $this->crudReadOne($builder);
+
+        return $response;
+    }
+
+    /**
+     * @param UpdateQueryBuilder $builder
+     *
+     * @return NameModel
+     * @throws MysqlException
+     */
+    public function update(UpdateQueryBuilder $builder): NameModel
+    {
+        /** @var NameModel|null $model */
+        $model = $this->crudUpdate($builder);
+
+        return $model;
+    }
+
+    /**
+     * @param DeleteQueryBuilder $builder
+     *
+     * @return bool
+     * @throws MysqlException
+     */
+    public function delete(DeleteQueryBuilder $builder): bool
+    {
+        return $this->crudDelete($builder);
+    }   
+    
+    /**
+     * @param int $id
+     *
+     * @return null|NameModel
+     * @throws MysqlException
+     */
+    public function customMethod(int $id): ?NameModel
+    {
+        $query = 'SELECT * FROM ' . $this->getTableName() . ' WHERE id=:id';
+
+        if ($result = $this->getCrudManager()->getMysql()->fetchRow($query, ['id' => $id]))
+        {
+            return (new NameModel())->fromArray($result);
+        }
+
+        return null;
+    }
 }
 ```
 
-#### FetchRow
-
-Returns all selected columns from a matched dataset. The example below returns ```id```, ```age``` for the matched dataset. If nothing got matched ```null``` will be returned.
+### 5.2. Setup model
 
 ```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+<?php
 
-$sqlBuilder
-    ->setQuery('SELECT id, age FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
+namespace Test\Crud;
 
-$result = $sqlManager->fetchRow($sqlBuilder);
+use Simplon\Mysql\Crud\CrudModel;
 
-var_dump($result); // ['id' => '1', 'age' => '22'] || null
-```
-
-#### FetchRowMany
-
-Returns all selected columns from all matched dataset. The example below returns for each matched dataset ```id```, ```age```. If nothing got matched ```null``` will be returned.
-
-```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setQuery('SELECT id, age FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
-
-$result = $sqlManager->fetchRowMany($sqlBuilder);
-
-var_dump($result); // [ ['id' => '1', 'age' => '22'],  ['id' => '15', 'age' => '40'], ... ] || null
-```
-
-#### FetchRowManyCursor
-
-Same explanation as for ```FetchColumnManyCursor``` except that we receive all selected columns.
-
-```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setQuery('SELECT id, age FROM names WHERE name = :name')
-    ->setConditions(array('name' => 'Peter'));
-
-foreach ($sqlManager->fetchRowManyCursor($sqlBuilder) as $result)
+/**
+ * @package Test\Crud
+ */
+class NameModel extends CrudModel
 {
-    var_dump($result); // ['id' => '1', 'age' => '22']
+    const COLUMN_ID = 'id';
+    const COLUMN_NAME = 'name';
+    const COLUMN_AGE = 'age';
+
+    /**
+     * @var int
+     */
+    protected $id;
+    /**
+     * @var string
+     */
+    protected $name;
+    /**
+     * @var int
+     */
+    protected $age;
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return (int)$this->id;
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return NameModel
+     */
+    public function setId(int $id): NameModel
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return NameModel
+     */
+    public function setName(string $name): NameModel
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAge(): int
+    {
+        return (int)$this->age;
+    }
+
+    /**
+     * @param int $age
+     *
+     * @return NameModel
+     */
+    public function setAge(int $age): NameModel
+    {
+        $this->age = $age;
+
+        return $this;
+    }
 }
 ```
 
--------------------------------------------------
+### 5.3. Connect to store
 
-### 5.2. Insert
-
-#### Single data
-
-Inserting data into the database is pretty straight forward. Follow the example below:
+In order to interact with our store we need to create an instance. For the following points we will make use of this instance.
 
 ```php
-$data = array(
-    'id'   => false,
-    'name' => 'Peter',
-    'age'  => 45,
+$store = new NamesStore($pdoConn);
+```
+
+### 5.4. Query
+
+#### Fetch one item
+
+Returns a `name model` or `NULL` if nothing could be matched.
+
+```php
+$model = $store->readOne(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
 
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setTableName('names')
-    ->setData($data);
-
-$id = $sqlManager->insert($sqlBuilder);
-
-var_dump($id); // 50 || false
+echo $model->getId(); // prints user id
 ```
 
-The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```true``` for a successful insert. If anything went bogus you will receive ```false```. 
+#### Fetch many items
 
-#### Many datasets
-
-Follow the example for inserting many datasets at once:
+Returns an array of `name models` or `NULL` if nothing could be matched.
 
 ```php
-$data = array(
-    array(
-        'id'   => false,
-        'name' => 'Peter',
-        'age'  => 45,
-    ),
-    array(
-        'id'   => false,
-        'name' => 'Peter',
-        'age'  => 16,
-    ),
+$models = $store->read(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
 
-$sqlBuilder = (new \Simplon\Mysql\Manager\SqlQueryBuilder())
-    ->setTableName('names')
-    ->setData($data);
-
-$result = $sqlManager->insert($sqlBuilder);
-
-var_dump($id); // [50, 51, ...] || false
+echo $models[0]->getId(); // prints user id from first matched model
 ```
 
-The result depends on the table. If the table holds an ```autoincrementing ID``` column you will receive the ID count for the inserted data. If the table does not hold such a field you will receive ```true``` for a successful insert. If anything went bogus you will receive ```false```. 
+### 5.5. Insert
 
-### 5.3. Update
-
-#### Simple update statement
-
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
+The following example shows how to create a new store entry.
 
 ```php
-$data = array(
-    'name' => 'Peter',
-    'age'  => 50,
+$model = $store->create(
+    (new CreateQueryBuilder())->setModel(
+        (new NameModel())
+            ->setName('Johnny')
+            ->setAge(22)
+    )
+);
+```
+
+### 5.6. Update  
+
+The following example shows how to update an existing store entry.
+
+```php
+//
+// fetch a model
+//
+
+$model = $store->readOne(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
 
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+//
+// update age
+//
 
-$sqlBuilder
-    ->setTableName('names')
-    ->setConditions(array('id' => 50))
-    ->setData($data);
+$model->setAge(36);
 
-$result = $sqlManager->update($sqlBuilder);
+//
+// persist change
+//
 
-var_dump($result); // true || null
+$model = $store->update(
+    (new UpdateQueryBuilder())
+        ->setModel($model)
+        ->addCondition(NameModel::COLUMN_ID, $model->getId())
+);
 ```
 
-#### Custom update conditions query
+### 5.7. Delete  
 
-Same as for insert statements accounts for updates. Its easy to understand. If the update succeeded the response will be ```true```. If nothing has been updated you will receive ```null```.
+The following example shows how to delete an existing store entry.
 
 ```php
-$data = array(
-    'name' => 'Peter',
-    'age'  => 50,
+//
+// fetch a model
+//
+
+$model = $store->readOne(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
 
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+//
+// delete model from store
+//
 
-$sqlBuilder
-    ->setTableName('names')
-    ->setConditions(array('id' => 50))
-    ->setConditionsQuery('id = :id OR name =: name')
-    ->setData($data)
-
-$result = $sqlManager->update($sqlBuilder);
-
-var_dump($result); // true || null
+$store->delete(
+    (new DeleteQueryBuilder())
+        ->addCondition(NameModel::COLUMN_ID, $model->getId())
+)
 ```
 
-### 5.4. Replace
+### 5.8. Custom queries
 
-As MySQL states it: ```REPLACE``` works exactly like ```INSERT```, except that if an old row in the table has the same value as a new row for a ```PRIMARY KEY``` or a ```UNIQUE index```, the old row is deleted before the new row is inserted.
-
-#### Replace a single datasets
-
-As a result you will either receive the ```INSERT ID``` or ```false``` in case something went wrong.
+You also have the possibility to write custom queries/handlings for your store. I added a method to the store which demonstrates on how to implement custom handlings.
 
 ```php
-$data = array(
-    'id'   => 5,
-    'name' => 'Peter',
-    'age'  => 16,
-);
+/**
+ * @param int $id
+ *
+ * @return null|NameModel
+ * @throws MysqlException
+ */
+public function customMethod(int $id): ?NameModel
+{
+    $query = 'SELECT * FROM ' . $this->getTableName() . ' WHERE id=:id';
 
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
+    if ($result = $this->getCrudManager()->getMysql()->fetchRow($query, ['id' => $id]))
+    {
+        return (new NameModel())->fromArray($result);
+    }
 
-$sqlBuilder
-    ->setTableName('names')
-    ->setData($data);
-
-$result = $sqlManager->replace($sqlBuilder);
-
-var_dump($result); // 1 || false
-```
-
-#### Replace multiple datasets
-
-As a result you will either receive an array of ```INSERT IDs``` or ```false``` in case something went wrong.
-
-```php
-$data = array(
-    array(
-        'id'   => 5,
-        'name' => 'Peter',
-        'age'  => 16,
-    ),
-    array(
-        'id'   => 10,
-        'name' => 'John',
-        'age'  => 22,
-    ),
-);
-
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setTableName('names')
-    ->setData($data);
-
-$result = $sqlManager->replaceMany($sqlBuilder);
-
-var_dump($result); // [5, 10]  || false
-```
-
-### 5.5. Delete
-
-#### Simple delete conditions
-
-The following example demonstrates how to remove data. If the query succeeds we will receive ```true``` else ```false```.
-
-```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setTableName('names')
-    ->setConditions(array('id' => 50));
-
-$result = $sqlManager->delete($sqlBuilder);
-
-var_dump($result); // true || false
-```
-
-#### Custom delete conditions query
-
-The following example demonstrates how to remove data with a custom conditions query. If the query succeeds we will receive ```true``` else ```false```.
-
-```php
-$sqlBuilder = new \Simplon\Mysql\Manager\SqlQueryBuilder();
-
-$sqlBuilder
-    ->setTableName('names')
-    ->setConditions(array('id' => 50, 'name' => 'Peter'))
-    ->setConditionsQuery('id = :id OR name =: name');
-
-$result = $sqlManager->delete($sqlBuilder);
-
-var_dump($result); // true || false
+    return null;
+}
 ```
 
 -------------------------------------------------
 
 ## 6. IN() Clause Handling
 
-#### 6.1. The issue
+### 6.1. The issue
 
 There is no way using an ```IN()``` clause via PDO. This functionality is simply not given. However, you could do something like the following:
 
@@ -719,9 +732,10 @@ $query = "SELECT * FROM users WHERE email IN (" . join(',', $emails) . ")";
 ```
 
 The only way how this would work is by wrapping each value like the following: ```'"email"'```. Way too much work.
-#### 6.2. The solution
 
-To take advantage of the built in ```IN() Clause``` with escaping and type handling do the following:
+### 6.2. The solution
+
+To take advantage of the built in ```IN() Clause``` with escaping and type handling do the following for the direct access. CRUD will do the query building automatically for you.
 
 ```php
 // integers
@@ -735,238 +749,7 @@ $query = "SELECT * FROM users WHERE email IN (:emails)";
 
 -------------------------------------------------
 
-## 7. CRUD Helper (CONTENT IS OUTDATED. UPDATE WILL FOLLLOW)
-
-#### 7.1. Intro
-
-```CRUD``` stands for ```Create Read Update Delete``` and reflects the for basic functions for persisent storage.
-
-I found myself writing more and more CRUDs for all my object/database interactions simply for the reason of having a
-```SINGLE POINT OF ACCESS``` when I was interacting with these objects for above mentioned functions. Eventually, it has
-sort of a touch of a database model but with more flexibility. Also, we keep writing ```VALUE OBJECTS``` and by that we
-keep the red line for all our code base.
-
-__Note:__ ```VALUE OBJECTS``` are actually ```MODELS``` while models are not value objects. The reason for this is that a value
-object is vehicle for all sorts of data while models are only vehicles for database data. At least that's what it should be.  
-
-#### 7.2. Requirements/Restrictions
-
-There are really __not many__ requirements/restrictions:
-
-- Instance of ```SqlCrudManager``` - requires an instance of ```Simplon\Mysql```.
-- Value object needs to extend from ```SqlCrudVo```
-- Table name should be in plural or set it via ```SqlCrudVo::$crudSource``` within the value object.
-- Value object's instance variables must match the table's column names in ```CamelCase``` (see example below).
-- Each value object reflects ```ONE OBJECT``` only - ```Mysql::fetchRow()``` fetches your data.
-- ```VARIABLE = COLUMN``` __Don't set any property in your value object__ which doesn't reflect your database table. __If you have to__,
-    make either use of ```SqlCrudVo::crudColumns()``` or ```SqlCrudVo::crudIgnore()```. See ```Flexibility``` for description.
- 
-#### 7.3. Flexibility
-
-- __Set source:__ In case you have a table name which can't be easily pluralised (e.g. person/people) you can set the source yourself via ```SqlCrudVo::$crudSource``` within value object
-
-- __Set custom read query:__ In case you need a custom query to get your object you can set it when you instantiate the object ```new SqlCrudVo($query)``` or simply within your ```__construct() { parent::construct($query); }```. 
-
-- __Callbacks:__ You can implement two methods which will be called prior/after saving an object: ```SqlCrudVo::crudBeforeSave($isCreateEvent)``` and ```SqlCrudVo::crudAfterSave($isCreateEvent)```. The manager
-    will pass you a boolean to let you know what type of save process happens/happened. You could use this e.g. to set automatically ```created_at``` and ```updated_at``` fields. 
-
-- __Set columns:__ If you have to either match property- and column name or only want a selection of your properties make use of ```SqlCrudVo::crudColumns()``` within your value object. It should return an array where the ```ARRAY KEY``` reflects the value object's ```VARIABLE NAME``` and the ```ARRAY VALUE``` the ```COLUMN NAME```.
-    __Example:__ ```array('createdAt' => 'created_at')```
-
-- __Ignore properties:__ Considering the prior point you could do the reverse and simply ```IGNORE VARIABLES```. For that implement ```SqlCrudVo::crudIgnore()``` which should return an array of properties you would like to ignore.
-
-- __No assumptions:__ There are no assumptions about primary keys or anything alike. You set all conditions for reading, updating and/or deleting objects.
-
-- __Casted values:__ Thanks to your value object which is always in between you and your database you can cast all values - good bye ```STRING CASTED ONLY``` values.
-
-#### 7.4. Conclusion
-
-That's all what is needed - at least for now. It's ```simple```, ```explicit``` and ```flexible``` enough not to restrict you in your requirements respectively your ```creativity```.
-
-#### 7.5. Examples
-
-Enough talk, bring it on! Alright, what is needed? Lets assume we have a database table called ```users``` and a value
-object called ```UserVo```. __Note:__ the value object name has to be the singular of the table's plural name.
-
-Here is the table schema:
-
-```sql
-CREATE TABLE `users` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL DEFAULT '',
-  `email` varchar(254) NOT NULL DEFAULT '',
-  `created_at` int(10) unsigned NOT NULL,
-  `updated_at` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-```
-
-... and here is our value object for the given table:
-
-```php
-class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
-{
-    protected $id;
-    protected $name;
-    protected $email;
-    protected $createdAt;
-    protected $updatedAt;
-
-    // ... here goes getter/setter for the above variables
-} 
-```
-
-Now, lets do some CRUD, baby! For all processes we need an instance of our ```SqlCrudManager```:
-
-```php
-/**
-* construct it with an instance of your simplon/mysql
-*/
-$sqlCrudManager = new \Simplon\Mysql\Crud\SqlCrudManager($mysqlInstance);
-```
-
-Create a user:
-
-```php
-$userVo = new UserVo();
-
-$userVo
-    ->setId(null)
-    ->setName('Johnny Foobar')
-    ->setEmail('foo@bar.com');
-
-/** @var UserVo $userVo */
-$userVo = $sqlCrudManager->create($userVo);
-
-// print insert id
-echo $userVo->getId(); // 1
-```
-
-Read a user:
-
-```php
-// conditions: where id = 1
-$conds = array('id' => 1);
-
-/** @var UserVo $userVo */
-$userVo = $sqlCrudManager->read(new UserVo(), $conds);
-
-// print name
-echo $userVo->getName(); // Johnny Foobar
-```
-
-Update a user:
-
-```php
-// conditions: where id = 1
-$conds = array('id' => 1);
-
-/** @var UserVo $userVo */
-$userVo = $sqlCrudManager->read(new UserVo(), $conds);
-
-// set new name
-$userVo->setName('Hansi Hinterseher');
-
-// update
-/** @var UserVo $userVo */
-$userVo = $sqlCrudManager->update($userVo, $conds);
-
-// print name
-echo $userVo->getName(); // Hansi Hinterseher
-```
-
-Delete a user:
-
-```php
-// conditions: where id = 1
-$conds = array('id' => 1);
-
-/**
-* UserVo::crudGetSource() is the name of the table
-* based on the value object's name
-*/
-$sqlCrudManager->update(UserVo::crudGetSource(), $conds);
-```
-
-#### 7.6. Example Custom Vo
-
-Setting a ```custom table name``` since the plural from person is not persons:
-
-```php
-class PersonVo extends \Simplon\Mysql\Crud\SqlCrudVo
-{
-    /**
-    * @return string
-    */
-    public static function crudGetSource()
-    {
-        return 'people';
-    }
-
-    // ... here goes the rest
-}
-```
-
-In case your ```column names``` are totally off there is a way to match them anyway against your ```properties```:
-
-```php
-class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
-{
-    protected $id;
-    protected $name;
-    protected $email;
-    protected $createdAt;
-    protected $updatedAt;
-
-    /**
-    * @return array
-    */
-    public function crudColumns()
-    {
-        return array(
-            'id'        => 'xx_id',
-            'name'      => 'xx_name',
-            'email'     => 'xx_email',
-            'createdAt' => 'xx_created_at',
-            'updatedAt' => 'xx_updated_at',
-        );
-    }
-
-    // ... here goes the rest
-}
-```
-
-Sometimes there are some ```helper properties``` which are not part of your database entry. Here is a way to ignore them:
-
-```php
-class UserVo extends \Simplon\Mysql\Crud\SqlCrudVo
-{
-    protected $id;
-    protected $name;
-    protected $email;
-    protected $createdAt;
-    protected $updatedAt;
-
-    // helper property: not part of the people table
-    protected $isOffline;
-
-    /**
-    * @return array
-    */
-    public function crudIgnore()
-    {
-        return array(
-            'isOffline',
-        );
-    }
-
-    // ... here goes the rest
-}
-```
-
--------------------------------------------------
-
-## 8. Exceptions
+## 7. Exceptions
 
 For both access methods (direct, sqlmanager) occuring exceptions will be wrapped by a ```MysqlException```. All essential exception information will be summarised as ```JSON``` within the ```Exception Message```.
 
@@ -982,7 +765,7 @@ Here is an example of how that might look like:
 
 Simplon/Mysql is freely distributable under the terms of the MIT license.
 
-Copyright (c) 2015 Tino Ehrich ([tino@bigpun.me](mailto:tino@bigpun.me))
+Copyright (c) 2017 Tino Ehrich ([tino@bigpun.me](mailto:tino@bigpun.me))
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

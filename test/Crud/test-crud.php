@@ -9,33 +9,18 @@ require __DIR__ . '/../config.php';
 use Simplon\Mysql\Mysql;
 use Simplon\Mysql\PDOConnector;
 use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
-use Test\Crud\SampleModel;
-use Test\Crud\SampleStore;
+use Test\Crud\NameModel;
+use Test\Crud\NamesStore;
 
 $pdoConnector = new PDOConnector($config['server'], $config['username'], $config['password'], $config['database']);
 $dbh = new Mysql($pdoConnector->connect());
 
 // ############################################
 
-$store = new SampleStore($dbh);
+$store = new NamesStore($dbh);
 
-//$sampleModel = $store->create(
-//    (new CreateQueryBuilder())->setModel(
-//        (new SampleModel())
-//            ->setName('Foo bar')
-//            ->setEmail('foo@bar.com')
-//            ->setPasswordHash('12345')
-//            ->setPubToken('XXXXX')
-//            ->setTimeZone('Europe/Berlin')
-//    )
-//);
-
-$model = $store->read(
-    (new ReadQueryBuilder())->addCondition(SampleModel::COLUMN_EMAIL, ['tino@pushcast.io', 'foo@bar.com'])
+$model = $store->readOne(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
-
-//$model = $store->readOne(
-//    (new ReadQueryBuilder())->addCondition(SampleModel::COLUMN_EMAIL, 'foo@bar.com')
-//);
 
 var_dump($model);
