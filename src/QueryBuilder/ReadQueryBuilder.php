@@ -3,7 +3,6 @@
 namespace Simplon\Mysql\QueryBuilder;
 
 /**
- * Class ReadQueryBuilder
  * @package Simplon\Mysql\QueryBuilder
  */
 class ReadQueryBuilder
@@ -15,37 +14,30 @@ class ReadQueryBuilder
      * @var string
      */
     protected $from;
-
     /**
      * @var array
      */
     protected $select = [];
-
     /**
      * @var array
      */
     protected $joins;
-
     /**
      * @var array
      */
     protected $conditions = [];
-
     /**
      * @var string
      */
     protected $condsQuery;
-
     /**
      * @var array
      */
     protected $sorting;
-
     /**
      * @var array
      */
     protected $group;
-
     /**
      * @var string
      */
@@ -54,7 +46,7 @@ class ReadQueryBuilder
     /**
      * @return string
      */
-    public function getFrom()
+    public function getFrom(): string
     {
         return $this->from;
     }
@@ -65,7 +57,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setFrom($from, $alias = null)
+    public function setFrom(string $from, ?string $alias = null): self
     {
         if ($alias !== null)
         {
@@ -82,9 +74,9 @@ class ReadQueryBuilder
      *
      * @return string
      */
-    public function getColumns()
+    public function getColumns(): string
     {
-        return join(', ', $this->getSelect());
+        return implode(', ', $this->getSelect());
     }
 
     /**
@@ -94,15 +86,15 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setColumns($fields)
+    public function setColumns(string $fields): self
     {
         return $this->setSelect([$fields]);
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getSelect()
+    public function getSelect(): array
     {
         return empty($this->select) ? ['*'] : $this->select;
     }
@@ -112,7 +104,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function addSelect($column)
+    public function addSelect(string $column): self
     {
         $this->select[] = $column;
 
@@ -124,7 +116,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setSelect(array $select)
+    public function setSelect(array $select): self
     {
         foreach ($select as $column)
         {
@@ -141,7 +133,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function addInnerJoin($tableName, $alias, $condsQuery)
+    public function addInnerJoin(string $tableName, string $alias, string $condsQuery): self
     {
         return $this->addJoin('INNER', $tableName, $alias, $condsQuery);
     }
@@ -153,23 +145,23 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function addLeftJoin($tableName, $alias, $condsQuery)
+    public function addLeftJoin(string $tableName, string $alias, string $condsQuery): self
     {
         return $this->addJoin('LEFT', $tableName, $alias, $condsQuery);
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getJoins()
+    public function getJoins(): ?array
     {
         return $this->joins;
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getConditions()
+    public function getConditions(): ?array
     {
         return $this->conditions;
     }
@@ -180,7 +172,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function addCondition($key, $val)
+    public function addCondition(string $key, $val): self
     {
         $this->conditions[$key] = $val;
 
@@ -192,7 +184,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setConditions($conds)
+    public function setConditions(array $conds): self
     {
         $this->conditions = $conds;
 
@@ -200,9 +192,9 @@ class ReadQueryBuilder
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getCondsQuery()
+    public function getCondsQuery(): ?string
     {
         return $this->condsQuery;
     }
@@ -212,7 +204,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setCondsQuery($condsQuery)
+    public function setCondsQuery(string $condsQuery): self
     {
         $this->condsQuery = $condsQuery;
 
@@ -220,9 +212,9 @@ class ReadQueryBuilder
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getSorting()
+    public function getSorting(): ?array
     {
         return $this->sorting;
     }
@@ -233,7 +225,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function addSorting($field, $direction)
+    public function addSorting(string $field, string $direction): self
     {
         $field = strpos($field, '.') !== false ? $field : '`' . $field . '`';
         $this->sorting[] = $field . ' ' . $direction;
@@ -246,7 +238,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setSorting(array $sorting)
+    public function setSorting(array $sorting): self
     {
         foreach ($sorting as $val)
         {
@@ -258,9 +250,9 @@ class ReadQueryBuilder
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getGroup()
+    public function getGroup(): ?array
     {
         return $this->group;
     }
@@ -270,7 +262,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function addGroup($column)
+    public function addGroup(string $column): self
     {
         $this->group[] = strpos($column, '.') !== false ? $column : '`' . $column . '`';
 
@@ -282,7 +274,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setGroup(array $columns)
+    public function setGroup(array $columns): self
     {
         foreach ($columns as $column)
         {
@@ -293,9 +285,9 @@ class ReadQueryBuilder
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getLimit()
+    public function getLimit(): ?string
     {
         return $this->limit;
     }
@@ -306,7 +298,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    public function setLimit($rows, $offset = 0)
+    public function setLimit(int $rows, int $offset = 0): self
     {
         $this->limit = $offset . ', ' . $rows;
 
@@ -316,7 +308,7 @@ class ReadQueryBuilder
     /**
      * @return string
      */
-    public function renderQuery()
+    public function renderQuery(): string
     {
         $query = ['SELECT', join(', ', $this->getSelect()), 'FROM ' . $this->getFrom()];
 
@@ -393,7 +385,7 @@ class ReadQueryBuilder
      *
      * @return ReadQueryBuilder
      */
-    private function addJoin($type, $tableName, $alias, $conds)
+    private function addJoin(string $type, string $tableName, string $alias, string $conds): self
     {
         if ($this->joins === null)
         {

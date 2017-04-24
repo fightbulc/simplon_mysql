@@ -3,7 +3,6 @@
 namespace Simplon\Mysql;
 
 /**
- * Class MysqlQueryIterator
  * @package Simplon\Mysql
  */
 class MysqlQueryIterator implements \Iterator
@@ -11,7 +10,7 @@ class MysqlQueryIterator implements \Iterator
     /**
      * @var int
      */
-    protected $position;
+    protected $position = 0;
     /**
      * @var \PDOStatement
      */
@@ -31,21 +30,20 @@ class MysqlQueryIterator implements \Iterator
 
     /**
      * @param \PDOStatement $pdoStatement
-     * @param $fetchType
+     * @param string $fetchType
      * @param int $fetchMode
      */
-    public function __construct(\PDOStatement $pdoStatement, $fetchType, $fetchMode = \PDO::FETCH_ASSOC)
+    public function __construct(\PDOStatement $pdoStatement, string $fetchType, int $fetchMode = \PDO::FETCH_ASSOC)
     {
-        $this->position = 0;
         $this->pdoStatement = $pdoStatement;
         $this->fetchType = $fetchType;
         $this->fetchMode = $fetchMode;
     }
 
-    function rewind()
+    function rewind(): void
     {
         $this->position = 0;
-        $this->data = $this->fetchType === 'fetch' ? $this->pdoStatement->fetch($this->fetchMode) : $this->pdoStatement->fetchColumn();
+        $this->data = $this->fetchData();
     }
 
     /**
@@ -57,24 +55,37 @@ class MysqlQueryIterator implements \Iterator
     }
 
     /**
-     * @return int|mixed
+     * @return int
      */
-    function key()
+    function key(): int
     {
         return $this->position;
     }
 
-    function next()
+    function next(): void
     {
-        $this->data = $this->fetchType === 'fetch' ? $this->pdoStatement->fetch($this->fetchMode) : $this->pdoStatement->fetchColumn();
+        $this->data = $this->fetchData();
         ++$this->position;
     }
 
     /**
      * @return bool
      */
-    function valid()
+    function valid(): bool
     {
         return $this->data !== false;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function fetchData()
+    {
+        if ($this->fetchType === 'fetch')
+        {
+            return $this->pdoStatement->fetch($this->fetchMode);
+        }
+
+        return $this->pdoStatement->fetchColumn();
     }
 }

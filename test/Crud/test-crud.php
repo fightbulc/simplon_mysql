@@ -1,38 +1,26 @@
 <?php
+/**
+ * @var array $config
+ */
 
 require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../config.php';
 
-use Simplon\Mysql\Crud\CrudManager;
-use Test\Crud\SampleStore;
+use Simplon\Mysql\Mysql;
+use Simplon\Mysql\PDOConnector;
+use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
+use Test\Crud\NameModel;
+use Test\Crud\NamesStore;
 
-$config = [
-    'server'   => '127.0.0.1',
-    'username' => 'root',
-    'password' => 'root',
-    'database' => 'pushcast_devel_app',
-];
-
-$dbh = new \Simplon\Mysql\Mysql(
-    $config['server'],
-    $config['username'],
-    $config['password'],
-    $config['database']
-);
+$pdoConnector = new PDOConnector($config['server'], $config['username'], $config['password'], $config['database']);
+$dbh = new Mysql($pdoConnector->connect());
 
 // ############################################
 
-$sampleStorage = new SampleStore(
-    $dbh, new CrudManager($dbh)
+$store = new NamesStore($dbh);
+
+$model = $store->readOne(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
 
-$sampleModel = $sampleStorage->readOne(['email' => 'tino@pushcast.io']);
-
-var_dump($sampleModel);
-echo '<hr>';
-
-$sampleModel = $sampleStorage->update(
-    $sampleModel->setName('FOO BAR2')
-);
-
-var_dump($sampleModel);
-echo '<hr>';
+var_dump($model);

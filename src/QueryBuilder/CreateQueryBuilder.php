@@ -5,7 +5,6 @@ namespace Simplon\Mysql\QueryBuilder;
 use Simplon\Mysql\Crud\CrudModelInterface;
 
 /**
- * Class CreateQueryBuilder
  * @package Simplon\Mysql\QueryBuilder
  */
 class CreateQueryBuilder
@@ -14,17 +13,14 @@ class CreateQueryBuilder
      * @var CrudModelInterface
      */
     protected $model;
-
     /**
      * @var string
      */
     protected $tableName;
-
     /**
      * @var bool
      */
-    protected $insertIgnore;
-
+    protected $insertIgnore = true;
     /**
      * @var array
      */
@@ -33,7 +29,7 @@ class CreateQueryBuilder
     /**
      * @return CrudModelInterface
      */
-    public function getModel()
+    public function getModel(): CrudModelInterface
     {
         return $this->model;
     }
@@ -43,7 +39,7 @@ class CreateQueryBuilder
      *
      * @return CreateQueryBuilder
      */
-    public function setModel(CrudModelInterface $model)
+    public function setModel(CrudModelInterface $model): self
     {
         $this->model = $model;
 
@@ -53,7 +49,7 @@ class CreateQueryBuilder
     /**
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return $this->tableName;
     }
@@ -63,7 +59,7 @@ class CreateQueryBuilder
      *
      * @return CreateQueryBuilder
      */
-    public function setTableName($tableName)
+    public function setTableName(string $tableName): self
     {
         $this->tableName = $tableName;
 
@@ -73,19 +69,17 @@ class CreateQueryBuilder
     /**
      * @return boolean
      */
-    public function getInsertIgnore()
+    public function isInsertIgnore(): bool
     {
         return $this->insertIgnore;
     }
 
     /**
-     * @param boolean $insertIgnore
-     *
      * @return CreateQueryBuilder
      */
-    public function setInsertIgnore($insertIgnore)
+    public function setInsertIgnore(): self
     {
-        $this->insertIgnore = $insertIgnore;
+        $this->insertIgnore = true;
 
         return $this;
     }
@@ -93,7 +87,7 @@ class CreateQueryBuilder
     /**
      * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         if ($this->getModel() instanceof CrudModelInterface)
         {
@@ -108,7 +102,7 @@ class CreateQueryBuilder
      *
      * @return CreateQueryBuilder
      */
-    public function setData(array $data)
+    public function setData(array $data): self
     {
         $this->data = $data;
 

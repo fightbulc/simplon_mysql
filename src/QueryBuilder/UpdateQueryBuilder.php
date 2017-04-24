@@ -5,7 +5,6 @@ namespace Simplon\Mysql\QueryBuilder;
 use Simplon\Mysql\Crud\CrudModelInterface;
 
 /**
- * Class UpdateQueryBuilder
  * @package Simplon\Mysql\QueryBuilder
  */
 class UpdateQueryBuilder
@@ -14,27 +13,22 @@ class UpdateQueryBuilder
      * @var CrudModelInterface
      */
     protected $model;
-
     /**
      * @var string
      */
     protected $tableName;
-
     /**
      * @var string
      */
     protected $query;
-
     /**
-     * @var array
+     * @var null|array
      */
-    protected $conds;
-
+    protected $conditions;
     /**
      * @var string
      */
     protected $condsQuery;
-
     /**
      * @var array
      */
@@ -43,7 +37,7 @@ class UpdateQueryBuilder
     /**
      * @return CrudModelInterface
      */
-    public function getModel()
+    public function getModel(): CrudModelInterface
     {
         return $this->model;
     }
@@ -53,7 +47,7 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setModel(CrudModelInterface $model)
+    public function setModel(CrudModelInterface $model): self
     {
         $this->model = $model;
 
@@ -63,7 +57,7 @@ class UpdateQueryBuilder
     /**
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return $this->tableName;
     }
@@ -73,7 +67,7 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setTableName($tableName)
+    public function setTableName(string $tableName): self
     {
         $this->tableName = $tableName;
 
@@ -83,7 +77,7 @@ class UpdateQueryBuilder
     /**
      * @return string
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->query;
     }
@@ -93,7 +87,7 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setQuery($query)
+    public function setQuery(string $query): self
     {
         $this->query = $query;
 
@@ -101,11 +95,24 @@ class UpdateQueryBuilder
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getConds()
+    public function getConditions(): ?array
     {
-        return $this->conds;
+        return $this->conditions;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $val
+     *
+     * @return UpdateQueryBuilder
+     */
+    public function addCondition(string $key, $val): self
+    {
+        $this->conditions[$key] = $val;
+
+        return $this;
     }
 
     /**
@@ -113,17 +120,17 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setConds(array $conds)
+    public function setConditions(array $conds): self
     {
-        $this->conds = $conds;
+        $this->conditions = $conds;
 
         return $this;
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getCondsQuery()
+    public function getCondsQuery(): ?string
     {
         return $this->condsQuery;
     }
@@ -133,7 +140,7 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setCondsQuery($condsQuery)
+    public function setCondsQuery(string $condsQuery): self
     {
         $this->condsQuery = $condsQuery;
 
@@ -143,7 +150,7 @@ class UpdateQueryBuilder
     /**
      * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         if ($this->getModel() instanceof CrudModelInterface)
         {
@@ -158,7 +165,7 @@ class UpdateQueryBuilder
      *
      * @return UpdateQueryBuilder
      */
-    public function setData(array $data)
+    public function setData(array $data): self
     {
         $this->data = $data;
 
