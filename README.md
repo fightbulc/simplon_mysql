@@ -419,7 +419,7 @@ class NamesStore extends CrudStore
     }
 
     /**
-     * @param ReadQueryBuilder $builder
+     * @param ReadQueryBuilder|null $builder
      *
      * @return NameModel[]|null
      * @throws MysqlException
