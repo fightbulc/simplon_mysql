@@ -24,7 +24,7 @@ interface CrudStoreInterface
 
     public function create(CreateQueryBuilder $builder);
 
-    public function read(ReadQueryBuilder $builder);
+    public function read(?ReadQueryBuilder $builder = null): ?array;
 
     public function readOne(ReadQueryBuilder $builder);
 
