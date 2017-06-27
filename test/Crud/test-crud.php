@@ -23,4 +23,7 @@ $model = $store->readOne(
     (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_NAME, 'Peter')
 );
 
-var_dump($model);
+var_dump([
+    $model,
+    $model->fromJson(json_encode(['name' => 'Hans', 'age' => 10]), false)->isChanged()
+]);
