@@ -19,7 +19,7 @@ class StorageUtil
      *
      * @return string
      */
-    public static function getUniquePubToken(CrudStoreInterface $storage, string $tokenColumnName = 'pub_token', int $length = 12, ?string $prefix = null)
+    public static function getUniqueToken(CrudStoreInterface $storage, string $tokenColumnName = 'token', int $length = 12, ?string $prefix = null)
     {
         $token = null;
         $isUnique = false;
