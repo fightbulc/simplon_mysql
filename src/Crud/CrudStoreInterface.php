@@ -17,10 +17,7 @@ interface CrudStoreInterface
      */
     public function getTableName(): string;
 
-    /**
-     * @return CrudModelInterface
-     */
-    public function getModel(): CrudModelInterface;
+    public function getModel();
 
     public function create(CreateQueryBuilder $builder);
 
