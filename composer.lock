@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "simplon/helper",
-            "version": "1.0.4",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fightbulc/simplon_helper.git",
-                "reference": "c541bd499e42a60c2c8aebfc1ecbd82d461b7360"
+                "reference": "ceda15b330c4d01ccaf5c9033c878598359a6cdd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fightbulc/simplon_helper/zipball/c541bd499e42a60c2c8aebfc1ecbd82d461b7360",
-                "reference": "c541bd499e42a60c2c8aebfc1ecbd82d461b7360",
+                "url": "https://api.github.com/repos/fightbulc/simplon_helper/zipball/ceda15b330c4d01ccaf5c9033c878598359a6cdd",
+                "reference": "ceda15b330c4d01ccaf5c9033c878598359a6cdd",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "passwords",
                 "tokens"
             ],
-            "time": "2017-06-22T06:48:05+00:00"
+            "time": "2017-07-11T07:01:25+00:00"
         }
     ],
     "packages-dev": [],
