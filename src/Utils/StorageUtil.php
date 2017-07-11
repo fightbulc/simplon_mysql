@@ -13,22 +13,24 @@ class StorageUtil
 {
     /**
      * @param CrudStoreInterface $storage
-     * @param string $tokenColumnName
-     * @param int $length
-     * @param string $prefix
+     * @param null|UniqueTokenOptions $options
      *
      * @return string
      */
-    public static function getUniqueToken(CrudStoreInterface $storage, string $tokenColumnName = 'token', int $length = 12, ?string $prefix = null)
+    public static function getUniqueToken(CrudStoreInterface $storage, ?UniqueTokenOptions $options = null)
     {
         $token = null;
         $isUnique = false;
-        $characters = SecurityUtil::TOKEN_UPPERCASE_LETTERS_NUMBERS;
+
+        if (!$options)
+        {
+            $options = new UniqueTokenOptions();
+        }
 
         while ($isUnique === false)
         {
-            $token = SecurityUtil::createRandomToken($length, $prefix, $characters);
-            $isUnique = $storage->readOne((new ReadQueryBuilder())->addCondition($tokenColumnName, $token)) === null;
+            $token = SecurityUtil::createRandomToken($options->getLength(), $options->getPrefix(), $options->getCharacters());
+            $isUnique = $storage->readOne((new ReadQueryBuilder())->addCondition($options->getColumn(), $token)) === null;
         }
 
         return $token;
