@@ -683,27 +683,33 @@ class Mysql
         // bind named params
         $pdoStatement = $this->setParams($pdoStatement, $conds);
 
-        // execute
-        $pdoStatement->execute();
-
-        // check for errors
-        if ($pdoStatement->errorCode() !== '00000')
+        try
         {
-            $error = [
-                'query'     => $query,
-                'params'    => $conds,
-                'errorInfo' => $this->prepareErrorInfo($pdoStatement->errorInfo()),
+            $pdoStatement->execute();
+
+            if ($pdoStatement->errorCode() === '00000')
+            {
+                $this->setLastStatement($pdoStatement);
+
+                return $pdoStatement;
+            }
+
+            $errorInfo = $this->prepareErrorInfo($pdoStatement->errorInfo());
+        }
+        catch (\Exception $e)
+        {
+            $errorInfo = [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
             ];
-
-            $errorInfo = json_encode($error);
-
-            throw new MysqlException($errorInfo);
         }
 
-        // cache statement
-        $this->setLastStatement($pdoStatement);
-
-        return $pdoStatement;
+        throw new MysqlException(json_encode([
+            'query'     => $query,
+            'params'    => $conds,
+            'errorInfo' => $errorInfo,
+        ]));
     }
 
     /**
