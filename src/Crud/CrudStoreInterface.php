@@ -7,9 +7,6 @@ use Simplon\Mysql\QueryBuilder\DeleteQueryBuilder;
 use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
 
-/**
- * @package Simplon\Mysql\Crud
- */
 interface CrudStoreInterface
 {
     /**

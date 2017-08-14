@@ -2,9 +2,6 @@
 
 namespace Simplon\Mysql;
 
-/**
- * @package Simplon\Mysql
- */
 class PDOConnector
 {
     /**

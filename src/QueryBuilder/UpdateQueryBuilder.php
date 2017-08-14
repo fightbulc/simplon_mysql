@@ -4,9 +4,6 @@ namespace Simplon\Mysql\QueryBuilder;
 
 use Simplon\Mysql\Crud\CrudModelInterface;
 
-/**
- * @package Simplon\Mysql\QueryBuilder
- */
 class UpdateQueryBuilder
 {
     /**

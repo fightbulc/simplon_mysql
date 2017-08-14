@@ -2,9 +2,6 @@
 
 namespace Simplon\Mysql\QueryBuilder;
 
-/**
- * @package Simplon\Mysql\QueryBuilder
- */
 class ReadQueryBuilder
 {
     const ORDER_ASC = 'ASC';
