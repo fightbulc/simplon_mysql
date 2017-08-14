@@ -4,10 +4,8 @@ namespace Simplon\Mysql\Utils;
 
 use Simplon\Helper\Data\Data;
 use Simplon\Helper\SecurityUtil;
+use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 
-/**
- * @package Simplon\Mysql\Utils
- */
 class UniqueTokenOptions extends Data
 {
     /**
@@ -26,6 +24,42 @@ class UniqueTokenOptions extends Data
      * @var string
      */
     protected $characters = SecurityUtil::TOKEN_UPPERCASE_LETTERS_NUMBERS;
+    /**
+     * @var ReadQueryBuilder
+     */
+    protected $readQuery;
+
+    /**
+     * @param ReadQueryBuilder $builder
+     *
+     * @return null|ReadQueryBuilder
+     */
+    public function mergeReadQuery(ReadQueryBuilder $builder): ?ReadQueryBuilder
+    {
+        if ($this->readQuery)
+        {
+            foreach ($builder->getConditions() as $key => $val)
+            {
+                $this->readQuery->addCondition($key, $val);
+            }
+
+            return $this->readQuery;
+        }
+
+        return $builder;
+    }
+
+    /**
+     * @param ReadQueryBuilder $readQuery
+     *
+     * @return UniqueTokenOptions
+     */
+    public function presetReadQuery(ReadQueryBuilder $readQuery): UniqueTokenOptions
+    {
+        $this->readQuery = $readQuery;
+
+        return $this;
+    }
 
     /**
      * @return string

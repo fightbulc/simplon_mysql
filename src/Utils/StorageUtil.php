@@ -6,9 +6,6 @@ use Simplon\Helper\SecurityUtil;
 use Simplon\Mysql\Crud\CrudStoreInterface;
 use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 
-/**
- * @package Simplon\Mysql\Utils
- */
 class StorageUtil
 {
     /**
@@ -30,7 +27,12 @@ class StorageUtil
         while ($isUnique === false)
         {
             $token = SecurityUtil::createRandomToken($options->getLength(), $options->getPrefix(), $options->getCharacters());
-            $isUnique = $storage->readOne((new ReadQueryBuilder())->addCondition($options->getColumn(), $token)) === null;
+
+            $query = $options->mergeReadQuery(
+                (new ReadQueryBuilder())->addCondition($options->getColumn(), $token)
+            );
+
+            $isUnique = $storage->readOne($query) === null;
         }
 
         return $token;
