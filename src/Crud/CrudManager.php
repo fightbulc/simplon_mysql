@@ -9,6 +9,7 @@ use Simplon\Mysql\QueryBuilder\CreateQueryBuilder;
 use Simplon\Mysql\QueryBuilder\DeleteQueryBuilder;
 use Simplon\Mysql\QueryBuilder\ReadQueryBuilder;
 use Simplon\Mysql\QueryBuilder\UpdateQueryBuilder;
+use Simplon\Mysql\Utils\QueryUtil;
 
 class CrudManager
 {
@@ -75,7 +76,9 @@ class CrudManager
             ->getMysql()
             ->fetchRowManyCursor(
                 $builder->renderQuery(),
-                $this->removeNullValuesFromConds($builder->getConditions())
+                $this->filterCondsNullValues(
+                    $this->filterCondsValues($builder->getConditions())
+                )
             )
             ;
     }
@@ -92,7 +95,9 @@ class CrudManager
             ->getMysql()
             ->fetchRow(
                 $builder->renderQuery(),
-                $this->removeNullValuesFromConds($builder->getConditions())
+                $this->filterCondsNullValues(
+                    $this->filterCondsValues($builder->getConditions())
+                )
             )
             ;
     }
@@ -110,10 +115,12 @@ class CrudManager
         $conds = [];
         $condsQuery = null;
 
-        if ($builder->getConditions())
+        if (!empty($builder->getConditions()))
         {
             $condsQuery = $this->buildCondsQuery($builder->getConditions(), $builder->getCondsQuery());
-            $conds = $this->removeNullValuesFromConds($builder->getConditions());
+            $conds = $this->filterCondsNullValues(
+                $this->filterCondsValues($builder->getConditions())
+            );
         }
 
         $this->getMysql()->update(
@@ -138,10 +145,12 @@ class CrudManager
         $conds = [];
         $condsQuery = null;
 
-        if ($builder->getConditions())
+        if (!empty($builder->getConditions()))
         {
             $condsQuery = $this->buildCondsQuery($builder->getConditions(), $builder->getCondsQuery());
-            $conds = $this->removeNullValuesFromConds($builder->getConditions());
+            $conds = $this->filterCondsNullValues(
+                $this->filterCondsValues($builder->getConditions())
+            );
         }
 
         return $this->getMysql()->delete($builder->getTableName(), $conds, $condsQuery);
@@ -160,26 +169,9 @@ class CrudManager
             return (string)$condsQuery;
         }
 
-        $condsString = [];
+        $condsQueryBuild = QueryUtil::buildCondsQuery($conds);
 
-        foreach ($conds as $key => $val)
-        {
-            $query = $key . ' = :' . $key;
-
-            if ($val === null)
-            {
-                $query = $key . ' IS NULL';
-            }
-
-            if (is_array($val) === true)
-            {
-                $query = $key . ' IN (:' . $key . ')';
-            }
-
-            $condsString[] = $query;
-        }
-
-        return join(' AND ', $condsString);
+        return join(' AND ', $condsQueryBuild->getCondPairs());
     }
 
     /**
@@ -187,15 +179,32 @@ class CrudManager
      *
      * @return array
      */
-    private function removeNullValuesFromConds(array $conds): array
+    private function filterCondsValues(array $conds): array
+    {
+        $values = [];
+
+        foreach ($conds as $key => $data)
+        {
+            $values[$key] = $data['value'];
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param array $filteredCondsValues
+     *
+     * @return array
+     */
+    private function filterCondsNullValues(array $filteredCondsValues): array
     {
         $new = [];
 
-        foreach ($conds as $key => $val)
+        foreach ($filteredCondsValues as $key => $value)
         {
-            if ($val !== null)
+            if ($value !== null)
             {
-                $new[$key] = $val;
+                $new[$key] = $value;
             }
         }
 

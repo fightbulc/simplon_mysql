@@ -2,8 +2,13 @@
 
 namespace Simplon\Mysql\QueryBuilder;
 
+use Simplon\Mysql\Utils\ConditionsTrait;
+use Simplon\Mysql\Utils\QueryUtil;
+
 class ReadQueryBuilder
 {
+    use ConditionsTrait;
+
     const ORDER_ASC = 'ASC';
     const ORDER_DESC = 'DESC';
 
@@ -19,14 +24,6 @@ class ReadQueryBuilder
      * @var array
      */
     protected $joins;
-    /**
-     * @var array
-     */
-    protected $conditions = [];
-    /**
-     * @var string
-     */
-    protected $condsQuery;
     /**
      * @var array
      */
@@ -158,59 +155,6 @@ class ReadQueryBuilder
     /**
      * @return array|null
      */
-    public function getConditions(): ?array
-    {
-        return $this->conditions;
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $val
-     *
-     * @return ReadQueryBuilder
-     */
-    public function addCondition(string $key, $val): self
-    {
-        $this->conditions[$key] = $val;
-
-        return $this;
-    }
-
-    /**
-     * @param array $conds
-     *
-     * @return ReadQueryBuilder
-     */
-    public function setConditions(array $conds): self
-    {
-        $this->conditions = $conds;
-
-        return $this;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getCondsQuery(): ?string
-    {
-        return $this->condsQuery;
-    }
-
-    /**
-     * @param string $condsQuery
-     *
-     * @return ReadQueryBuilder
-     */
-    public function setCondsQuery(string $condsQuery): self
-    {
-        $this->condsQuery = $condsQuery;
-
-        return $this;
-    }
-
-    /**
-     * @return array|null
-     */
     public function getSorting(): ?array
     {
         return $this->sorting;
@@ -316,47 +260,22 @@ class ReadQueryBuilder
 
         if ($this->getConditions() || $this->getCondsQuery())
         {
-            $conds = [];
+            $condPairs = [];
 
             if ($this->getCondsQuery())
             {
-                $conds[] = $this->getCondsQuery();
+                $condPairs[] = $this->getCondsQuery();
             }
             else
             {
-                $resetConds = [];
-
-                foreach ($this->getConditions() as $key => $value)
-                {
-                    // handle db named columns e.g. "db.id"
-                    $formattedKey = str_replace('.', '', $key);
-                    $resetConds[$formattedKey] = $value;
-
-                    // handle only columns (non-column conds are prepend with _)
-                    if (substr($key, 0, 1) !== '_')
-                    {
-                        $key = strpos($key, '.') !== false ? $key : '`' . $key . '`';
-                        $condQuery = $key . ' = :' . $formattedKey;
-
-                        if ($value === null)
-                        {
-                            $condQuery = $key . ' IS NULL';
-                        }
-                        elseif (is_array($value))
-                        {
-                            $condQuery = $key . ' IN(:' . $formattedKey . ')';
-                        }
-
-                        $conds[] = $condQuery;
-                    }
-                }
-
-                $this->setConditions($resetConds);
+                $condsQueryBuild = QueryUtil::buildCondsQuery($this->getConditions());
+                $this->setConditions($condsQueryBuild->getStrippedConds());
+                $condPairs = $condsQueryBuild->getCondPairs();
             }
 
-            if (empty($conds) === false)
+            if (empty($condPairs) === false)
             {
-                $query[] = 'WHERE ' . join(' AND ', $conds);
+                $query[] = 'WHERE ' . join(' AND ', $condPairs);
             }
         }
 

@@ -3,9 +3,12 @@
 namespace Simplon\Mysql\QueryBuilder;
 
 use Simplon\Mysql\Crud\CrudModelInterface;
+use Simplon\Mysql\Utils\ConditionsTrait;
 
 class DeleteQueryBuilder
 {
+    use ConditionsTrait;
+
     /**
      * @var CrudModelInterface
      */
@@ -18,14 +21,6 @@ class DeleteQueryBuilder
      * @var string
      */
     protected $query;
-    /**
-     * @var null|array
-     */
-    protected $conditions;
-    /**
-     * @var string
-     */
-    protected $condsQuery;
 
     /**
      * @return CrudModelInterface
@@ -83,59 +78,6 @@ class DeleteQueryBuilder
     public function setQuery(string $query): self
     {
         $this->query = $query;
-
-        return $this;
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getConditions(): ?array
-    {
-        return $this->conditions;
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $val
-     *
-     * @return DeleteQueryBuilder
-     */
-    public function addCondition(string $key, $val): self
-    {
-        $this->conditions[$key] = $val;
-
-        return $this;
-    }
-
-    /**
-     * @param array $conditions
-     *
-     * @return DeleteQueryBuilder
-     */
-    public function setConditions(array $conditions): self
-    {
-        $this->conditions = $conditions;
-
-        return $this;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getCondsQuery(): ?string
-    {
-        return $this->condsQuery;
-    }
-
-    /**
-     * @param string $condsQuery
-     *
-     * @return DeleteQueryBuilder
-     */
-    public function setCondsQuery(string $condsQuery): self
-    {
-        $this->condsQuery = $condsQuery;
 
         return $this;
     }

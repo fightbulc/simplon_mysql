@@ -3,9 +3,12 @@
 namespace Simplon\Mysql\QueryBuilder;
 
 use Simplon\Mysql\Crud\CrudModelInterface;
+use Simplon\Mysql\Utils\ConditionsTrait;
 
 class UpdateQueryBuilder
 {
+    use ConditionsTrait;
+
     /**
      * @var CrudModelInterface
      */
@@ -18,14 +21,6 @@ class UpdateQueryBuilder
      * @var string
      */
     protected $query;
-    /**
-     * @var null|array
-     */
-    protected $conditions;
-    /**
-     * @var string
-     */
-    protected $condsQuery;
     /**
      * @var array
      */
@@ -87,59 +82,6 @@ class UpdateQueryBuilder
     public function setQuery(string $query): self
     {
         $this->query = $query;
-
-        return $this;
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getConditions(): ?array
-    {
-        return $this->conditions;
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $val
-     *
-     * @return UpdateQueryBuilder
-     */
-    public function addCondition(string $key, $val): self
-    {
-        $this->conditions[$key] = $val;
-
-        return $this;
-    }
-
-    /**
-     * @param array $conds
-     *
-     * @return UpdateQueryBuilder
-     */
-    public function setConditions(array $conds): self
-    {
-        $this->conditions = $conds;
-
-        return $this;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getCondsQuery(): ?string
-    {
-        return $this->condsQuery;
-    }
-
-    /**
-     * @param string $condsQuery
-     *
-     * @return UpdateQueryBuilder
-     */
-    public function setCondsQuery(string $condsQuery): self
-    {
-        $this->condsQuery = $condsQuery;
 
         return $this;
     }
