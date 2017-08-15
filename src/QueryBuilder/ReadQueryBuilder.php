@@ -269,7 +269,12 @@ class ReadQueryBuilder
             else
             {
                 $condsQueryBuild = QueryUtil::buildCondsQuery($this->getConditions());
-                $this->setConditions($condsQueryBuild->getStrippedConds());
+
+                foreach ($condsQueryBuild->getStrippedConds() as $key => $data)
+                {
+                    $this->addCondition($key, $data['value'], $data['operator']);
+                }
+
                 $condPairs = $condsQueryBuild->getCondPairs();
             }
 

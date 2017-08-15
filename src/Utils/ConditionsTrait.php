@@ -45,7 +45,10 @@ trait ConditionsTrait
      */
     public function setConditions(array $conditions)
     {
-        $this->conditions = $conditions;
+        foreach ($conditions as $key => $value)
+        {
+            $this->addCondition($key, $value);
+        }
 
         return $this;
     }
@@ -69,5 +72,4 @@ trait ConditionsTrait
 
         return $this;
     }
-
 }
