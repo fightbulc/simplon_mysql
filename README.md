@@ -606,6 +606,16 @@ $model = $store->readOne(
 echo $model->getId(); // prints user id
 ```
 
+You can make use of operators from the `addCondition`:
+
+```php
+$model = $store->readOne(
+    (new ReadQueryBuilder())->addCondition(NameModel::COLUMN_AGE, 20, '>')
+);
+
+echo $model->getId(); // prints user id
+```
+
 #### Fetch many items
 
 Returns an array of `name models` or `NULL` if nothing could be matched.
