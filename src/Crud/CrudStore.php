@@ -187,7 +187,7 @@ abstract class CrudStore implements CrudStoreInterface
             )
         );
 
-        if ($response)
+        if ($response && $builder->getModel())
         {
             $this->runBehaviour($builder->getModel(), $this->afterDeleteBehaviour);
         }

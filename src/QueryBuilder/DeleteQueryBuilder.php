@@ -23,9 +23,9 @@ class DeleteQueryBuilder
     protected $query;
 
     /**
-     * @return CrudModelInterface
+     * @return null|CrudModelInterface
      */
-    public function getModel(): CrudModelInterface
+    public function getModel(): ?CrudModelInterface
     {
         return $this->model;
     }

@@ -2,7 +2,6 @@
 
 namespace Test\Crud;
 
-use Simplon\Mysql\Crud\CrudModelInterface;
 use Simplon\Mysql\Crud\CrudStore;
 use Simplon\Mysql\MysqlException;
 use Simplon\Mysql\QueryBuilder\CreateQueryBuilder;
@@ -24,9 +23,9 @@ class NamesStore extends CrudStore
     }
 
     /**
-     * @return CrudModelInterface
+     * @return NameModel
      */
-    public function getModel(): CrudModelInterface
+    public function getModel(): NameModel
     {
         return new NameModel();
     }
