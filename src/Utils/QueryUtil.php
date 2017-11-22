@@ -34,20 +34,27 @@ class QueryUtil
                 $key = strpos($key, '.') !== false ? $key : '`' . $key . '`';
                 $query = $key . ' ' . $operator . ' :' . $strippedKey;
 
-                $useNot = null;
-
-                if ($operator === self::OP_NOT)
-                {
-                    $useNot = ' NOT';
-                }
-
                 if ($value === null)
                 {
-                    $query = $key . $useNot . ' IS NULL';
+                    $not = ' IS NULL';
+
+                    if ($operator === self::OP_NOT)
+                    {
+                        $not = ' IS NOT NULL';
+                    }
+
+                    $query = $key . $not;
                 }
                 elseif (is_array($value))
                 {
-                    $query = $key . $useNot . ' IN(:' . $strippedKey . ')';
+                    $not = null;
+
+                    if ($operator === self::OP_NOT)
+                    {
+                        $not = ' NOT';
+                    }
+
+                    $query = $key . $not . ' IN(:' . $strippedKey . ')';
                 }
 
                 $pairs[] = $query;
