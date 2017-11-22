@@ -6,6 +6,8 @@ use Simplon\Mysql\Data\CondsQueryBuild;
 
 class QueryUtil
 {
+    const OP_NOT = '!';
+
     /**
      * @param array $conds
      *
@@ -32,13 +34,20 @@ class QueryUtil
                 $key = strpos($key, '.') !== false ? $key : '`' . $key . '`';
                 $query = $key . ' ' . $operator . ' :' . $strippedKey;
 
+                $useNot = null;
+
+                if ($operator === self::OP_NOT)
+                {
+                    $useNot = ' NOT';
+                }
+
                 if ($value === null)
                 {
-                    $query = $key . ' IS NULL';
+                    $query = $key . $useNot . ' IS NULL';
                 }
                 elseif (is_array($value))
                 {
-                    $query = $key . ' IN(:' . $strippedKey . ')';
+                    $query = $key . $useNot . ' IN(:' . $strippedKey . ')';
                 }
 
                 $pairs[] = $query;
