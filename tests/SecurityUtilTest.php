@@ -35,7 +35,6 @@ class SecurityUtilTest extends TestCase
         $this->assertEquals(20, strlen($token));
 
         $token = SecurityUtil::createRandomToken(15, 'prefix_');
-        var_dump($token);
         $this->assertEquals(15, strlen($token));
         $this->assertStringStartsWith('prefix_', $token);
 
