@@ -437,7 +437,7 @@ class Mysql
     /**
      * @return \PDO
      */
-    protected function getPdo(): \PDO
+    public function getPdo(): \PDO
     {
         return $this->pdo;
     }
